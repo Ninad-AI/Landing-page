@@ -1,0 +1,115 @@
+/* Google Fonts - loaded via link in layout.tsx for Tailwind v4 compatibility */
+@import "tailwindcss";
+
+:root {
+  /* Colors */
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #6125d8;
+  --primary-light: #9968fa;
+  --accent-blue: #00a9ff;
+  --accent-cyan: #98dbff;
+  --text-muted: #ccd3d7;
+  --text-secondary: #c4c4c4;
+  --card-bg: rgba(51, 20, 114, 0.41);
+  --card-border: rgba(255, 255, 255, 0.4);
+  
+  /* Fonts */
+  --font-inter: 'Inter', sans-serif;
+  --font-roboto: 'Roboto', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+  --font-ibm-mono: 'IBM Plex Mono', monospace;
+  --font-anonymous: 'Anonymous Pro', monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-cyan: var(--accent-cyan);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-ibm-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+}
+
+/* Utility classes for fonts */
+.font-inter { font-family: var(--font-inter); }
+.font-roboto { font-family: var(--font-roboto); }
+.font-poppins { font-family: var(--font-poppins); }
+.font-ibm-mono { font-family: var(--font-ibm-mono); }
+.font-anonymous { font-family: var(--font-anonymous); }
+
+/* Gradient text utility */
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 0 0 60px 20px rgba(97, 37, 216, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 60px 20px rgba(0, 169, 255, 0.2);
+}
+
+/* Glass effect */
+.glass {
+  backdrop-filter: blur(32px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Button hover effects */
+.btn-primary {
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(97, 37, 216, 0.4);
+}
+
+/* Marquee animations */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 30s linear infinite;
+}
