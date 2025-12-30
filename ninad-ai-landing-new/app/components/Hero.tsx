@@ -4,7 +4,7 @@ const imgImage4 = "/assets/hero-orb.png";
 export default function Hero() {
   return (
     <>
-      <section className="relative w-full min-h-screen bg-black overflow-hidden">
+      <section className="relative w-full min-h-screen overflow-hidden">
       {/* ===== Background glows ===== */}
       <div
         className="absolute h-[780px] w-[760px] left-[-260px] top-[-220px] pointer-events-none rounded-full blur-[120px] opacity-60"
@@ -34,6 +34,9 @@ export default function Hero() {
         <p className="font-['Inter'] font-extrabold text-[clamp(60px,7vw,88px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.8px]">
           REAL-TIME
         </p>
+
+        <br></br>
+        <br></br>
 
         {/* AI VOICE */}
         <div className="relative flex items-center justify-center leading-none px-6">
@@ -93,6 +96,9 @@ export default function Hero() {
             ICE
           </span>
         </div>
+
+        <br></br>
+        <br></br>
 
         {/* TAGLINE */}
         <p className="font-['Inter'] font-extrabold text-[clamp(32px,3.6vw,44px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center">

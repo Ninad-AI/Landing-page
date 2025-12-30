@@ -102,9 +102,6 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
 export default function Comparison() {
   return (
     <section className="relative py-20 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-black" />
-
       {/* Background glow effects */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2746px] h-[1746px] -mt-[251px]">

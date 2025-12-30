@@ -154,9 +154,6 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 export default function Pricing() {
   return (
     <section className="relative py-20 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-black" />
-
       {/* Background glow */}
       <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[200px] left-1/2 -translate-x-1/2" />
 

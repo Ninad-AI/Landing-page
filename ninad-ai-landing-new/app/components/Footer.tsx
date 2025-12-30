@@ -29,7 +29,7 @@ const socialIcons = [
 
 export default function Footer() {
   return (
-    <footer className="relative bg-black pt-16 pb-8">
+    <footer className="relative pt-16 pb-8">
       {/* Content */}
       <div className="relative max-w-[1280px] mx-auto px-8">
         {/* Main Footer Content */}
