@@ -19,20 +19,20 @@ export default function Hero() {
       />
 
       {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex flex-col items-center pt-[120px] pb-[120px] px-4 max-w-[1200px] mx-auto">
-        <p className="font-['Inter'] font-extrabold text-[clamp(52px,7vw,76px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.5px]">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-[140px] pb-[140px] px-6 max-w-[1400px] mx-auto space-y-6">
+        <p className="font-['Inter'] font-extrabold text-[clamp(50px,6.2vw,72px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.5px]">
           REAL-TIME
         </p>
 
-        <div className="relative flex items-center justify-center gap-[6px] mt-[12px] leading-none">
+        <div className="relative flex items-center justify-center gap-[8px] leading-none px-2">
           <span
-            className="font-['Inter'] font-extrabold text-[clamp(140px,20vw,260px)] leading-[0.86] tracking-[-12px] lg:tracking-[-16px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            className="font-['Inter'] font-extrabold text-[clamp(126px,18vw,230px)] leading-[0.86] tracking-[-10px] lg:tracking-[-14px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
             style={{ WebkitTextFillColor: "transparent" }}
           >
             AI V
           </span>
 
-          <div className="relative w-[clamp(130px,14vw,240px)] h-[clamp(130px,14vw,240px)] flex-shrink-0 pointer-events-none self-center">
+          <div className="relative w-[clamp(124px,12.5vw,220px)] h-[clamp(124px,12.5vw,220px)] flex-shrink-0 pointer-events-none self-center">
             <img
               src={imgImage4}
               alt="Voice Orb"
@@ -41,18 +41,18 @@ export default function Hero() {
           </div>
 
           <span
-            className="font-['Inter'] font-extrabold text-[clamp(140px,20vw,260px)] leading-[0.86] tracking-[-8px] lg:tracking-[-12px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            className="font-['Inter'] font-extrabold text-[clamp(126px,18vw,230px)] leading-[0.86] tracking-[-8px] lg:tracking-[-12px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
             style={{ WebkitTextFillColor: "transparent" }}
           >
             ICE
           </span>
         </div>
 
-        <p className="font-['Inter'] font-extrabold text-[clamp(26px,3.5vw,36px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center mt-[24px]">
+        <p className="font-['Inter'] font-extrabold text-[clamp(26px,3vw,34px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center">
           THAT FEELS HUMAN
         </p>
 
-        <p className="font-['Roboto'] font-light text-[14px] md:text-[18px] text-[#ccd3d7] text-center leading-[1.6] max-w-[700px] mt-[26px] tracking-[0.6px]">
+        <p className="font-['Roboto'] font-light text-[14px] md:text-[18px] text-[#ccd3d7] text-center leading-[1.6] max-w-[820px] tracking-[0.6px]">
           Low-latency, expressive speech for apps, agents, and experiences ready to integrate in minutes.
         </p>
       </div>
