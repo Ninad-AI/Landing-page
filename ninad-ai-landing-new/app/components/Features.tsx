@@ -23,9 +23,9 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="relative py-16 overflow-hidden">
+    <section id="features" className="relative py-16 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-black pointer-events-none" />
 
       {/* Content */}
       <div className="relative max-w-[1280px] mx-auto px-8">

@@ -8,12 +8,12 @@ const productItems = [
 
 export default function Products() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section id="products" className="relative py-20 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-black pointer-events-none" />
 
       {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
         <div className="absolute w-[800px] h-[800px] bg-[#6125d8] rounded-full blur-[250px] opacity-15 top-[100px] left-[200px]" />
       </div>
 

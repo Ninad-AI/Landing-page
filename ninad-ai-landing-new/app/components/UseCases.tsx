@@ -29,12 +29,12 @@ function ArrowIcon() {
 
 export default function UseCases() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section id="use-cases" className="relative py-20 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-black" />
+      <div className="absolute inset-0 bg-black pointer-events-none" />
 
       {/* Background glow effects */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-[1000px] h-[1000px] bg-[#6125d8] rounded-full blur-[300px] opacity-10 -top-[200px] -left-[200px]" />
         <div className="absolute w-[800px] h-[800px] bg-[#00a9ff] rounded-full blur-[250px] opacity-10 top-[300px] right-[-200px]" />
       </div>

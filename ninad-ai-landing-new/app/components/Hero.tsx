@@ -1,116 +1,60 @@
-import Image from "next/image";
-
-// Background glow assets
-const imgEllipse4 = "http://localhost:3845/assets/e44577d0a20b1b3420867d954fe5151527d1da0b.svg";
-const imgEllipse2 = "http://localhost:3845/assets/ef06fbfc3ae4efda65590dedb8ff886158e09fd7.svg";
-const imgEllipse1 = "http://localhost:3845/assets/a8380cdd2cd8fa6410a89d4ebe26d4ef2536385e.svg";
-// Orb image
-const imgImage4 = "http://localhost:3845/assets/18082cc40595bf0a0bf88d3c446face94decd0cd.png";
-// Feature label gradient texture
-const imgEmotionDrivenOutput = "http://localhost:3845/assets/8409aab01c8c4a934a36384458d2d3721610a9d5.png";
-// Features grid connector SVG
-const imgGroup62 = "http://localhost:3845/assets/a2fbc248b1ec71ecdc8f1538eac9d8fdebc4166a.svg";
+// Orb image - use local asset
+const imgImage4 = "/assets/hero-orb.png";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[700px] overflow-hidden bg-black">
-      {/* ========== BACKGROUND GLOWS ========== */}
-      {/* Top-left purple glow */}
-      <div className="absolute h-[666px] left-[-223px] top-[-175px] w-[652px] pointer-events-none">
-        <div className="absolute inset-[-98.59%_-100.71%]">
-          <img alt="" className="block max-w-none size-full" src={imgEllipse4} />
-        </div>
-      </div>
-      {/* Top-right blue glow */}
-      <div className="absolute h-[552px] right-[-200px] top-[50px] w-[567px] pointer-events-none">
-        <div className="absolute inset-[-62.03%_-60.39%]">
-          <img alt="" className="block max-w-none size-full" src={imgEllipse2} />
-        </div>
-      </div>
-      {/* Bottom glow */}
-      <div className="absolute h-[400px] bottom-[-100px] left-[-400px] w-[800px] pointer-events-none">
-        <div className="absolute inset-[-44.38%_-27.7%]">
-          <img alt="" className="block max-w-none size-full" src={imgEllipse1} />
-        </div>
-      </div>
+    <section className="relative w-full min-h-screen overflow-hidden bg-black">
+      {/* ===== Background glows ===== */}
+      <div
+        className="absolute h-[666px] w-[652px] left-[-223px] top-[-175px] pointer-events-none rounded-full blur-[100px] opacity-60"
+        style={{ background: "radial-gradient(circle, rgba(97, 37, 216, 0.6) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute h-[552px] w-[567px] right-[-200px] top-[50px] pointer-events-none rounded-full blur-[100px] opacity-50"
+        style={{ background: "radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute h-[400px] w-[800px] left-[-400px] bottom-[-100px] pointer-events-none rounded-full blur-[120px] opacity-40"
+        style={{ background: "radial-gradient(circle, rgba(147, 51, 234, 0.5) 0%, transparent 70%)" }}
+      />
 
-      {/* ========== MAIN HERO CONTENT ========== */}
-      <div className="relative z-10 flex flex-col items-center justify-center pt-[140px] pb-[80px] px-4 max-w-[1920px] mx-auto">
-        
-        {/* REAL-TIME text */}
-        <p className="font-['Inter'] font-extrabold text-[80px] text-[rgba(255,255,255,0.9)] uppercase leading-none text-center">
+      {/* ===== Hero content ===== */}
+      <div className="relative z-10 flex flex-col items-center pt-[120px] pb-[120px] px-4 max-w-[1200px] mx-auto">
+        <p className="font-['Inter'] font-extrabold text-[clamp(52px,7vw,76px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.5px]">
           REAL-TIME
         </p>
 
-        {/* AI VOICE with Orb - Group 58 */}
-        <div className="relative flex items-center justify-center mt-[82px] mx-auto">
-          {/* AI V */}
-<span
-  className="
-    font-['Inter']
-    font-extrabold
-    text-[266px]
-    leading-[0.85]
-    tracking-[-18.62px]
-    bg-gradient-to-b
-    from-[#e7fdff]
-    from-[20.909%]
-    to-[#878787]
-    to-[153.64%]
-    bg-clip-text
-    inline-block
-    pr-[20px]
-  "
-  style={{ WebkitTextFillColor: 'transparent' }}
->
-  AI V
-</span>
+        <div className="relative flex items-center justify-center gap-[6px] mt-[12px] leading-none">
+          <span
+            className="font-['Inter'] font-extrabold text-[clamp(140px,20vw,260px)] leading-[0.86] tracking-[-12px] lg:tracking-[-16px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            style={{ WebkitTextFillColor: "transparent" }}
+          >
+            AI V
+          </span>
 
-
-          {/* Orb - positioned inline */}
-          <div className="relative w-[256px] h-[256px] flex-shrink-0 mx-4 pointer-events-none">
+          <div className="relative w-[clamp(130px,14vw,240px)] h-[clamp(130px,14vw,240px)] flex-shrink-0 pointer-events-none self-center">
             <img
               src={imgImage4}
               alt="Voice Orb"
-              className="w-[136.71%] h-[125.68%] absolute left-[-21.36%] top-[-15.03%] max-w-none"
+              className="w-[137%] h-[126%] absolute left-[-21%] top-[-15%] max-w-none"
             />
           </div>
 
-          {/* ICE */}
-          <span 
-            className="
-              font-['Inter']
-              font-extrabold
-              text-[266px]
-              leading-[0.85]
-              tracking-[-0.48px]
-              bg-gradient-to-b
-              from-[#e7fdff]
-              from-[20.909%]
-              to-[#878787]
-              to-[153.64%]
-              bg-clip-text
-            "
-            style={{ WebkitTextFillColor: 'transparent' }}
+          <span
+            className="font-['Inter'] font-extrabold text-[clamp(140px,20vw,260px)] leading-[0.86] tracking-[-8px] lg:tracking-[-12px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            style={{ WebkitTextFillColor: "transparent" }}
           >
             ICE
           </span>
         </div>
 
-
-
-        {/* THAT FEELS HUMAN text */}
-        <p className="font-['Inter'] font-extrabold text-[48px] text-white uppercase leading-none text-center mt-[83px]">
+        <p className="font-['Inter'] font-extrabold text-[clamp(26px,3.5vw,36px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center mt-[24px]">
           THAT FEELS HUMAN
         </p>
 
-        {/* Tagline */}
-        <p 
-          className="font-['Roboto'] font-light text-[17px] text-[#ccd3d7] text-center leading-relaxed max-w-[794px] mt-[50px] tracking-[0.1em]"
-        >
+        <p className="font-['Roboto'] font-light text-[14px] md:text-[18px] text-[#ccd3d7] text-center leading-[1.6] max-w-[700px] mt-[26px] tracking-[0.6px]">
           Low-latency, expressive speech for apps, agents, and experiences ready to integrate in minutes.
         </p>
-
       </div>
     </section>
   );
