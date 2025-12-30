@@ -3,59 +3,109 @@ const imgImage4 = "/assets/hero-orb.png";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-black">
+    <>
+      <section className="relative w-full min-h-screen bg-black overflow-hidden">
       {/* ===== Background glows ===== */}
       <div
-        className="absolute h-[666px] w-[652px] left-[-223px] top-[-175px] pointer-events-none rounded-full blur-[100px] opacity-60"
-        style={{ background: "radial-gradient(circle, rgba(97, 37, 216, 0.6) 0%, transparent 70%)" }}
+        className="absolute h-[780px] w-[760px] left-[-260px] top-[-220px] pointer-events-none rounded-full blur-[120px] opacity-60"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(97, 37, 216, 0.65) 0%, transparent 70%)",
+        }}
       />
       <div
-        className="absolute h-[552px] w-[567px] right-[-200px] top-[50px] pointer-events-none rounded-full blur-[100px] opacity-50"
-        style={{ background: "radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, transparent 70%)" }}
+        className="absolute h-[650px] w-[670px] right-[-240px] top-[60px] pointer-events-none rounded-full blur-[120px] opacity-50"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(59, 130, 246, 0.55) 0%, transparent 70%)",
+        }}
       />
       <div
-        className="absolute h-[400px] w-[800px] left-[-400px] bottom-[-100px] pointer-events-none rounded-full blur-[120px] opacity-40"
-        style={{ background: "radial-gradient(circle, rgba(147, 51, 234, 0.5) 0%, transparent 70%)" }}
+        className="absolute h-[460px] w-[900px] left-[-450px] bottom-[-140px] pointer-events-none rounded-full blur-[140px] opacity-45"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(147, 51, 234, 0.55) 0%, transparent 70%)",
+        }}
       />
 
       {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-[140px] pb-[140px] px-6 max-w-[1400px] mx-auto space-y-6">
-        <p className="font-['Inter'] font-extrabold text-[clamp(50px,6.2vw,72px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.5px]">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen pt-[170px] pb-[170px] px-6 max-w-[1700px] mx-auto space-y-8">
+        {/* REAL-TIME */}
+        <p className="font-['Inter'] font-extrabold text-[clamp(60px,7vw,88px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center tracking-[-0.8px]">
           REAL-TIME
         </p>
 
-        <div className="relative flex items-center justify-center gap-[8px] leading-none px-2">
+        {/* AI VOICE */}
+        <div className="relative flex items-center justify-center leading-none px-6">
+          {/* AI V */}
           <span
-            className="font-['Inter'] font-extrabold text-[clamp(126px,18vw,230px)] leading-[0.86] tracking-[-10px] lg:tracking-[-14px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            className="
+              font-['Inter']
+              font-extrabold
+              text-[clamp(150px,19vw,280px)]
+              leading-[0.85]
+              tracking-[-10px] lg:tracking-[-16px]
+              bg-gradient-to-b from-[#e7fdff] from-[18%] to-[#878787] to-[150%]
+              bg-clip-text
+              px-[0.14em]
+              overflow-visible
+            "
             style={{ WebkitTextFillColor: "transparent" }}
           >
             AI V
           </span>
 
-          <div className="relative w-[clamp(124px,12.5vw,220px)] h-[clamp(124px,12.5vw,220px)] flex-shrink-0 pointer-events-none self-center">
+          {/* Orb */}
+          <div
+            className="
+              relative
+              w-[clamp(160px,14.5vw,280px)]
+              h-[clamp(160px,14.5vw,280px)]
+              flex-shrink-0
+              pointer-events-none
+              self-center
+              mx-[-0.1em]
+            "
+            style={{ animation: "orb-breathe 6s ease-in-out infinite", transformOrigin: "50% 50%" }}
+          >
             <img
               src={imgImage4}
               alt="Voice Orb"
-              className="w-[137%] h-[126%] absolute left-[-21%] top-[-15%] max-w-none"
+              className="absolute left-[-22%] top-[-16%] w-[140%] h-[130%] max-w-none"
             />
           </div>
 
+          {/* ICE */}
           <span
-            className="font-['Inter'] font-extrabold text-[clamp(126px,18vw,230px)] leading-[0.86] tracking-[-8px] lg:tracking-[-12px] bg-gradient-to-b from-[#e7fdff] from-[20%] to-[#878787] to-[150%] bg-clip-text"
+            className="
+              font-['Inter']
+              font-extrabold
+              text-[clamp(150px,19vw,280px)]
+              leading-[0.85]
+              tracking-[-8px] lg:tracking-[-14px]
+              bg-gradient-to-b from-[#e7fdff] from-[18%] to-[#878787] to-[150%]
+              bg-clip-text
+              px-[0.14em]
+              overflow-visible
+            "
             style={{ WebkitTextFillColor: "transparent" }}
           >
             ICE
           </span>
         </div>
 
-        <p className="font-['Inter'] font-extrabold text-[clamp(26px,3vw,34px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center">
+        {/* TAGLINE */}
+        <p className="font-['Inter'] font-extrabold text-[clamp(32px,3.6vw,44px)] text-[rgba(255,255,255,0.92)] uppercase leading-none text-center">
           THAT FEELS HUMAN
         </p>
 
-        <p className="font-['Roboto'] font-light text-[14px] md:text-[18px] text-[#ccd3d7] text-center leading-[1.6] max-w-[820px] tracking-[0.6px]">
-          Low-latency, expressive speech for apps, agents, and experiences ready to integrate in minutes.
+        {/* SUBTEXT */}
+        <p className="font-['Roboto'] font-light text-[16px] md:text-[22px] text-[#ccd3d7] text-center leading-[1.65] max-w-[960px] tracking-[0.7px]">
+          Low-latency, expressive speech for apps, agents, and experiences ready to
+          integrate in minutes.
         </p>
       </div>
-    </section>
+      </section>
+    </>
   );
 }
