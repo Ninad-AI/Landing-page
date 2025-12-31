@@ -26,7 +26,7 @@ export default function Languages() {
       </div>
 
       {/* Content */}
-      <div className="relative max-w-[1280px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Section Title */}
         <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
           Speak every language

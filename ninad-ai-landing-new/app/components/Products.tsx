@@ -70,7 +70,7 @@ export default function Products() {
   return (
     <section id="products" className="relative py-20 overflow-hidden bg-black">
       {/* Content */}
-      <div className="relative max-w-[1400px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Section Title */}
         <h2 className="font-inter font-black text-[110px] leading-none tracking-[-3.3px] text-center mb-4 gradient-text bg-gradient-to-b from-white from-[17%] to-[#999] to-[109%]">
           PRODUCTS
@@ -86,7 +86,7 @@ export default function Products() {
         {/* Products Layout */}
         <div className="flex relative" ref={containerRef}>
           {/* Product List - Left Side */}
-          <div className="flex-shrink-0 w-[500px] relative">
+          <div className="flex-shrink-0 w-[420px] relative">
             {products.map((product, index) => (
               <div key={index} className="relative">
                 {/* Divider Line Above (skip first) */}
@@ -96,11 +96,11 @@ export default function Products() {
                 <button
                   ref={(el) => { productRefs.current[index] = el; }}
                   onClick={() => handleProductClick(index)}
-                  className={`w-full text-left py-4 transition-opacity duration-300 cursor-pointer ${
+                  className={`w-full text-left py-3 transition-opacity duration-300 cursor-pointer ${
                     activeProduct === index ? 'opacity-100' : 'opacity-50'
                   } hover:opacity-100`}
                 >
-                  <h3 className="font-inter font-bold text-[40px] leading-none tracking-[-1.2px] text-white uppercase">
+                  <h3 className="font-inter font-bold text-[36px] leading-none tracking-[-1.2px] text-white uppercase">
                     {product.name}
                   </h3>
                 </button>

@@ -57,7 +57,7 @@ function ArrowIcon({ isOpen }: { isOpen: boolean }) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`transition-transform duration-300 ${isOpen ? "rotate-[-90deg]" : "rotate-0"}`}
+      className={`transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${isOpen ? "rotate-[-90deg]" : "rotate-0"}`}
     >
       <path
         d="M9 6L15 12L9 18"
@@ -80,7 +80,7 @@ export default function UseCases() {
   return (
     <section id="use-cases" className="relative py-20 overflow-hidden bg-gradient-to-br from-[#000000] via-[#0a0a0a] to-[#6125D8]/70">
       {/* Content */}
-      <div className="relative max-w-[1400px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Section Title */}
         <h2 className="font-inter font-extrabold text-[48px] md:text-[64px] lg:text-[80px] leading-none tracking-[-2.4px] text-white uppercase mb-12">
           Real-World Use
@@ -98,7 +98,7 @@ export default function UseCases() {
                 {/* Accordion Item */}
                 <div
                   onClick={() => toggleAccordion(index)}
-                  className={`bg-[#1f1f1f] border border-[#9968fa] rounded-[5px] cursor-pointer transition-all duration-700 ease-in-out ${
+                  className={`bg-[#1f1f1f] border border-[#9968fa] rounded-[5px] cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
                     isOpen 
                       ? "opacity-100" 
                       : openIndex !== null 
@@ -129,9 +129,9 @@ export default function UseCases() {
                   <div
                     className="overflow-hidden"
                     style={{
-                      maxHeight: isOpen ? "600px" : "0px",
+                      maxHeight: isOpen ? "400px" : "0px",
                       opacity: isOpen ? 1 : 0,
-                      transition: "max-height 700ms ease-in-out, opacity 700ms ease-in-out",
+                      transition: "max-height 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     <ul className="px-6 pb-6 pt-2 list-disc list-inside space-y-2">

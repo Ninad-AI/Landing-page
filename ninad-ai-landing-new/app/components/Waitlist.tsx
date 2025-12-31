@@ -15,7 +15,7 @@ export default function Waitlist() {
       <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-[#f5f5f7] to-[#fafafa]" />
 
       {/* Content Container */}
-      <div className="relative h-full w-full max-w-[1354px] mx-auto flex items-center justify-between px-8">
+      <div className="relative h-full w-full max-w-[1600px] mx-auto flex items-center justify-between px-8">
         {/* Left Side - Title */}
         <div className="flex-shrink-0">
           <h2 className="font-['Inter'] font-extrabold text-[40px] leading-[1.1] text-[#1a0a4a] uppercase tracking-tight">

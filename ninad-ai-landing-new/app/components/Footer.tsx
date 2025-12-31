@@ -31,7 +31,7 @@ export default function Footer() {
   return (
     <footer className="relative pt-16 pb-8">
       {/* Content */}
-      <div className="relative max-w-[1280px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Main Footer Content */}
         <div className="flex gap-16 mb-12">
           {/* Logo and Description */}
