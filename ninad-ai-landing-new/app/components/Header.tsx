@@ -40,10 +40,10 @@ export default function Header() {
           <a
             href="#waitlist"
             aria-label="Book demo"
-            className="relative h-[45.476px] w-[127.529px] flex-shrink-0"
+            className="relative h-[45.476px] w-[127.529px] flex-shrink-0 group"
           >
-            <span className="absolute inset-0 bg-white border border-[#6125d8] rounded-[31px] opacity-[0.81] shadow-[0px_0px_31.1px_2px_rgba(97,37,216,0.39)]" />
-            <span className="absolute inset-0 flex items-center justify-center font-['Inter'] font-extrabold text-[#6125d8] text-[15px]">
+            <span className="absolute inset-0 bg-white group-hover:bg-[#6125d8] border border-[#6125d8] rounded-[31px] opacity-[0.81] shadow-[0px_0px_31.1px_2px_rgba(97,37,216,0.39)] transition-colors duration-300" />
+            <span className="absolute inset-0 flex items-center justify-center font-['Inter'] font-extrabold text-[#6125d8] group-hover:text-white text-[15px] transition-colors duration-300">
               BOOK DEMO
             </span>
           </a>
