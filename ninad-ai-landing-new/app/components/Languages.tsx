@@ -26,25 +26,25 @@ export default function Languages() {
       </div>
 
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
         {/* Section Title */}
-        <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
+        <h2 className="font-inter font-extrabold text-[48px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
           Speak every language
         </h2>
 
         {/* Plans & Pricing subtitle */}
-        <h3 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-[#c4c4c4] uppercase mb-8">
+        <h3 className="font-inter font-extrabold text-[48px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-[#c4c4c4] uppercase mb-8">
           PLANS & PRICING
         </h3>
 
         {/* Description */}
-        <div className="font-inter font-normal text-[30px] leading-[1.13] text-[#f7f3ff] max-w-[802px] mb-12">
+        <div className="font-inter font-normal text-[20px] md:text-[26px] lg:text-[30px] leading-[1.13] text-[#f7f3ff] max-w-[802px] mb-12">
           <p className="mb-0">Ninad AI supports native speech in multiple languages.</p>
           <p>Localize a given voice to any accent or language.</p>
         </div>
 
         {/* Language Cards Marquee */}
-        <div className="relative h-[137px] overflow-hidden">
+        <div className="relative h-[137px] overflow-hidden w-screen -ml-[calc((100vw-min(1170px,calc(100vw-110px)))/2)]">
           {/* First row - scrolling left */}
           <div className="flex gap-4 animate-marquee mb-4">
             {[...languages, ...languages].map((lang, index) => (

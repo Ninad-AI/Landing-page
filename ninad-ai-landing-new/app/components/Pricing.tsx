@@ -169,11 +169,11 @@ export default function Pricing() {
       <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[200px] left-1/2 -translate-x-1/2" />
 
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
         {/* Header with Title and Toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
           {/* Section Title */}
-          <h2 className="font-inter font-extrabold text-[48px] md:text-[64px] lg:text-[80px] leading-none tracking-[-2.4px] text-white uppercase mb-6 md:mb-0">
+          <h2 className="font-inter font-extrabold text-[40px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-6 md:mb-0">
             Plans & Pricing
           </h2>
 
