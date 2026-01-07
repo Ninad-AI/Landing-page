@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NINAD-AI — Marketing Landing Page 🚀
 
-## Getting Started
+**A fast, responsive landing page built with Next.js (App Router) and Tailwind CSS.** This repository contains the frontend for NINAD-AI's marketing site — modular components, accessibility-focused markup, and optimised performance by default.
 
-First, run the development server:
+---
+
+## Overview ✅
+
+This project is a Next.js 16 app (Turbopack) using the App Router and TypeScript. It provides a clean, component-driven landing page with the following pre-built components:
+- `Header`, `Hero`, `Features`, `Comparison`, `Products`, `Pricing`, `UseCases`, `Waitlist`, `Languages`, `Footer` (see `app/components/`)
+
+The site uses Tailwind CSS for styling and PostCSS for processing. It's easy to extend and customize to match your brand.
+
+---
+
+## Features ✨
+
+- Responsive layout and accessible components
+- Built with Next.js App Router + TypeScript
+- Tailwind CSS for utility-first styling
+- Fast dev feedback with Turbopack
+- Clean component structure for easy maintenance
+
+---
+
+## Tech Stack 🔧
+
+- Next.js 16 (App Router, Turbopack)
+- React 19 + TypeScript
+- Tailwind CSS, PostCSS
+- ESLint for linting
+
+---
+
+## Quick Start — Local Development 🛠️
+
+Prerequisites:
+- Node.js v18 or later
+- npm (bundled with Node)
+
+Commands:
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server (http://localhost:3000)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Build for production
+npm run build
+
+# Run the production build locally
+npm start
+
+# Run linter
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser. Changes to files under `app/` will hot-reload.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Tip: If you need a specific Node version, use nvm (or nvm-windows) to manage versions.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Project Structure 📁
 
-To learn more about Next.js, take a look at the following resources:
+- `app/` - main Next.js App Router source
+  - `layout.tsx`, `page.tsx`, `globals.css`
+  - `components/` - reusable UI components (see names above)
+- `public/` - static assets
+- `package.json` - scripts and deps
+- `tailwind.config.js`, `postcss.config.mjs` - styling config
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploying 🔁
 
-## Deploy on Vercel
+Recommended: Deploy to Vercel for seamless integration with Next.js features (Edge functions, CDN, analytics).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Basic steps:
+1. Connect this repo in Vercel
+2. Set the build command to `npm run build` and the output directory will be handled by Next.js
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You can also build and serve by running `npm run build` then `npm start` on any Node-capable host.
+
+---
+
+## Customization & Development Tips 💡
+
+- Modify components in `app/components/` and update `app/layout.tsx` for global changes
+- Add new pages using the App Router conventions (`app/<route>/page.tsx`)
+- Extend Tailwind in `tailwind.config.js` to add brand colors or utilities
+
+---
+
+## Contributing 🤝
+
+Contributions are welcome! Please open an issue or a PR with a clear description of the change. If you add features, include tests or screenshots when applicable.
+
+Guidelines:
+- Follow the existing code style (TypeScript + Tailwind)
+- Keep components small and focused
+- Run the linter before creating a PR: `npm run lint`
+
+---
+
+## License 📄
+
+No license file is included in this repo yet. If you want to make this open source, consider adding an `LICENSE` (e.g., **MIT**) file.
+
+---
+
+## Contact ✉️
+
+For questions or help: open an issue in this repo or contact the project owner.
+
+---
+
+Enjoy building! 🎉
