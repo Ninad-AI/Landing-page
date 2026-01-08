@@ -15,12 +15,9 @@ const languages = [
 
 export default function Languages() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden bg-black">
       {/* Background with gradient */}
       <div className="absolute inset-0">
-        {/* Main background image placeholder - gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-[#1a0a2e] to-black" />
-
         {/* Glow effects */}
         <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[100px] left-1/2 -translate-x-1/2" />
       </div>
@@ -28,17 +25,12 @@ export default function Languages() {
       {/* Content */}
       <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
         {/* Section Title */}
-        <h2 className="font-inter font-extrabold text-[48px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
+        <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
           Speak every language
         </h2>
 
-        {/* Plans & Pricing subtitle */}
-        <h3 className="font-inter font-extrabold text-[48px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-[#c4c4c4] uppercase mb-8">
-          PLANS & PRICING
-        </h3>
-
         {/* Description */}
-        <div className="font-inter font-normal text-[20px] md:text-[26px] lg:text-[30px] leading-[1.13] text-[#f7f3ff] max-w-[802px] mb-12">
+        <div className="font-inter font-normal text-[30px] leading-[1.13] text-[#f7f3ff] max-w-[802px] mb-12">
           <p className="mb-0">Ninad AI supports native speech in multiple languages.</p>
           <p>Localize a given voice to any accent or language.</p>
         </div>

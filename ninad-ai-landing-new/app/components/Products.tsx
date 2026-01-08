@@ -72,16 +72,21 @@ export default function Products() {
       {/* Content */}
       <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Section Title */}
-        <h2 className="font-inter font-black text-[110px] leading-none tracking-[-3.3px] text-center mb-4 gradient-text bg-gradient-to-b from-white from-[17%] to-[#999] to-[109%]">
+        <h2 
+          className="font-inter font-black text-[110px] leading-none tracking-[-3.3px] text-center mb-4 bg-clip-text"
+          style={{ 
+            WebkitTextFillColor: "transparent", 
+            backgroundImage: "linear-gradient(179deg, rgb(255, 255, 255) 17%, rgb(153, 153, 153) 109%)" 
+          }}
+        >
           PRODUCTS
         </h2>
 
         {/* Subtitle */}
-        <p className="font-inter font-light text-[20px] text-center text-[#f9f1ff] tracking-[-0.6px] mb-16 max-w-[700px] mx-auto">
-          Experience expressive, adaptable, and high-fidelity voice technology
-          <br />
-          built for real-world impact.
-        </p>
+        <div className="font-inter font-light text-[20px] text-center text-[#f9f1ff] tracking-[-0.6px] mb-16 max-w-[700px] mx-auto leading-none uppercase">
+          <p className="mb-1">Experience expressive, adaptable, and high-fidelity voice technology</p>
+          <p>built for real-world impact.</p>
+        </div>
 
         {/* Products Layout */}
         <div className="flex relative" ref={containerRef}>
@@ -100,7 +105,7 @@ export default function Products() {
                     activeProduct === index ? 'opacity-100' : 'opacity-50'
                   } hover:opacity-100`}
                 >
-                  <h3 className="font-inter font-bold text-[36px] leading-none tracking-[-1.2px] text-white uppercase">
+                  <h3 className="font-inter font-bold text-[40px] leading-none tracking-[-1.2px] text-white uppercase">
                     {product.name}
                   </h3>
                 </button>

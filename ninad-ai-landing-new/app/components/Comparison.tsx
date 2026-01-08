@@ -12,21 +12,23 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
 
   return (
     <div
-      className={`relative rounded-[22px] backdrop-blur-[2px] border border-[#2a1f5c] ${
+      className={`relative rounded-[20px] backdrop-blur-[2px] ${
         isNinad
-          ? "w-[420px] h-[545px] border-white/40"
-          : "w-[400px] h-[510px]"
+          ? "w-[375px] h-[477px]"
+          : "w-[360px] h-[450px]"
       }`}
       style={{
-        background: 'linear-gradient(180deg, rgba(51, 20, 114, 0.41) 0%, rgba(55, 109, 249, 0.2) 100%)',
+        background: isNinad 
+          ? '#e0ebf6'
+          : '#e0ebf6',
       }}
     >
       {/* Visual area with gradient background */}
       <div
-        className={`relative mx-auto rounded-[16px] overflow-hidden bg-white border-2 border-white opacity-75 ${
+        className={`relative mx-auto rounded-[15px] overflow-hidden bg-white border-2 border-white opacity-75 ${
           isNinad
-            ? "w-[398px] h-[380px] mt-5"
-            : "w-[380px] h-[340px] mt-5"
+            ? "w-[361px] h-[364px] mt-[25px] mx-[7px]"
+            : "w-[340px] h-[327px] mt-[10px] mx-[10px]"
         }`}
       >
         {/* Decorative gradient elements */}
@@ -67,11 +69,11 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
 
       {/* Play Button */}
       <div
-        className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
-          isNinad ? "w-[140px] h-[140px]" : "w-[125px] h-[125px]"
+        className={`absolute left-1/2 -translate-x-1/2 ${
+          isNinad ? "w-[105px] h-[104px]" : "w-[89px] h-[88px]"
         }`}
         style={{
-          top: isNinad ? 'calc(5px + 190px)' : 'calc(20px + 170px)'
+          top: isNinad ? 'calc(25% + 20px)' : 'calc(30% + 10px)'
         }}
       >
         <Image
@@ -84,10 +86,10 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
 
       {/* Labels */}
       <div className={`absolute left-1/2 -translate-x-1/2 text-center w-full ${
-        isNinad ? "bottom-8" : "bottom-7"
+        isNinad ? "bottom-10" : "bottom-8"
       }`}>
         {isNinad && (
-          <div className="relative w-[200px] h-[48px] mb-2 mx-auto">
+          <div className="relative w-[205px] h-[50px] mb-2 mx-auto">
             <Image
               src="/assets/ninad-ai.png"
               alt="Ninad AI"
@@ -97,11 +99,11 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
           </div>
         )}
         {title && (
-          <p className="font-inter font-extrabold text-[36px] leading-none text-white">
+          <p className="font-inter font-extrabold text-[40px] leading-none text-[rgba(0,165,255,0.77)]">
             {title}
           </p>
         )}
-        <p className={`font-inter font-extrabold text-[36px] leading-none text-[#8e8b95] opacity-60 ${title ? "mt-1" : ""}`}>
+        <p className={`font-inter font-extrabold text-[40px] leading-none text-[#19182d] opacity-[0.63] ${title ? "mt-1" : ""}`}>
           {subtitle}
         </p>
       </div>
@@ -116,7 +118,6 @@ export default function Comparison() {
       <div 
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: "url('assets/lines.svg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -134,20 +135,23 @@ export default function Comparison() {
       </div>
 
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8 z-10">
         {/* Section Title */}
-        <h2 className="font-inter font-extrabold text-[130px] leading-[0.97] tracking-[-3.9px] text-center mb-10 gradient-text bg-gradient-to-b from-white from-[10%] to-[#98dbff] to-[91%]">
-          COMPARISON
+        <h2 
+          className="font-inter font-extrabold text-[75px] leading-[0.97] tracking-[-2.25px] text-center mb-4 bg-clip-text"
+          style={{ 
+            WebkitTextFillColor: "transparent", 
+            backgroundImage: "linear-gradient(181deg, rgb(255, 255, 255) 10%, rgb(162, 160, 217) 91%)",
+            textShadow: "5px 4px 45px rgba(255, 249, 249, 0.15)"
+          }}
+        >
+          VOICE COMPARISON
         </h2>
 
-        {/* Voice Cloning CTA */}
-        <div className="flex justify-center mb-18">
-          <button className="h-[62px] px-10 bg-[#e9f8ff] border border-[#00a9fe] rounded-[33px] shadow-[0px_2px_80px_10px_rgba(255,254,254,0.28)]">
-            <span className="font-inter font-extrabold text-[19px] text-[#00a9ff]">
-              VOICE CLONING
-            </span>
-          </button>
-        </div>
+        {/* Subtitle */}
+        <p className="font-inter font-light text-[20px] text-[#e3e3e3] text-center tracking-[-0.6px] mb-8 max-w-[700px] mx-auto">
+          Listen to the difference. Our AI captures the soul of the original voice.
+        </p>
 
         {/* Voice Cards */}
         <div className="flex items-end justify-center gap-8">

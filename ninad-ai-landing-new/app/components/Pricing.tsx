@@ -164,7 +164,7 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-hidden bg-black">
       {/* Background glow */}
       <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[200px] left-1/2 -translate-x-1/2" />
 
@@ -173,12 +173,12 @@ export default function Pricing() {
         {/* Header with Title and Toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
           {/* Section Title */}
-          <h2 className="font-inter font-extrabold text-[40px] md:text-[56px] lg:text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-6 md:mb-0">
+          <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-[#c4c4c4] uppercase mb-6 md:mb-0">
             Plans & Pricing
           </h2>
 
           {/* Billing Toggle */}
-          <div className="relative h-[42px] bg-[#1a1a2e] rounded-[22px] overflow-hidden flex">
+          <div className="relative h-[42px] bg-[rgba(255,255,255,0.5)] rounded-[22px] overflow-hidden flex">
             {/* Monthly Tab */}
             <button
               onClick={() => setIsYearly(false)}
@@ -209,9 +209,15 @@ export default function Pricing() {
         </div>
 
         {/* Glass Container */}
-        <div className="relative rounded-[30px] border border-[#4a4a4a] overflow-hidden">
+        <div className="relative rounded-[30px] border-2 border-[#bab7b7] overflow-hidden">
           {/* Glass background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a2e]/80 to-[#0d0d1a]/90 backdrop-blur-sm rounded-[30px]" />
+          <div 
+            className="absolute inset-0 backdrop-blur-[2.15px] rounded-[30px]" 
+            style={{ 
+              backgroundImage: "linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%)" 
+            }}
+          />
+          <div className="absolute inset-0 bg-[rgba(255,255,255,0.5)] mix-blend-overlay rounded-[30px]" />
           
           {/* Bottom glow effect */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[200px] bg-[#6125d8] rounded-full blur-[100px] opacity-20" />

@@ -16,7 +16,7 @@ export default function Waitlist() {
       <div className="relative h-full w-[min(1170px,calc(100vw-110px))] mx-auto flex items-center justify-between">
         {/* Left Side - Title */}
         <div className="flex-shrink-0">
-          <h2 className="font-['Inter'] font-extrabold text-[32px] md:text-[40px] leading-[1.1] text-[#1a0a4a] uppercase tracking-tight">
+          <h2 className="font-inter font-extrabold text-[40px] leading-[1.1] text-[#1a0a4a] uppercase tracking-tight">
             JOIN THE<br />WAITLIST NOW
           </h2>
         </div>
@@ -29,19 +29,19 @@ export default function Waitlist() {
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-[400px] md:w-[560px] h-[53px] px-6 bg-white border-2 border-[#d4d4d8] rounded-l-full font-['IBM_Plex_Mono'] font-light text-[18px] md:text-[21px] text-[#212121] placeholder:text-[#212121]/70 outline-none focus:border-[#6125d8] transition-colors"
+              className="w-[560px] h-[53px] px-6 bg-white border-2 border-[#d4d4d8] rounded-l-full font-['IBM_Plex_Mono'] font-light text-[21px] text-[#212121] placeholder:text-[#212121]/70 outline-none focus:border-[#6125d8] transition-colors"
             />
 
             {/* Submit Button */}
-            <button className="w-[140px] md:w-[158px] h-[53px] bg-[#6125d8] rounded-r-full hover:bg-[#7a3ef0] transition-colors flex items-center justify-center -ml-[2px]">
-              <span className="font-['Inter'] font-medium text-[16px] md:text-[20px] text-white whitespace-nowrap">
+            <button className="w-[158px] h-[53px] bg-[#6125d8] rounded-r-full hover:bg-[#7a3ef0] transition-colors flex items-center justify-center -ml-[2px]">
+              <span className="font-inter font-medium text-[20px] text-white whitespace-nowrap">
                 Join Waitlist
               </span>
             </button>
           </div>
 
           {/* Helper Text */}
-          <p className="mt-3 max-w-[641px] font-['Inter'] text-[12px] md:text-[14px] text-[#6125d8] opacity-70 tracking-[-0.42px] leading-tight text-right">
+          <p className="mt-3 max-w-[641px] font-inter text-[14px] text-[#6125d8] opacity-70 tracking-[-0.42px] leading-tight text-right">
             We'll email you as soon as the waitlist opens. Automated messaging service coming soon.
           </p>
         </div>

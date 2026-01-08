@@ -78,11 +78,19 @@ export default function UseCases() {
   };
 
   return (
-    <section id="use-cases" className="relative py-20 overflow-hidden bg-gradient-to-br from-[#000000] via-[#0a0a0a] to-[#6125D8]/70">
+    <section id="use-cases" className="relative py-20 overflow-hidden bg-black">
+      {/* Background glow */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute w-[2746px] h-[1746px] left-[-166px] top-[-251px]">
+          <div className="absolute w-[800px] h-[800px] bg-[#6125d8] rounded-full blur-[200px] opacity-20 top-[400px] left-[200px]" />
+          <div className="absolute w-[600px] h-[600px] bg-[#00a9ff] rounded-full blur-[180px] opacity-15 top-[600px] right-[400px]" />
+        </div>
+      </div>
+
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative max-w-[1600px] mx-auto px-8 z-10">
         {/* Section Title */}
-        <h2 className="font-inter font-extrabold text-[48px] md:text-[64px] lg:text-[80px] leading-none tracking-[-2.4px] text-white uppercase mb-12">
+        <h2 className="font-inter font-extrabold text-[80px] leading-none tracking-[-2.4px] text-white uppercase mb-12">
           Real-World Use
         </h2>
 
@@ -110,7 +118,7 @@ export default function UseCases() {
                   <div className="h-[77px] flex items-center justify-between px-6">
                     {/* Use Case Name */}
                     <h3
-                      className="font-inter font-light text-[24px] sm:text-[32px] md:text-[38px] lg:text-[42px] leading-none tracking-[-1.26px] bg-clip-text text-transparent"
+                      className="font-inter font-light text-[42px] leading-none tracking-[-1.26px] bg-clip-text text-transparent"
                       style={{
                         backgroundImage:
                           "linear-gradient(102deg, rgba(255, 255, 255, 0.8) 3%, #6125d8 96%)",

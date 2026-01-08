@@ -71,14 +71,14 @@ export default function Features() {
       {/* Content */}
       <div className="relative max-w-[1600px] mx-auto px-8">
         {/* Section Title */}
-        <div className="flex justify-center mb-10">
+        <div className="flex justify-center mb-8">
           <h2
             className="
               font-inter
               font-bold
-              text-[130px]
-              leading-[1.08]
-              tracking-[-3.9px]
+              text-[94px]
+              leading-[0.97]
+              tracking-[-2.82px]
               text-center
               gradient-text
               bg-[linear-gradient(180deg,#e7fdff_20%,#878787_150%)]
@@ -92,7 +92,7 @@ export default function Features() {
         </div>
 
         {/* Subtitle */}
-        <div className="font-inter font-medium text-[32px] leading-[1.25] text-white/80 max-w-[1500px] mx-auto mb-20 text-center overflow-visible">
+        <div className="font-inter font-medium text-[24px] leading-[1.03] text-white/80 max-w-[1149px] mx-auto mb-16 text-center overflow-visible">
           <p className="mb-1">
             Experience the next evolution in voice AI.
           </p>
@@ -192,15 +192,15 @@ export default function Features() {
                   />
                 )}
               
-                <div className="w-full space-y-5 text-center flex flex-col items-center">
+                <div className="w-full space-y-3 text-center flex flex-col items-center">
                 {/* Title */}
                 <h3
                   className="
                     font-inter
                     font-extrabold
-                    text-[44px]
-                    leading-[1.08]
-                    tracking-[-0.88px]
+                    text-[30px]
+                    leading-[0.98]
+                    tracking-[-0.6px]
                     gradient-text
                     bg-[linear-gradient(180deg,#ffffff_0%,#b18bff_100%)]
                     overflow-visible
@@ -216,11 +216,11 @@ export default function Features() {
                   className="
                     font-inter
                     font-semibold
-                    text-[18px]
-                    leading-[1.35]
-                    tracking-[-0.3px]
+                    text-[11px]
+                    leading-[1.045]
+                    tracking-[-0.22px]
                     text-white
-                    max-w-[600px]
+                    max-w-[434px]
                     overflow-visible
                     pb-[0.12em]
                   "

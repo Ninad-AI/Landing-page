@@ -19,106 +19,116 @@ const legalLinks = [
 ];
 
 const socialIcons = [
-  { name: "Facebook", src: "/assets/social/facebook.png" },
-  { name: "GitLab", src: "/assets/social/gitlab.png" },
-  { name: "GitHub", src: "/assets/social/github.png" },
-  { name: "Telegram", src: "/assets/social/telegram.png" },
-  { name: "Instagram", src: "/assets/social/instagram.png" },
-  { name: "Figma", src: "/assets/social/figma.png" },
+  { name: "Facebook", src: "/assets/socialmedia-logos/facebook.png" },
+  { name: "GitLab", src: "/assets/socialmedia-logos/gitlab.png" },
+  { name: "GitHub", src: "/assets/socialmedia-logos/github.png" },
+  { name: "Telegram", src: "/assets/socialmedia-logos/telegram.png" },
+  { name: "Instagram", src: "/assets/socialmedia-logos/instagram.png" },
+  { name: "Figma", src: "/assets/socialmedia-logos/figma.png" },
 ];
 
 export default function Footer() {
   return (
-    <footer className="relative pt-16 pb-8">
-      {/* Content */}
-      <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
-        {/* Main Footer Content */}
-        <div className="flex gap-16 mb-12">
-          {/* Logo and Description */}
-          <div className="max-w-[298px]">
-            {/* Logo */}
-            <div className="relative w-[153px] h-[34px] mb-4">
-              <Image
-                src="/assets/ninad-ai.png"
-                alt="Ninad AI"
-                fill
-                className="object-contain"
-              />
+    <footer className="relative">
+      {/* Main Footer Section - Black Background */}
+      <div className="bg-black py-16">
+        <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
+          {/* Main Footer Content - Grid Layout */}
+          <div className="grid grid-cols-[298px_132px_133px_1fr] gap-x-20">
+            {/* Logo and Description Column */}
+            <div>
+              {/* Logo */}
+              <div className="relative w-38 h-8.5 mb-6">
+                <Image
+                  src="/assets/ninad-ai.png"
+                  alt="Ninad AI"
+                  fill
+                  className="object-contain object-left"
+                />
+              </div>
+
+              {/* Description */}
+              <p className="font-roboto font-normal text-sm text-white leading-normal">
+                Low-latency, expressive speech for apps, agents, and experiences
+                ready to integrate in minutes.
+              </p>
             </div>
 
-            {/* Description */}
-            <p className="font-roboto font-normal text-[14px] text-white leading-relaxed">
-              Low-latency, expressive speech for apps, agents, and experiences
-              ready to integrate in minutes.
-            </p>
-          </div>
+            {/* Products Column */}
+            <div>
+              <h4 className="font-roboto font-bold text-xl text-white mb-6">
+                Products
+              </h4>
+              <ul className="space-y-3">
+                {productLinks.map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href="#"
+                      className="font-roboto font-normal text-sm text-white hover:text-[#6125d8] transition-colors whitespace-nowrap"
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Products Column */}
-          <div>
-            <h4 className="font-roboto font-bold text-[20px] text-white mb-4">
-              Products
-            </h4>
-            <ul className="space-y-2">
-              {productLinks.map((link, index) => (
-                <li key={index}>
+            {/* Company Column */}
+            <div>
+              <h4 className="font-roboto font-bold text-xl text-white mb-6">
+                Company
+              </h4>
+              <ul className="space-y-3">
+                {companyLinks.map((link, index) => (
+                  <li key={index}>
+                    <a
+                      href="#"
+                      className="font-roboto font-normal text-sm text-white hover:text-[#6125d8] transition-colors whitespace-nowrap"
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Follow Us Column */}
+            <div>
+              <h4 className="font-roboto font-bold text-xl text-white mb-6">
+                Follow us
+              </h4>
+              <div className="flex gap-4">
+                {socialIcons.map((social, index) => (
                   <a
+                    key={index}
                     href="#"
-                    className="font-roboto font-normal text-[14px] text-white hover:text-[#6125d8] transition-colors"
+                    className="w-6 h-6 relative hover:opacity-80 transition-opacity flex items-center justify-center"
                   >
-                    {link}
+                    <Image
+                      src={social.src}
+                      alt={social.name}
+                      width={social.name === "Facebook" ? 12 : 22}
+                      height={social.name === "Facebook" ? 22 : 22}
+                      className="object-contain"
+                    />
                   </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Column */}
-          <div>
-            <h4 className="font-roboto font-bold text-[20px] text-white mb-4">
-              Company
-            </h4>
-            <ul className="space-y-2">
-              {companyLinks.map((link, index) => (
-                <li key={index}>
-                  <a
-                    href="#"
-                    className="font-roboto font-normal text-[14px] text-white hover:text-[#6125d8] transition-colors"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Social Links */}
-          <div>
-            <h4 className="font-roboto font-bold text-[20px] text-white mb-4">
-              Follow us
-            </h4>
-            <div className="flex gap-4">
-              {socialIcons.map((social, index) => (
-                <a
-                  key={index}
-                  href="#"
-                  className="w-[24px] h-[24px] relative hover:opacity-80 transition-opacity"
-                >
-                  <Image
-                    src={social.src}
-                    alt={social.name}
-                    fill
-                    className="object-contain"
-                  />
-                </a>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-white/20 pt-6 flex items-center justify-between">
+      {/* Bottom Bar - Gradient Background */}
+      <div 
+        className="h-14 relative"
+        style={{
+          background: 'linear-gradient(90deg, rgba(97, 37, 216, 0.6) 0%, rgba(0, 169, 255, 0.4) 50%, rgba(97, 37, 216, 0.6) 100%)',
+        }}
+      >
+        <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto h-full flex items-center justify-between">
           {/* Copyright */}
-          <p className="font-roboto font-light text-[12px] text-white">
+          <p className="font-roboto font-light text-xs text-white">
             © 2021 All Rights Reserved
           </p>
 
@@ -128,7 +138,7 @@ export default function Footer() {
               <a
                 key={index}
                 href="#"
-                className="font-roboto font-normal text-[14px] text-white/80 hover:text-white transition-colors"
+                className="font-roboto font-normal text-sm text-white/80 hover:text-white transition-colors whitespace-nowrap"
               >
                 {link}
               </a>
