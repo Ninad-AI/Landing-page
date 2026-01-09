@@ -12,11 +12,13 @@ interface Product {
 const products: Product[] = [
   {
     name: "Expressive TTS",
-    description: "Our Expressive Text-to-Speech brings writing to life with depth and rhythm. Unlike standard TTS, Ninad voices adjust intonation, energy, and sentiment - perfect for audiobooks, podcasts, assistants, and learning platforms that demand authentic emotion."
+    description: "Our Expressive Text-to-Speech brings writing to life with depth and rhythm. Unlike standard TTS, Ninad voices adjust intonation, energy, and sentiment - perfect for audiobooks, podcasts, assistants, and learning platforms that demand authentic emotion.",
+    descriptionPosition: 'below'
   },
   {
     name: "Voice Cloning",
-    description: "We don't just copy your voice, we replicate your identity. Ninad's voice cloning captures tone, style, and emotional nuance, creating voices that sound genuinely human. Perfect for content creation, assistants, and brand storytelling."
+    description: "We don’t just copy your voice, we replicate your identity. Ninad captures tone, style, and emotional nuance to create voices that sound truly human, perfect for content, assistants, and brand storytelling.",
+    descriptionPosition: 'below'
   },
   {
     name: "Conversation AI",
@@ -40,21 +42,37 @@ export default function Products() {
   const [activeProduct, setActiveProduct] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [linePosition, setLinePosition] = useState(0);
+  const [listHeight, setListHeight] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
   const productRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Calculate line position based on active product
-    if (productRefs.current[activeProduct] && containerRef.current) {
-      const button = productRefs.current[activeProduct];
-      const container = containerRef.current;
-      if (button) {
-        const buttonRect = button.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        // Position line at the bottom of the active product
-        setLinePosition(buttonRect.bottom - containerRect.top);
+    const updatePositions = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+      
+      // Calculate line position based on active product
+      if (productRefs.current[activeProduct] && containerRef.current) {
+        const button = productRefs.current[activeProduct];
+        const container = containerRef.current;
+        if (button) {
+          const buttonRect = button.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          // Position line at the bottom of the active product
+          setLinePosition(buttonRect.bottom - containerRect.top);
+        }
       }
-    }
+
+      // Calculate total list height
+      if (listRef.current) {
+        setListHeight(listRef.current.offsetHeight);
+      }
+    };
+
+    updatePositions();
+    window.addEventListener('resize', updatePositions);
+    return () => window.removeEventListener('resize', updatePositions);
   }, [activeProduct]);
 
   const handleProductClick = (index: number) => {
@@ -97,7 +115,7 @@ export default function Products() {
         {/* Products Layout */}
         <div className="flex flex-col lg:flex-row relative" ref={containerRef}>
           {/* Product List - Left Side */}
-          <div className="flex-shrink-0 w-full lg:w-[450px] relative mb-12 lg:mb-0">
+          <div ref={listRef} className="flex-shrink-0 w-full lg:w-[450px] relative mb-12 lg:mb-0">
             {products.map((product, index) => (
               <div key={index} className="relative">
                 {/* Divider Line Above (skip first) */}
@@ -136,28 +154,47 @@ export default function Products() {
           />
 
           {/* Product Description - Right Side */}
-          <div className="flex-1 lg:pl-20 relative min-h-[300px] lg:min-h-[500px]">
+          <div 
+            className="flex-1 lg:pl-20 relative"
+            style={{ 
+              minHeight: '400px',
+              height: listHeight > 0 && isDesktop ? `${listHeight}px` : 'auto'
+            }}
+          >
              <div 
                 className={`
-                    transition-all duration-500 ease-out
+                    transition-all duration-500 ease-out h-full
                     ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
                 `}
-                style={{
-                     marginTop: '2rem'
-                }}
              >
-                <h4 className="font-sans font-medium text-primary text-sm uppercase tracking-widest mb-4 hidden lg:block">
-                    Description
-                </h4>
+                {/* Above Line Container */}
+                {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
+                    <div 
+                        className="lg:absolute lg:left-0 lg:right-0 lg:pb-4 mb-4 lg:mb-0"
+                        style={{ 
+                            bottom: `calc(100% - ${linePosition}px)`
+                        }}
+                    >
+                        <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                            {products[activeProduct].description}
+                        </p>
+                    </div>
+                )}
 
-                <p className="font-roboto text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
-                  {products[activeProduct].description}
-                </p>
-
-                {products[activeProduct].descriptionPart2 && (
-                    <p className="font-roboto text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90 mt-6 lg:mt-12 pl-0 lg:pl-12 border-l-2 border-primary/30">
-                        {products[activeProduct].descriptionPart2}
-                    </p>
+                {/* Below Line Container */}
+                {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
+                    <div 
+                        className="lg:absolute lg:left-0 lg:right-0 lg:pt-4"
+                        style={{ 
+                            top: `${linePosition}px`
+                        }}
+                    >
+                        <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                            {products[activeProduct].descriptionPosition === 'split' 
+                                ? products[activeProduct].descriptionPart2 
+                                : products[activeProduct].description}
+                        </p>
+                    </div>
                 )}
              </div>
           </div>
