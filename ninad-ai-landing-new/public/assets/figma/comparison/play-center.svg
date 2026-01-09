@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 105 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="PLAY button">
+<g id="Frame 11">
+<rect width="105" height="104" rx="52" fill="var(--fill-0, #866FE6)"/>
+</g>
+<g id="Vector 41" filter="url(#filter0_i_596_653)">
+<path d="M45.5053 33.418L72.5137 49.3785C74.4954 50.5496 74.4954 53.4504 72.5137 54.6215L45.5053 70.582C43.5081 71.7622 41 70.3028 41 67.9605V36.0395C41 33.6972 43.5081 32.2378 45.5053 33.418Z" fill="white"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_i_596_653" x="41" y="33" width="33" height="39" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1"/>
+<feGaussianBlur stdDeviation="0.5"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_596_653"/>
+</filter>
+</defs>
+</svg>
