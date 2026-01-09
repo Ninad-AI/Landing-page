@@ -68,44 +68,55 @@ export default function Products() {
   };
 
   return (
-    <section id="products" className="relative py-20 overflow-hidden bg-black">
+    <section id="products" className="relative py-20 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
+      {/* Background Elements */}
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
+
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative container mx-auto px-6 max-w-7xl">
         {/* Section Title */}
         <h2 
-          className="font-inter font-black text-[110px] leading-none tracking-[-3.3px] text-center mb-4 bg-clip-text"
-          style={{ 
-            WebkitTextFillColor: "transparent", 
-            backgroundImage: "linear-gradient(179deg, rgb(255, 255, 255) 17%, rgb(153, 153, 153) 109%)" 
-          }}
+          className="
+            font-sans font-black 
+            text-4xl md:text-6xl lg:text-[110px] 
+            leading-none tracking-tight 
+            text-center mb-4 
+            bg-clip-text text-transparent 
+            bg-gradient-to-b from-white to-white/40
+          "
         >
           PRODUCTS
         </h2>
 
         {/* Subtitle */}
-        <div className="font-inter font-light text-[20px] text-center text-[#f9f1ff] tracking-[-0.6px] mb-16 max-w-[700px] mx-auto leading-none uppercase">
+        <div className="font-sans font-medium text-lg md:text-xl text-center text-muted tracking-tight mb-16 md:mb-24 max-w-3xl mx-auto uppercase">
           <p className="mb-1">Experience expressive, adaptable, and high-fidelity voice technology</p>
           <p>built for real-world impact.</p>
         </div>
 
         {/* Products Layout */}
-        <div className="flex relative" ref={containerRef}>
+        <div className="flex flex-col lg:flex-row relative" ref={containerRef}>
           {/* Product List - Left Side */}
-          <div className="flex-shrink-0 w-[420px] relative">
+          <div className="flex-shrink-0 w-full lg:w-[450px] relative mb-12 lg:mb-0">
             {products.map((product, index) => (
               <div key={index} className="relative">
                 {/* Divider Line Above (skip first) */}
-                {index !== 0 && <div className="w-full h-[2px] bg-gradient-to-r from-white/30 to-[#6125d8]/30" />}
+                {index !== 0 && <div className="w-full h-[1px] bg-gradient-to-r from-white/20 to-primary/20" />}
                 
                 {/* Product Item */}
                 <button
                   ref={(el) => { productRefs.current[index] = el; }}
                   onClick={() => handleProductClick(index)}
-                  className={`w-full text-left py-3 transition-opacity duration-300 cursor-pointer ${
-                    activeProduct === index ? 'opacity-100' : 'opacity-50'
-                  } hover:opacity-100`}
+                  className={`
+                    w-full text-left py-4 md:py-6 group
+                    transition-all duration-300 cursor-pointer 
+                    ${activeProduct === index ? 'opacity-100 pl-4' : 'opacity-50 hover:opacity-80 hover:pl-2'}
+                  `}
                 >
-                  <h3 className="font-inter font-bold text-[40px] leading-none tracking-[-1.2px] text-white uppercase">
+                  <h3 className={`
+                    font-sans font-bold text-2xl md:text-4xl leading-none uppercase transition-colors
+                    ${activeProduct === index ? 'text-white' : 'text-white/60 group-hover:text-white/80'}
+                  `}>
                     {product.name}
                   </h3>
                 </button>
@@ -113,93 +124,42 @@ export default function Products() {
             ))}
             
             {/* Bottom divider */}
-            <div className="w-full h-[2px] bg-gradient-to-r from-white/30 to-[#6125d8]/30" />
+            <div className="w-full h-[1px] bg-gradient-to-r from-white/20 to-primary/20" />
           </div>
 
-          {/* Animated Line */}
+          {/* Animated Line (Desktop only) */}
           <div 
-            className="absolute left-0 w-full h-[2px] bg-white transition-all duration-500 ease-out pointer-events-none z-10"
+            className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-500 ease-out pointer-events-none z-10"
             style={{ 
               top: `${linePosition}px`,
             }}
           />
 
           {/* Product Description - Right Side */}
-          <div className="flex-1 pl-16 relative min-h-[500px]">
-            {/* For "below" position - text starts below the line */}
-            {!products[activeProduct].descriptionPosition && (
-              <div 
-                className="absolute left-16 right-0 transition-all duration-500 ease-out"
-                style={{ 
-                  top: `${linePosition + 16}px`
+          <div className="flex-1 lg:pl-20 relative min-h-[300px] lg:min-h-[500px]">
+             <div 
+                className={`
+                    transition-all duration-500 ease-out
+                    ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
+                `}
+                style={{
+                     marginTop: '2rem'
                 }}
-              >
-                <p className={`font-mono text-[30px] leading-[1.12] text-[#fffbfb] transition-opacity duration-300 ${
-                  isTransitioning ? 'opacity-0' : 'opacity-100'
-                }`}>
+             >
+                <h4 className="font-sans font-medium text-primary text-sm uppercase tracking-widest mb-4 hidden lg:block">
+                    Description
+                </h4>
+
+                <p className="font-roboto text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
                   {products[activeProduct].description}
                 </p>
-              </div>
-            )}
 
-            {/* For "split" position - half above, half below */}
-            {products[activeProduct].descriptionPosition === 'split' && (
-              <>
-                <div 
-                  className="absolute left-16 right-0 transition-all duration-500 ease-out"
-                  style={{ 
-                    bottom: `calc(100% - ${linePosition}px + 16px)`
-                  }}
-                >
-                  <p className={`font-mono text-[30px] leading-[1.12] text-[#fffbfb] transition-opacity duration-300 ${
-                    isTransitioning ? 'opacity-0' : 'opacity-100'
-                  }`}>
-                    {products[activeProduct].description}
-                  </p>
-                </div>
-                <div 
-                  className="absolute left-16 right-0 transition-all duration-500 ease-out"
-                  style={{ 
-                    top: `${linePosition + 16}px`
-                  }}
-                >
-                  <p className={`font-mono text-[30px] leading-[1.12] text-[#fffbfb] transition-opacity duration-300 ${
-                    isTransitioning ? 'opacity-0' : 'opacity-100'
-                  }`}>
-                    {products[activeProduct].descriptionPart2}
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* For "above" position - text ends at the line */}
-            {products[activeProduct].descriptionPosition === 'above' && (
-              <>
-                <div 
-                  className="absolute left-16 right-0 transition-all duration-500 ease-out"
-                  style={{ 
-                    bottom: `calc(100% - ${linePosition}px + 16px)`
-                  }}
-                >
-                  <p className={`font-mono text-[30px] leading-[1.12] text-[#fffbfb] transition-opacity duration-300 mb-8 ${
-                    isTransitioning ? 'opacity-0' : 'opacity-100'
-                  }`}>
-                    {products[activeProduct].description}
-                  </p>
-                  
-                  {/* Coming Soon Badge - Only for Speech Intelligence */}
-                  {activeProduct === 4 && (
-                    <div className={`text-right transition-opacity duration-300 ${
-                      isTransitioning ? 'opacity-0' : 'opacity-100'
-                    }`}>
-                      <span className="text-white text-[20px] tracking-[-0.6px]">
-                        COMING SOON
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
+                {products[activeProduct].descriptionPart2 && (
+                    <p className="font-roboto text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90 mt-6 lg:mt-12 pl-0 lg:pl-12 border-l-2 border-primary/30">
+                        {products[activeProduct].descriptionPart2}
+                    </p>
+                )}
+             </div>
           </div>
         </div>
       </div>

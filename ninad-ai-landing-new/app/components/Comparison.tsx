@@ -1,111 +1,95 @@
+'use client';
+
+import { useState } from 'react';
 import Image from "next/image";
 
 interface VoiceCardProps {
   title: string;
   subtitle: string;
-  variant: "original" | "ninad" | "market";
-  playButton: string;
+  isPrimary?: boolean;
 }
 
-function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
-  const isNinad = variant === "ninad";
+function VoiceCard({ title, subtitle, isPrimary = false }: VoiceCardProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <div
-      className={`relative rounded-[20px] backdrop-blur-[2px] ${
-        isNinad
-          ? "w-[375px] h-[477px]"
-          : "w-[360px] h-[450px]"
-      }`}
-      style={{
-        background: isNinad 
-          ? '#e0ebf6'
-          : '#e0ebf6',
-      }}
+      className={`
+        relative 
+        w-full max-w-sm 
+        aspect-[3/4] 
+        rounded-[24px] 
+        border 
+        transition-all duration-500 
+        group
+        ${isPrimary 
+          ? 'border-primary/50 bg-primary/5 shadow-[0_0_50px_-12px_var(--color-primary)] z-10 scale-105 md:scale-110' 
+          : 'border-white/10 bg-white/5 hover:border-white/20'
+        }
+      `}
     >
-      {/* Visual area with gradient background */}
-      <div
-        className={`relative mx-auto rounded-[15px] overflow-hidden bg-white border-2 border-white opacity-75 ${
-          isNinad
-            ? "w-[361px] h-[364px] mt-[25px] mx-[7px]"
-            : "w-[340px] h-[327px] mt-[10px] mx-[10px]"
-        }`}
-      >
-        {/* Decorative gradient elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          {/* Purple/Blue gradient shapes */}
-          <div
-            className={`absolute w-[780px] h-[260px] rounded-full blur-[60px] ${
-              variant === "market"
-                ? "bg-[#1758ff]/30"
-                : variant === "ninad"
-                ? "bg-[#6125d8]/40"
-                : "bg-gradient-to-r from-[#6125d8]/30 to-[#00a9ff]/30"
-            } -bottom-[400px] -left-[100px] rotate-[92deg]`}
-          />
-          <div
-            className={`absolute w-[848px] h-[412px] rounded-full blur-[80px] ${
-              variant === "market"
-                ? "bg-[#1758ff]/20"
-                : variant === "ninad"
-                ? "bg-[#6125d8]/30"
-                : "bg-gradient-to-r from-[#6125d8]/20 to-[#00a9ff]/20"
-            } -bottom-[500px] -left-[150px] rotate-[105deg]`}
-          />
-          <div
-            className={`absolute w-[682px] h-[363px] rounded-full blur-[50px] ${
-              variant === "market"
-                ? "bg-[#1758ff]/25"
-                : variant === "ninad"
-                ? "bg-[#6125d8]/35"
-                : "bg-gradient-to-r from-[#6125d8]/25 to-[#00a9ff]/25"
-            } -bottom-[200px] left-[7px] rotate-[93deg]`}
-          />
+      {/* Dynamic Background Glow */}
+      <div className={`absolute inset-0 rounded-[24px] overflow-hidden opacity-20 pointer-events-none`}>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-[80px] ${
+            isPrimary ? 'bg-primary' : 'bg-gray-500'
+        }`} />
+      </div>
+
+      <div className="relative h-full flex flex-col items-center justify-between p-8 md:p-10">
+        
+        {/* Top: Visualizer Area */}
+        <div className="w-full h-1/2 flex items-center justify-center gap-1.5">
+           {[...Array(8)].map((_, i) => (
+             <div
+                key={i}
+                className={`
+                    w-2 md:w-3 rounded-full transition-all duration-300
+                    ${isPrimary ? 'bg-primary-light' : 'bg-white/40'}
+                    ${isPlaying ? 'animate-pulse' : ''}
+                `}
+                style={{
+                  height: isPlaying ? `${Math.random() * 80 + 20}%` : '20%',
+                  opacity: isPlaying ? 1 : 0.5,
+                  animationDelay: `${i * 0.1}s`
+                }}
+             />
+           ))}
         </div>
 
-        {/* Noise texture overlay */}
-        <div className="absolute inset-0 opacity-[0.08] bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==')] bg-repeat" />
-      </div>
+        {/* Center: Play Button */}
+        <button
+          onClick={() => setIsPlaying(!isPlaying)}
+          className={`
+            w-20 h-20 md:w-24 md:h-24
+            rounded-full
+            flex items-center justify-center
+            transition-transform duration-300 active:scale-95
+            ${isPrimary 
+              ? 'bg-gradient-to-br from-primary to-primary-light text-white shadow-lg shadow-primary/40 hover:shadow-primary/60' 
+              : 'bg-white/10 text-white hover:bg-white/20'
+            }
+          `}
+        >
+          {isPlaying ? (
+             <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" strokeWidth={0} stroke="currentColor" className="w-8 h-8 md:w-10 md:h-10">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" strokeWidth={0} stroke="currentColor" className="w-8 h-8 md:w-10 md:h-10 ml-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+            </svg>
+          )}
+        </button>
 
-      {/* Play Button */}
-      <div
-        className={`absolute left-1/2 -translate-x-1/2 ${
-          isNinad ? "w-[105px] h-[104px]" : "w-[89px] h-[88px]"
-        }`}
-        style={{
-          top: isNinad ? 'calc(25% + 20px)' : 'calc(30% + 10px)'
-        }}
-      >
-        <Image
-          src={playButton}
-          alt="Play"
-          fill
-          className="object-contain"
-        />
-      </div>
-
-      {/* Labels */}
-      <div className={`absolute left-1/2 -translate-x-1/2 text-center w-full ${
-        isNinad ? "bottom-10" : "bottom-8"
-      }`}>
-        {isNinad && (
-          <div className="relative w-[205px] h-[50px] mb-2 mx-auto">
-            <Image
-              src="/assets/ninad-ai.png"
-              alt="Ninad AI"
-              fill
-              className="object-contain"
-            />
-          </div>
-        )}
-        {title && (
-          <p className="font-inter font-extrabold text-[40px] leading-none text-[rgba(0,165,255,0.77)]">
-            {title}
-          </p>
-        )}
-        <p className={`font-inter font-extrabold text-[40px] leading-none text-[#19182d] opacity-[0.63] ${title ? "mt-1" : ""}`}>
-          {subtitle}
-        </p>
+        {/* Bottom: Text */}
+        <div className="text-center mt-8">
+             <h3 className={`font-sans font-bold text-lg md:text-xl tracking-wide uppercase ${isPrimary ? 'text-primary-light' : 'text-gray-400'}`}>
+                 {title}
+             </h3>
+             <p className="font-roboto font-medium text-2xl md:text-3xl text-white mt-1">
+                 {subtitle}
+             </p>
+        </div>
       </div>
     </div>
   );
@@ -113,73 +97,62 @@ function VoiceCard({ title, subtitle, variant, playButton }: VoiceCardProps) {
 
 export default function Comparison() {
   return (
-    <section className="relative py-32 overflow-hidden min-h-screen flex items-center">
-      {/* Background lines.svg */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      />
-      
-      {/* Background glow effects */}
-      <div className="absolute inset-0 z-[1]">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2746px] h-[1746px] -mt-[251px]">
-          {/* Purple glow */}
-          <div className="absolute w-[800px] h-[800px] bg-[#6125d8] rounded-full blur-[200px] opacity-20 top-[200px] left-[400px]" />
-          {/* Blue glow */}
-          <div className="absolute w-[600px] h-[600px] bg-[#00a9ff] rounded-full blur-[180px] opacity-15 top-[400px] right-[300px]" />
-        </div>
+    <section className="relative py-24 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
+      {/* Background Gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 w-full h-[500px] bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
       </div>
 
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8 z-10">
-        {/* Section Title */}
-        <h2 
-          className="font-inter font-extrabold text-[75px] leading-[0.97] tracking-[-2.25px] text-center mb-4 bg-clip-text"
-          style={{ 
-            WebkitTextFillColor: "transparent", 
-            backgroundImage: "linear-gradient(181deg, rgb(255, 255, 255) 10%, rgb(162, 160, 217) 91%)",
-            textShadow: "5px 4px 45px rgba(255, 249, 249, 0.15)"
-          }}
-        >
-          VOICE COMPARISON
-        </h2>
-
-        {/* Subtitle */}
-        <p className="font-inter font-light text-[20px] text-[#e3e3e3] text-center tracking-[-0.6px] mb-8 max-w-[700px] mx-auto">
-          Listen to the difference. Our AI captures the soul of the original voice.
-        </p>
-
-        {/* Voice Cards */}
-        <div className="flex items-end justify-center gap-8">
-          {/* Original Voice */}
-          <VoiceCard
-            title="ORIGINAL"
-            subtitle="VOICE"
-            variant="original"
-            playButton="/assets/play-button-grayscale.png"
-          />
-
-          {/* Ninad AI */}
-          <VoiceCard
-            title=""
-            subtitle="CLONE"
-            variant="ninad"
-            playButton="/assets/play-button-coloured.png"
-          />
-
-          {/* Market Clone */}
-          <VoiceCard
-            title="MARKET"
-            subtitle="CLONE"
-            variant="market"
-            playButton="/assets/play-button-grayscale.png"
-          />
+      <div className="container mx-auto px-6 relative z-10">
+        
+        {/* Header */}
+        <div className="text-center mb-20">
+            <h2 
+            className="
+                font-sans font-bold text-4xl md:text-6xl lg:text-[80px] 
+                leading-none tracking-tight text-transparent bg-clip-text 
+                bg-gradient-to-b from-white to-white/50 mb-6
+            "
+            >
+            Hear the Difference
+            </h2>
+            <p className="font-roboto text-lg md:text-xl text-muted max-w-2xl mx-auto">
+            Experience the clarity, emotion, and human-like quality that sets Ninad AI apart from standard market solutions.
+            </p>
         </div>
+
+        {/* Comparison Grid */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 mt-12 mb-20">
+          
+          <VoiceCard 
+            title="Standard AI" 
+            subtitle="Generic"
+          />
+
+          <div className="relative z-20 flex-shrink-0 lg:-mx-4">
+            <div className="w-16 h-16 rounded-full bg-black border border-white/20 flex items-center justify-center">
+                <span className="font-mono text-white/50 font-bold italic text-xl">VS</span>
+            </div>
+          </div>
+
+          <VoiceCard 
+            title="Ninad AI" 
+            subtitle="Human" 
+            isPrimary
+          />
+
+        </div>
+        
+        {/* Bottom CTA or Info */}
+        <div className="text-center">
+            <p className="text-sm font-mono text-primary/80 uppercase tracking-widest">
+                Optimized for ultra-low latency - 280ms
+            </p>
+        </div>
+
       </div>
     </section>
   );
 }
+

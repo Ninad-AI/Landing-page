@@ -11,16 +11,17 @@ function CheckIcon({ highlighted = false }: { highlighted?: boolean }) {
       viewBox="0 0 20 20"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      className="flex-shrink-0"
     >
       <circle 
         cx="10" 
         cy="10" 
         r="9" 
-        fill={highlighted ? "white" : "#6125d8"} 
+        className={highlighted ? "fill-white" : "fill-primary"}
       />
       <path
         d="M6 10L9 13L14 7"
-        stroke={highlighted ? "#6125d8" : "white"}
+        className={highlighted ? "stroke-primary" : "stroke-white"}
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -86,16 +87,18 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
   return (
     <div
-      className={`relative rounded-[26px] p-8 flex flex-col ${
-        isHighlighted
-          ? "bg-[#6125d8] shadow-[0px_32px_34px_0px_rgba(82,67,194,0.3)] min-h-[474px] w-[294px]"
-          : "min-h-[420px] w-[232px]"
-      }`}
+      className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 hover:-translate-y-2
+        ${
+          isHighlighted
+            ? "bg-primary shadow-[0_20px_40px_-10px_rgba(97,37,216,0.4)] border border-primary z-10 lg:scale-105"
+            : "bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 hover:bg-white/10"
+        }
+      `}
     >
       {/* Badge */}
       {plan.badge && (
-        <div className="absolute top-5 right-5 bg-black rounded-[13.5px] px-3 py-1">
-          <span className="font-poppins font-extrabold text-[10px] text-white tracking-[0.83px]">
+        <div className="absolute top-6 right-6 bg-black/40 backdrop-blur-md rounded-full px-3 py-1 border border-white/10 shadow-lg">
+          <span className="font-sans font-bold text-[10px] text-white tracking-widest uppercase">
             {plan.badge}
           </span>
         </div>
@@ -103,16 +106,12 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* Price */}
       <div className="flex items-baseline gap-1 mb-2">
-        <span
-          className={`font-poppins font-bold text-[36px] leading-[46px] ${
-            isHighlighted ? "text-white" : "text-white"
-          }`}
-        >
+        <span className="font-sans font-bold text-4xl text-white">
           {plan.price}
         </span>
         <span
-          className={`font-poppins font-medium text-[14px] ${
-            isHighlighted ? "text-white/80" : "text-white/60"
+          className={`font-sans text-sm ${
+            isHighlighted ? "text-white/80" : "text-muted"
           }`}
         >
           {plan.period}
@@ -121,23 +120,23 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* Plan Name */}
       <h3
-        className={`font-poppins font-medium text-[28px] mb-6 ${
-          isHighlighted ? "text-white" : "text-[#6125d8]"
+        className={`font-sans font-bold text-xl mb-6 ${
+          isHighlighted ? "text-white" : "text-primary"
         }`}
       >
         {plan.name}
       </h3>
 
       {/* Features */}
-      <div className="space-y-3 flex-1">
+      <div className="space-y-4 mb-8 flex-1">
         {plan.features.map((feature, index) => (
-          <div key={index} className="flex items-center gap-3">
-            <div className="flex-shrink-0">
+          <div key={index} className="flex items-start gap-3">
+            <div className="mt-0.5">
               <CheckIcon highlighted={isHighlighted} />
             </div>
             <span
-              className={`font-poppins font-medium text-[13px] ${
-                isHighlighted ? "text-white" : "text-white"
+              className={`font-roboto text-sm leading-relaxed ${
+                isHighlighted ? "text-white/95" : "text-gray-300"
               }`}
             >
               {feature.text}
@@ -148,11 +147,13 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* CTA Button */}
       <button
-        className={`w-full h-[44px] rounded-[24px] font-poppins font-medium text-[15px] mt-8 ${
-          isHighlighted
-            ? "bg-white text-black"
-            : "bg-[#6125d8] text-white"
-        }`}
+        className={`w-full py-3.5 rounded-xl font-sans font-bold text-sm transition-colors duration-300 shadow-lg
+          ${
+            isHighlighted
+              ? "bg-white text-primary hover:bg-gray-100"
+              : "bg-primary text-white hover:bg-primary-dark"
+          }
+        `}
       >
         Choose plan
       </button>
@@ -164,70 +165,58 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <section className="relative py-20 overflow-hidden bg-black">
+    <section id="pricing" className="relative py-24 md:py-32 bg-black flex items-center justify-center overflow-hidden">
       {/* Background glow */}
-      <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[200px] left-1/2 -translate-x-1/2" />
+      <div className="absolute w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
       {/* Content */}
-      <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
-        {/* Header with Title and Toggle */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
-          {/* Section Title */}
-          <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-[#c4c4c4] uppercase mb-6 md:mb-0">
+      <div className="relative container mx-auto px-6 max-w-7xl z-10 w-full flex flex-col items-center">
+        {/* Section Title */}
+        <div className="text-center mb-16 w-full">
+            <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-7xl text-white mb-8 tracking-tight">
             Plans & Pricing
-          </h2>
-
-          {/* Billing Toggle */}
-          <div className="relative h-[42px] bg-[rgba(255,255,255,0.5)] rounded-[22px] overflow-hidden flex">
-            {/* Monthly Tab */}
-            <button
-              onClick={() => setIsYearly(false)}
-              className={`relative h-[42px] px-6 py-3 rounded-[22px] flex items-center transition-all duration-300 ${
-                !isYearly 
-                  ? "bg-[#6125d8] shadow-[4px_0px_3px_0px_rgba(6,3,25,0.23)]" 
-                  : ""
-              }`}
-            >
-              <span className="font-poppins font-medium text-[12px] text-white tracking-[0.83px]">
-                MONTHLY
-              </span>
-            </button>
-            {/* Yearly Tab */}
-            <button
-              onClick={() => setIsYearly(true)}
-              className={`relative h-[42px] px-6 py-3 rounded-[22px] flex items-center transition-all duration-300 ${
-                isYearly 
-                  ? "bg-[#6125d8] shadow-[4px_0px_3px_0px_rgba(6,3,25,0.23)]" 
-                  : ""
-              }`}
-            >
-              <span className="font-poppins font-medium text-[12px] text-white tracking-[0.83px]">
-                YEARLY
-              </span>
-            </button>
-          </div>
+            </h2>
+            
+            {/* Billing Toggle */}
+            <div className="flex justify-center">
+                <div className="inline-flex items-center p-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
+                    <button
+                    onClick={() => setIsYearly(false)}
+                    className={`px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-300 ${
+                        !isYearly 
+                        ? "bg-primary text-white shadow-lg" 
+                        : "text-white/60 hover:text-white"
+                    }`}
+                    >
+                    MONTHLY
+                    </button>
+                    <button
+                    onClick={() => setIsYearly(true)}
+                    className={`px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
+                        isYearly 
+                        ? "bg-primary text-white shadow-lg" 
+                        : "text-white/60 hover:text-white"
+                    }`}
+                    >
+                    ANNUAL
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${isYearly ? 'bg-white/20' : 'bg-primary/20 text-primary'}`}>
+                        -20%
+                    </span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        {/* Glass Container */}
-        <div className="relative rounded-[30px] border-2 border-[#bab7b7] overflow-hidden">
-          {/* Glass background */}
-          <div 
-            className="absolute inset-0 backdrop-blur-[2.15px] rounded-[30px]" 
-            style={{ 
-              backgroundImage: "linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.2) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%)" 
-            }}
-          />
-          <div className="absolute inset-0 bg-[rgba(255,255,255,0.5)] mix-blend-overlay rounded-[30px]" />
-          
-          {/* Bottom glow effect */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[200px] bg-[#6125d8] rounded-full blur-[100px] opacity-20" />
+        {/* Pricing Cards Container */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 w-full max-w-6xl items-start">
+          {/* Free Trial */}
+          <PricingCard plan={plans[0]} />
 
-          {/* Pricing Cards */}
-          <div className="relative flex flex-col lg:flex-row items-center lg:items-end justify-center gap-6 lg:gap-8 py-12 px-6">
-            {plans.map((plan, index) => (
-              <PricingCard key={index} plan={plan} />
-            ))}
-          </div>
+          {/* Professional */}
+          <PricingCard plan={plans[1]} />
+
+          {/* Organization (Highlighted) */}
+          <PricingCard plan={plans[2]} />
         </div>
       </div>
     </section>

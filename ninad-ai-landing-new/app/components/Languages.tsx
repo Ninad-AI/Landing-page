@@ -3,68 +3,74 @@ const languages = [
   "HINDI",
   "MARATHI",
   "BENGALI",
-  "ENGLISH",
+  "JAPANESE",
+  "GERMAN",
+  "SPANISH",
+  "FRENCH"
+];
+
+const indicLanguages = [
   "HINDI",
-  "GUJRATI",
+  "GUJARATI",
   "TAMIL",
   "TELUGU",
-  "KANNADA",
-  "TAMIL",
-  "TELUGU",
+  "KANNADA", 
+  "MALAYALAM",
+  "PUNJABI",
+  "ODIA"
 ];
 
 export default function Languages() {
   return (
-    <section className="relative py-20 overflow-hidden bg-black">
-      {/* Background with gradient */}
-      <div className="absolute inset-0">
-        {/* Glow effects */}
-        <div className="absolute w-[644px] h-[448px] bg-[#6125d8] rounded-full blur-[200px] opacity-30 top-[100px] left-1/2 -translate-x-1/2" />
+    <section className="relative py-24 md:py-32 overflow-hidden bg-black">
+      {/* Background Decor */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
       </div>
 
       {/* Content */}
-      <div className="relative w-[min(1170px,calc(100vw-110px))] mx-auto">
-        {/* Section Title */}
-        <h2 className="font-inter font-extrabold text-[62px] leading-none tracking-[-1.86px] text-white uppercase mb-4">
-          Speak every language
+      <div className="relative container mx-auto px-6 text-center z-10 mb-16">
+        <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-7xl text-white mb-6 tracking-tight">
+          Speak Every Language
         </h2>
 
-        {/* Description */}
-        <div className="font-inter font-normal text-[30px] leading-[1.13] text-[#f7f3ff] max-w-[802px] mb-12">
-          <p className="mb-0">Ninad AI supports native speech in multiple languages.</p>
-          <p>Localize a given voice to any accent or language.</p>
+        <div className="font-roboto text-lg md:text-2xl text-muted max-w-3xl mx-auto">
+          <p>Ninad AI supports native speech in multiple languages.</p>
+          <p>Localize any voice to any accent or language seamlessly.</p>
+        </div>
+      </div>
+
+      {/* Marquee Container */}
+      <div className="relative w-full overflow-hidden flex flex-col gap-6">
+        
+        {/* Row 1: Global Languages */}
+        <div className="flex gap-4 animate-marquee min-w-full">
+          {[...languages, ...languages, ...languages, ...languages].map((lang, index) => (
+            <div
+              key={`row1-${index}`}
+              className="flex-shrink-0 px-8 py-4 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-primary/50 transition-colors"
+            >
+              <span className="font-sans font-bold text-sm md:text-base text-white/90 uppercase tracking-widest">
+                {lang}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Language Cards Marquee */}
-        <div className="relative h-[137px] overflow-hidden w-screen -ml-[calc((100vw-min(1170px,calc(100vw-110px)))/2)]">
-          {/* First row - scrolling left */}
-          <div className="flex gap-4 animate-marquee mb-4">
-            {[...languages, ...languages].map((lang, index) => (
-              <div
-                key={`row1-${index}`}
-                className="flex-shrink-0 h-[61px] px-8 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-lg border border-white/20"
-              >
-                <span className="font-inter font-semibold text-[16px] text-white uppercase tracking-wide">
-                  {lang}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Second row - scrolling right */}
-          <div className="flex gap-4 animate-marquee-reverse">
-            {[...languages.reverse(), ...languages].map((lang, index) => (
-              <div
-                key={`row2-${index}`}
-                className="flex-shrink-0 h-[61px] px-8 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-lg border border-white/20"
-              >
-                <span className="font-inter font-semibold text-[16px] text-white uppercase tracking-wide">
-                  {lang}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Row 2: Regional Languages (Reverse) */}
+        <div className="flex gap-4 animate-marquee-reverse min-w-full">
+          {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
+            <div
+              key={`row2-${index}`}
+              className="flex-shrink-0 px-8 py-4 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-accent-blue/50 transition-colors"
+            >
+              <span className="font-sans font-bold text-sm md:text-base text-white/90 uppercase tracking-widest">
+                {lang}
+              </span>
+            </div>
+          ))}
         </div>
+
       </div>
     </section>
   );

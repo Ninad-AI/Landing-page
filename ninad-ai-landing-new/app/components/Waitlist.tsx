@@ -1,48 +1,50 @@
 export default function Waitlist() {
   return (
-    <section id="waitlist" className="relative w-full h-[164px] overflow-hidden">
-      {/* Background - light grey with subtle texture */}
-      <div className="absolute inset-0 w-full h-full bg-[#f5f5f7]" />
+    <section id="waitlist" className="relative w-full py-24 md:py-32 overflow-hidden bg-black flex items-center justify-center">
       
-      {/* Subtle noise texture overlay */}
-      <div 
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]"
-        style={{ 
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }}
-      />
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Content Container */}
-      <div className="relative h-full w-[min(1170px,calc(100vw-110px))] mx-auto flex items-center justify-between">
-        {/* Left Side - Title */}
-        <div className="flex-shrink-0">
-          <h2 className="font-inter font-extrabold text-[40px] leading-[1.1] text-[#1a0a4a] uppercase tracking-tight">
-            JOIN THE<br />WAITLIST NOW
+      <div className="relative container mx-auto px-6 md:px-12 lg:px-20 max-w-[1400px] flex flex-col items-center justify-center text-center gap-10 z-10">
+        
+        {/* Title */}
+        <div className="space-y-4">
+          <h2 className="font-sans font-extrabold text-4xl md:text-5xl lg:text-7xl leading-tight text-white tracking-tight">
+            JOIN THE WAITLIST
           </h2>
+          <p className="font-roboto text-lg md:text-xl text-white/60 max-w-2xl mx-auto">
+            Experience the future of conversational AI. Be the first to access our platform.
+          </p>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="flex flex-col items-end">
-          {/* Input Row */}
-          <div className="flex items-center">
+        {/* Form */}
+        <div className="w-full max-w-xl">
+          <form className="flex flex-col md:flex-row items-center gap-4 w-full">
             {/* Email Input */}
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-[560px] h-[53px] px-6 bg-white border-2 border-[#d4d4d8] rounded-l-full font-['IBM_Plex_Mono'] font-light text-[21px] text-[#212121] placeholder:text-[#212121]/70 outline-none focus:border-[#6125d8] transition-colors"
-            />
+            <div className="relative w-full md:flex-1 group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent-blue rounded-full p-[1px] opacity-50 group-hover:opacity-100 transition-opacity" />
+                <input
+                type="email"
+                placeholder="Enter your email address"
+                className="relative w-full h-[56px] px-6 bg-black rounded-full font-roboto text-base text-white placeholder:text-white/40 outline-none focus:bg-white/5 transition-all"
+                required
+                />
+            </div>
 
             {/* Submit Button */}
-            <button className="w-[158px] h-[53px] bg-[#6125d8] rounded-r-full hover:bg-[#7a3ef0] transition-colors flex items-center justify-center -ml-[2px]">
-              <span className="font-inter font-medium text-[20px] text-white whitespace-nowrap">
-                Join Waitlist
-              </span>
+            <button 
+              type="submit"
+              className="w-full md:w-auto h-[56px] px-8 bg-white text-black rounded-full font-sans font-bold text-base hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] whitespace-nowrap"
+            >
+              Get Early Access
             </button>
-          </div>
+          </form>
 
           {/* Helper Text */}
-          <p className="mt-3 max-w-[641px] font-inter text-[14px] text-[#6125d8] opacity-70 tracking-[-0.42px] leading-tight text-right">
-            We'll email you as soon as the waitlist opens. Automated messaging service coming soon.
+          <p className="mt-4 font-roboto text-sm text-white/40">
+            No spam. Unsubscribe anytime.
           </p>
         </div>
       </div>

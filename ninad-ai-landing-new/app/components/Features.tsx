@@ -43,6 +43,8 @@ export default function Features() {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
+      // Use percentages or flexible units if possible, but for this specific hover effect, JS calc is needed.
+      // We ensure the grid is responsive via CSS, and these calculations work on the rendered dimensions.
       const gridWidth = rect.width;
       const gridHeight = rect.height;
       const colWidth = (gridWidth - GAP) / 2;
@@ -66,37 +68,36 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="relative py-32 overflow-x-hidden overflow-y-visible bg-black min-h-screen flex items-center"
+      className="relative py-20 md:py-32 overflow-x-hidden overflow-y-visible bg-black min-h-screen flex items-center"
     >
       {/* Content */}
-      <div className="relative max-w-[1600px] mx-auto px-8">
+      <div className="relative container mx-auto px-6 md:px-12 lg:px-20 max-w-[1600px]">
         {/* Section Title */}
         <div className="flex justify-center mb-8">
           <h2
             className="
-              font-inter
+              font-sans
               font-bold
-              text-[94px]
-              leading-[0.97]
-              tracking-[-2.82px]
+              text-4xl md:text-6xl lg:text-[94px]
+              leading-none
+              tracking-tighter
               text-center
-              gradient-text
-              bg-[linear-gradient(180deg,#e7fdff_20%,#878787_150%)]
-              overflow-visible
-              pb-[0.2em]
+              bg-clip-text
+              text-transparent
+              bg-gradient-to-b from-white via-gray-300 to-gray-500
+              pb-4
             "
-            style={{ WebkitTextFillColor: "transparent" }}
           >
             Why choose Ninad AI?
           </h2>
         </div>
 
         {/* Subtitle */}
-        <div className="font-inter font-medium text-[24px] leading-[1.03] text-white/80 max-w-[1149px] mx-auto mb-16 text-center overflow-visible">
+        <div className="font-sans font-medium text-lg md:text-2xl text-muted max-w-4xl mx-auto mb-16 text-center">
           <p className="mb-1">
             Experience the next evolution in voice AI.
           </p>
-          <p className="mb-0 pb-[0.15em]">
+          <p className="mb-0">
             Ninad AI understands tone, emotion, and context to create voices
             that feel truly human.
           </p>
@@ -105,17 +106,17 @@ export default function Features() {
         {/* Features Grid */}
         <div
           ref={gridRef}
-          className="relative grid grid-cols-1 md:grid-cols-2 gap-[14px] overflow-hidden"
+          className="relative grid grid-cols-1 md:grid-cols-2 gap-[14px] overflow-hidden rounded-2xl"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
           {/* Cursor-following glow in the gap */}
           <div
-            className="pointer-events-none absolute w-[70px] h-[70px] rounded-full blur-[30px] transition-opacity duration-100 z-0"
+            className="pointer-events-none absolute w-[70px] h-[70px] rounded-full blur-[30px] transition-opacity duration-100 z-0 hidden md:block"
             style={{
               left: glowPos.x - 35,
               top: glowPos.y - 35,
-              backgroundColor: "#9968FA",
+              backgroundColor: "var(--color-primary-light)",
               opacity: glowPos.visible ? 1 : 0,
             }}
           />
@@ -127,86 +128,85 @@ export default function Features() {
             return (
               <div
                 key={index}
-                className="relative px-16 py-20 flex items-center justify-center bg-black overflow-hidden z-10 rounded-[12px]"
-                style={{
-                  border: '1px solid rgba(111, 90, 154, 0.15)',
-                }}
+                className="relative px-8 py-12 md:px-16 md:py-20 flex items-center justify-center bg-white/5 backdrop-blur-sm z-10 border border-white/5 md:border-none"
               >
-                {/* Right gradient border (for left column cards) */}
-                {isLeft && (
-                  <div
-                    className="absolute right-0 w-[1px]"
-                    style={{
-                      top: isTop ? '12px' : '0',
-                      bottom: isTop ? '0' : '12px',
-                      height: isTop ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
-                      background: isTop 
-                        ? 'linear-gradient(180deg, transparent 0%, #6125D8 100%)'
-                        : 'linear-gradient(180deg, #6125D8 0%, transparent 100%)',
-                    }}
-                  />
-                )}
-                
-                {/* Left gradient border (for right column cards) */}
-                {!isLeft && (
-                  <div
-                    className="absolute left-0 w-[1px]"
-                    style={{
-                      top: isTop ? '12px' : '0',
-                      bottom: isTop ? '0' : '12px',
-                      height: isTop ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
-                      background: isTop 
-                        ? 'linear-gradient(180deg, transparent 0%, #6125D8 100%)'
-                        : 'linear-gradient(180deg, #6125D8 0%, transparent 100%)',
-                    }}
-                  />
-                )}
-                
-                {/* Bottom gradient border (for top row cards) */}
-                {isTop && (
-                  <div
-                    className="absolute bottom-0 h-[1px]"
-                    style={{
-                      left: isLeft ? '12px' : '0',
-                      right: isLeft ? '0' : '12px',
-                      width: isLeft ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
-                      background: isLeft 
-                        ? 'linear-gradient(90deg, transparent 0%, #6125D8 100%)'
-                        : 'linear-gradient(90deg, #6125D8 0%, transparent 100%)',
-                    }}
-                  />
-                )}
-                
-                {/* Top gradient border (for bottom row cards) */}
-                {!isTop && (
-                  <div
-                    className="absolute top-0 h-[1px]"
-                    style={{
-                      left: isLeft ? '12px' : '0',
-                      right: isLeft ? '0' : '12px',
-                      width: isLeft ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
-                      background: isLeft 
-                        ? 'linear-gradient(90deg, transparent 0%, #6125D8 100%)'
-                        : 'linear-gradient(90deg, #6125D8 0%, transparent 100%)',
-                    }}
-                  />
-                )}
+                {/* Desktop Gradients (using design system colors) */}
+                <div className="hidden md:block">
+                    {/* Right gradient border (for left column cards) */}
+                    {isLeft && (
+                      <div
+                        className="absolute right-0 w-[1px]"
+                        style={{
+                          top: isTop ? '12px' : '0',
+                          bottom: isTop ? '0' : '12px',
+                          height: isTop ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
+                          background: isTop 
+                            ? 'linear-gradient(180deg, transparent 0%, var(--primary) 100%)'
+                            : 'linear-gradient(180deg, var(--primary) 0%, transparent 100%)',
+                        }}
+                      />
+                    )}
+                    
+                    {/* Left gradient border (for right column cards) */}
+                    {!isLeft && (
+                      <div
+                        className="absolute left-0 w-[1px]"
+                        style={{
+                          top: isTop ? '12px' : '0',
+                          bottom: isTop ? '0' : '12px',
+                          height: isTop ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
+                          background: isTop 
+                            ? 'linear-gradient(180deg, transparent 0%, var(--primary) 100%)'
+                            : 'linear-gradient(180deg, var(--primary) 0%, transparent 100%)',
+                        }}
+                      />
+                    )}
+                    
+                    {/* Bottom gradient border (for top row cards) */}
+                    {isTop && (
+                      <div
+                        className="absolute bottom-0 h-[1px]"
+                        style={{
+                          left: isLeft ? '12px' : '0',
+                          right: isLeft ? '0' : '12px',
+                          width: isLeft ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
+                          background: isLeft 
+                            ? 'linear-gradient(90deg, transparent 0%, var(--primary) 100%)'
+                            : 'linear-gradient(90deg, var(--primary) 0%, transparent 100%)',
+                        }}
+                      />
+                    )}
+                    
+                    {/* Top gradient border (for bottom row cards) */}
+                    {!isTop && (
+                      <div
+                        className="absolute top-0 h-[1px]"
+                        style={{
+                          left: isLeft ? '12px' : '0',
+                          right: isLeft ? '0' : '12px',
+                          width: isLeft ? 'calc(100% - 12px)' : 'calc(100% - 12px)',
+                          background: isLeft 
+                            ? 'linear-gradient(90deg, transparent 0%, var(--primary) 100%)'
+                            : 'linear-gradient(90deg, var(--primary) 0%, transparent 100%)',
+                        }}
+                      />
+                    )}
+                </div>
               
-                <div className="w-full space-y-3 text-center flex flex-col items-center">
+                <div className="w-full space-y-4 text-center flex flex-col items-center max-w-md">
                 {/* Title */}
                 <h3
                   className="
-                    font-inter
+                    font-sans
                     font-extrabold
-                    text-[30px]
-                    leading-[0.98]
-                    tracking-[-0.6px]
-                    gradient-text
-                    bg-[linear-gradient(180deg,#ffffff_0%,#b18bff_100%)]
-                    overflow-visible
-                    pb-[0.18em]
+                    text-2xl md:text-[30px]
+                    leading-tight
+                    tracking-tight
+                    bg-clip-text
+                    text-transparent
+                    bg-gradient-to-b from-white to-primary-light
+                    pb-2
                   "
-                  style={{ WebkitTextFillColor: "transparent" }}
                 >
                   {feature.title}
                 </h3>
@@ -214,15 +214,11 @@ export default function Features() {
                 {/* Description */}
                 <p
                   className="
-                    font-inter
-                    font-semibold
-                    text-[11px]
-                    leading-[1.045]
-                    tracking-[-0.22px]
-                    text-white
-                    max-w-[434px]
-                    overflow-visible
-                    pb-[0.12em]
+                    font-sans
+                    font-medium
+                    text-sm md:text-base
+                    leading-relaxed
+                    text-muted
                   "
                 >
                   {feature.description}
