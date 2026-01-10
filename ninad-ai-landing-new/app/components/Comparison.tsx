@@ -140,10 +140,10 @@ export default function Comparison() {
             Listen to the difference. Our AI captures the soul of the original voice.
             </p>
             
-            <button className="bg-white text-black font-sans font-bold px-10 py-4 rounded-full hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mx-auto text-base shadow-[0_4px_20px_rgba(255,255,255,0.2)] group">
+            {/* <button className="bg-white text-black font-sans font-bold px-10 py-4 rounded-full hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mx-auto text-base shadow-[0_4px_20px_rgba(255,255,255,0.2)] group">
               Create Your Clone 
               <span className="transition-transform group-hover:translate-x-1 text-xl">→</span>
-            </button>
+            </button> */}
         </div>
 
         {/* Comparison Grid */}

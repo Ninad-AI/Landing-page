@@ -32,7 +32,7 @@ const CaseIcon = ({ index }: { index: number }) => {
 };
 
 export default function UseCases() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const cases = [
      {
@@ -91,17 +91,18 @@ export default function UseCases() {
           
           {/* Left: Text Content & Sticky Header */}
           <div className="lg:sticky lg:top-32">
-            <h2 className="font-sans font-bold text-4xl md:text-6xl lg:text-7xl leading-tight text-white mb-8">
-              Empowering <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-light to-white">Every Interaction</span>
+            <h2 className="font-sans font-bold text-5xl md:text-7xl lg:text-8xl leading-tight text-white mb-8">
+              <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#999999_100%)]">Empowering</span>{' '}
+              <br />
+              <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#999999_100%)]">Every Interaction</span>
             </h2>
             <p className="font-roboto text-lg md:text-xl text-muted leading-relaxed max-w-lg mb-12">
               From enterprise solutions to creative projects, Ninad AI adapts to your specific needs with uncompromised quality and emotion.
             </p>
             
-            <button className="px-8 py-4 bg-white text-black font-sans font-bold rounded-full hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            {/* <button className="px-8 py-4 bg-white text-black font-sans font-bold rounded-full hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                 Explore All Solutions
-            </button>
+            </button> */}
           </div>
 
           {/* Right: Accordion */}
@@ -129,22 +130,27 @@ export default function UseCases() {
                   </div>
                 </button>
 
-                <div 
-                  className={`
-                    overflow-hidden transition-all duration-300 ease-in-out
-                    ${openIndex === index ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}
-                  `}
+                <div
+                  className={
+                    `grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-in-out motion-reduce:transition-none ` +
+                    (openIndex === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')
+                  }
                 >
-                   <div className="px-6 md:px-8 pb-8 pl-[80px] md:pl-[104px]">
-                       <ul className="space-y-3">
+                  <div
+                    className="min-h-0 cursor-pointer"
+                    onClick={() => setOpenIndex(null)}
+                  >
+                    <div className="px-6 md:px-8 pb-8 pl-[80px] md:pl-[104px]">
+                      <ul className="space-y-3">
                         {item.items.map((sub, i) => (
-                            <li key={i} className="flex items-center gap-3 text-white/80 font-roboto">
-                                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                {sub}
-                            </li>
+                          <li key={i} className="flex items-center gap-3 text-white/80 font-roboto">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                            {sub}
+                          </li>
                         ))}
-                       </ul>
-                   </div>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
