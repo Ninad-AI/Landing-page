@@ -1,6 +1,6 @@
-# NINAD-AI — Marketing Landing Page 🚀
+# NINAD-AI — Marketing Landing Page
 
-**A fast, responsive landing page built with Next.js (App Router) and Tailwind CSS.** This repository contains the frontend for NINAD-AI's marketing site — modular components, accessibility-focused markup, and optimised performance by default.
+Fast, responsive landing page built with Next.js (App Router) and Tailwind CSS.
 
 ---
 
@@ -10,6 +10,12 @@ This project is a Next.js 16 app (Turbopack) using the App Router and TypeScript
 - `Header`, `Hero`, `Features`, `Comparison`, `Products`, `Pricing`, `UseCases`, `Waitlist`, `Languages`, `Footer` (see `app/components/`)
 
 The site uses Tailwind CSS for styling and PostCSS for processing. It's easy to extend and customize to match your brand.
+
+This repo also includes:
+- A dedicated **Book Demo** page at `/book-demo`
+- Supabase-backed form submissions for:
+  - Waitlist signup (`/api/waitlist` → `waitlist_subscribers`)
+  - Demo requests (`/api/book-demo` → `demo_requests`)
 
 ---
 
@@ -71,6 +77,78 @@ Open http://localhost:3000 in your browser. Changes to files under `app/` will h
 - `public/` - static assets
 - `package.json` - scripts and deps
 - `tailwind.config.js`, `postcss.config.mjs` - styling config
+
+---
+
+## Book Demo Page
+
+- Route: `/book-demo`
+- Navbar links (Features/Products/Use Cases/Pricing) route back to `/#...` sections from this page.
+
+---
+
+## Supabase Setup
+
+### 1) Environment variables
+
+Create a local env file (not committed):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+Use [.env.example](.env.example) as a template.
+
+### 2) Required tables
+
+The API routes expect these tables:
+
+- `waitlist_subscribers`
+  - `id` (uuid)
+  - `email` (text)
+  - `created_at` (timestamptz)
+
+- `demo_requests`
+  - `id` (uuid)
+  - `created_at` (timestamptz)
+  - `name` (text)
+  - `email` (text)
+  - `phone` (text)
+  - `company` (text)
+
+Note: The Book Demo form also collects “What are you building?” currently for UX, but it is not stored unless you add a `message` column.
+
+### 3) RLS policies (if you use the anon key)
+
+If Row Level Security is enabled, allow inserts for the `anon` role.
+
+```sql
+-- Waitlist inserts
+alter table public.waitlist_subscribers enable row level security;
+
+create policy "public can insert waitlist_subscribers"
+on public.waitlist_subscribers
+for insert
+to anon
+with check (true);
+
+-- Demo request inserts
+alter table public.demo_requests enable row level security;
+
+create policy "public can insert demo_requests"
+on public.demo_requests
+for insert
+to anon
+with check (true);
+```
+
+Optional: prevent duplicate waitlist emails:
+
+```sql
+create unique index if not exists waitlist_subscribers_email_key
+on public.waitlist_subscribers (lower(email));
+```
 
 ---
 

@@ -2,12 +2,13 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#products", label: "Products" },
-  { href: "#use-cases", label: "Use Cases" },
-  { href: "#pricing", label: "Pricing" },
+  { href: "/#features", label: "Features" },
+  { href: "/#products", label: "Products" },
+  { href: "/#use-cases", label: "Use Cases" },
+  { href: "/#pricing", label: "Pricing" },
 ];
 
 export default function Header() {
@@ -65,7 +66,7 @@ export default function Header() {
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50">
+        <Link href="/" className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50">
           <Image
             src="/assets/ninad-ai.png"
             alt="Ninad AI"
@@ -73,29 +74,29 @@ export default function Header() {
             className="object-contain object-left"
             priority
           />
-        </a>
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               className="font-sans text-sm font-medium text-white/70 hover:text-white transition-colors uppercase tracking-wide"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
         {/* Desktop CTA */}
         <div className="hidden lg:block">
-          <a
-            href="#waitlist"
+          <Link
+            href="/book-demo"
             className="px-6 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           >
             Book Demo
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -130,24 +131,24 @@ export default function Header() {
         >
           <nav className="flex flex-col items-center gap-8">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="font-sans text-2xl font-bold text-white hover:text-primary transition-colors"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
-          <a
-            href="#waitlist"
+          <Link
+            href="/book-demo"
             onClick={() => setIsMobileMenuOpen(false)}
             className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
           >
             Book Demo
-          </a>
+          </Link>
         </div>
       </div>
     </header>
