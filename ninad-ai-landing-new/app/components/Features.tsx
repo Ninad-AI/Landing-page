@@ -62,7 +62,7 @@ export default function Features() {
             <h2
               className="
                 font-sans font-bold
-                text-4xl md:text-6xl lg:text-[94px]
+                text-4xl md:text-6xl lg:text-[110px]
                 leading-none tracking-tighter
                 bg-clip-text text-transparent
                 bg-gradient-to-b from-white via-gray-300 to-gray-500

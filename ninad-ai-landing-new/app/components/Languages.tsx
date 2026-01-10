@@ -28,7 +28,7 @@ export default function Languages() {
 
       {/* Content */}
       <div className="relative container mx-auto px-6 text-center z-10 mb-16">
-        <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-7xl mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
+        <h2 className="font-sans font-bold text-4xl md:text-6xl lg:text-[110px] mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
           Speak Every Language
         </h2>
 

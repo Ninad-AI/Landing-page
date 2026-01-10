@@ -129,7 +129,7 @@ export default function Comparison() {
         <div className="text-center mb-16">
             <h2 
             className="
-                font-sans font-black text-6xl md:text-8xl lg:text-[110px] 
+                font-sans font-black text-4xl md:text-6xl lg:text-[110px] 
                 leading-none tracking-tighter text-transparent bg-clip-text 
               bg-linear-to-b from-white via-white/90 to-white/40 mb-4
             "
