@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 
 const NAV_LINKS = [
@@ -13,20 +13,53 @@ const NAV_LINKS = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showScrollDivider, setShowScrollDivider] = useState(false);
+
+  const hasShownDividerRef = useRef(false);
+  const hideDividerTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      setIsScrolled(scrolled);
+
+      if (!scrolled) {
+        hasShownDividerRef.current = false;
+        setShowScrollDivider(false);
+        if (hideDividerTimerRef.current) {
+          window.clearTimeout(hideDividerTimerRef.current);
+          hideDividerTimerRef.current = null;
+        }
+        return;
+      }
+
+      if (!hasShownDividerRef.current) {
+        hasShownDividerRef.current = true;
+        setShowScrollDivider(true);
+        if (hideDividerTimerRef.current) {
+          window.clearTimeout(hideDividerTimerRef.current);
+        }
+        hideDividerTimerRef.current = window.setTimeout(() => {
+          setShowScrollDivider(false);
+          hideDividerTimerRef.current = null;
+        }, 700);
+      }
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (hideDividerTimerRef.current) {
+        window.clearTimeout(hideDividerTimerRef.current);
+        hideDividerTimerRef.current = null;
+      }
+    };
   }, []);
 
   return (
     <header 
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled || isMobileMenuOpen 
-          ? "bg-black/70 backdrop-blur-xl border-b border-white/10 py-4" 
+      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${
+        isScrolled || isMobileMenuOpen
+          ? `bg-black/55 backdrop-blur-xl py-4 ${showScrollDivider && !isMobileMenuOpen ? "border-b border-white/10" : "border-b border-transparent"}`
           : "bg-transparent py-6"
       }`}
     >
