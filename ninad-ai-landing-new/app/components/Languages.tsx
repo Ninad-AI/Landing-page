@@ -1,23 +1,21 @@
 const languages = [
-  "ENGLISH",
-  "HINDI",
-  "MARATHI",
-  "BENGALI",
-  "JAPANESE",
-  "GERMAN",
-  "SPANISH",
-  "FRENCH"
+  "English",
+  "Hindi",
+  "Marathi",
+  "Tamil",
+  "Telugu",
+  "Kannada",
+  "Bengali"
 ];
 
 const indicLanguages = [
-  "HINDI",
-  "GUJARATI",
-  "TAMIL",
-  "TELUGU",
-  "KANNADA", 
-  "MALAYALAM",
-  "PUNJABI",
-  "ODIA"
+  "English",
+  "हिंदी",
+  "मराठी",
+  "தமிழ்",
+  "తెలుగు",
+  "ಕನ್ನಡ",
+  "বাংলা"
 ];
 
 export default function Languages() {
@@ -30,7 +28,7 @@ export default function Languages() {
 
       {/* Content */}
       <div className="relative container mx-auto px-6 text-center z-10 mb-16">
-        <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-7xl text-white mb-6 tracking-tight">
+        <h2 className="font-sans font-bold text-4xl md:text-5xl lg:text-7xl mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
           Speak Every Language
         </h2>
 
@@ -41,36 +39,34 @@ export default function Languages() {
       </div>
 
       {/* Marquee Container */}
-      <div className="relative w-full overflow-hidden flex flex-col gap-6">
-        
-        {/* Row 1: Global Languages */}
+      <div className="relative w-full overflow-hidden flex flex-col gap-4">
+        {/* Row 1 */}
         <div className="flex gap-4 animate-marquee min-w-full">
           {[...languages, ...languages, ...languages, ...languages].map((lang, index) => (
             <div
               key={`row1-${index}`}
-              className="flex-shrink-0 px-8 py-4 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-primary/50 transition-colors"
+              className="flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center bg-white rounded-2xl border border-black/10"
             >
-              <span className="font-sans font-bold text-sm md:text-base text-white/90 uppercase tracking-widest">
+              <span className="font-sans font-bold text-sm md:text-base text-black tracking-widest">
                 {lang}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Row 2: Regional Languages (Reverse) */}
-        <div className="flex gap-4 animate-marquee-reverse min-w-full">
+        {/* Row 2 (brick offset) */}
+        <div className="flex gap-4 animate-marquee min-w-full translate-x-[111px]">
           {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
             <div
               key={`row2-${index}`}
-              className="flex-shrink-0 px-8 py-4 flex items-center justify-center bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-accent-blue/50 transition-colors"
+              className="flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center bg-white rounded-2xl border border-black/10"
             >
-              <span className="font-sans font-bold text-sm md:text-base text-white/90 uppercase tracking-widest">
+              <span className="font-sans font-bold text-sm md:text-base text-black tracking-widest">
                 {lang}
               </span>
             </div>
           ))}
         </div>
-
       </div>
     </section>
   );
