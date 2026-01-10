@@ -1,6 +1,3 @@
-// Orb image - use local asset
-const imgImage4 = "/assets/hero-orb.png";
-
 export default function Hero() {
   return (
     <section className="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center pt-32 pb-20">
@@ -46,15 +43,16 @@ export default function Hero() {
               flex-shrink-0
               pointer-events-none
               mx-0 md:mx-0
-              -ml-4
+              -ml-8
               animate-pulse-slow
             "
           >
             <img
-              src={imgImage4}
+              src="/assets/hero-orb.png"
               alt="Voice Orb"
               className="absolute inset-0 w-full h-full object-contain scale-125"
             />
+
           </div>
 
           {/* ICE */}
