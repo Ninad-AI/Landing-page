@@ -59,7 +59,7 @@ export default function Products() {
         if (button) {
           const buttonRect = button.getBoundingClientRect();
           const containerRect = container.getBoundingClientRect();
-          // Position line at the bottom of the active product
+          // Position line at the bottom of the active product for the split layout
           setLinePosition(buttonRect.bottom - containerRect.top);
         }
       }
@@ -70,17 +70,26 @@ export default function Products() {
       }
     };
 
-    updatePositions();
+    // Use requestAnimationFrame for smoother initial positioning
+    const rafId = requestAnimationFrame(updatePositions);
     window.addEventListener('resize', updatePositions);
-    return () => window.removeEventListener('resize', updatePositions);
+    return () => {
+      window.removeEventListener('resize', updatePositions);
+      cancelAnimationFrame(rafId);
+    };
   }, [activeProduct]);
 
   const handleProductClick = (index: number) => {
-    if (index !== activeProduct) {
+    if (index !== activeProduct && !isTransitioning) {
       setIsTransitioning(true);
-      setActiveProduct(index);
+      
+      // Wait for fade out before switching content
       setTimeout(() => {
-        setIsTransitioning(false);
+        setActiveProduct(index);
+        // Small delay to ensure state update is processed
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 50);
       }, 300);
     }
   };
@@ -128,7 +137,7 @@ export default function Products() {
                   className={`
                     w-full text-left py-4 md:py-6 group
                     transition-all duration-300 cursor-pointer 
-                    ${activeProduct === index ? 'opacity-100 pl-4' : 'opacity-50 hover:opacity-80 hover:pl-2'}
+                    ${activeProduct === index ? 'opacity-100 pl-4' : 'opacity-40 hover:opacity-70 hover:pl-2'}
                   `}
                 >
                   <h3 className={`
@@ -147,9 +156,10 @@ export default function Products() {
 
           {/* Animated Line (Desktop only) */}
           <div 
-            className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-500 ease-out pointer-events-none z-10"
+            className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-none z-10"
             style={{ 
-              top: `${linePosition}px`,
+              transform: `translateY(${linePosition - 1}px)`,
+              top: 0
             }}
           />
 
@@ -163,14 +173,14 @@ export default function Products() {
           >
              <div 
                 className={`
-                    transition-all duration-500 ease-out h-full
-                    ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
+                    transition-all duration-500 ease-in-out h-full
+                    ${isTransitioning ? 'opacity-0 translate-y-4 blur-sm' : 'opacity-100 translate-y-0 blur-0'}
                 `}
              >
                 {/* Above Line Container */}
                 {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
                     <div 
-                        className="lg:absolute lg:left-0 lg:right-0 lg:pb-4 mb-4 lg:mb-0"
+                        className="lg:absolute lg:left-0 lg:right-0 lg:pb-6 mb-4 lg:mb-0"
                         style={{ 
                             bottom: `calc(100% - ${linePosition}px)`
                         }}
@@ -184,7 +194,7 @@ export default function Products() {
                 {/* Below Line Container */}
                 {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
                     <div 
-                        className="lg:absolute lg:left-0 lg:right-0 lg:pt-4"
+                        className="lg:absolute lg:left-0 lg:right-0 lg:pt-6"
                         style={{ 
                             top: `${linePosition}px`
                         }}

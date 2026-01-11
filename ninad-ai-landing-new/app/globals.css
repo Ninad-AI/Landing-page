@@ -118,12 +118,3 @@ body {
   animation: marquee-reverse 30s linear infinite;
 }
 
-/* Orb breathing animation used in Hero */
-@keyframes orb-breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}

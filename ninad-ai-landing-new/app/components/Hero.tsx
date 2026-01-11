@@ -41,18 +41,28 @@ export default function Hero() {
               w-[clamp(80px,14vw,280px)]
               h-[clamp(80px,14vw,280px)]
               flex-shrink-0
-              pointer-events-none
+              cursor-pointer
               mx-0 md:mx-0
-              -ml-8
-              animate-pulse-slow
+              -ml-16
+              group
             "
           >
+            {/* Ambient glow behind orb */}
+            <div 
+              className="
+                absolute inset-0 
+                bg-primary/20 blur-[60px] rounded-full 
+                scale-75 animate-pulse
+                transition-all duration-700
+                group-hover:bg-primary/40 group-hover:blur-[80px] group-hover:scale-100
+              "
+            />
+            
             <img
               src="/assets/hero-orb.png"
               alt="Voice Orb"
-              className="absolute inset-0 w-full h-full object-contain scale-125"
+              className="absolute inset-0 w-full h-full object-contain scale-125 z-10 transition-all duration-700 group-hover:brightness-125"
             />
-
           </div>
 
           {/* ICE */}
