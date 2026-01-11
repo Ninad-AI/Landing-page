@@ -20,6 +20,7 @@
   --font-poppins: 'Poppins', sans-serif;
   --font-ibm-mono: 'IBM Plex Mono', monospace;
   --font-anonymous: 'Anonymous Pro', monospace;
+  --font-caveat: 'Caveat', cursive;
 }
 
 @theme inline {
@@ -31,6 +32,7 @@
   --color-accent-cyan: var(--accent-cyan);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-ibm-mono);
+  --font-hand: var(--font-caveat);
 }
 
 * {
