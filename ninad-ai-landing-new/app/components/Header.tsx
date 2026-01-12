@@ -94,7 +94,7 @@ export default function Header() {
         <div className="hidden lg:block">
           <Link
             href="/book-demo"
-            className="px-6 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+            className="px-6 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:scale-110"
           >
             Book Demo
           </Link>

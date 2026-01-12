@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 const languages = [
   "English",
   "Hindi",
@@ -19,6 +23,8 @@ const indicLanguages = [
 ];
 
 export default function Languages() {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   return (
     <section className="relative py-24 md:py-32 overflow-hidden bg-black">
       {/* Background Decor */}
@@ -39,15 +45,27 @@ export default function Languages() {
       </div>
 
       {/* Marquee Container */}
-      <div className="relative w-full overflow-hidden flex flex-col gap-4">
+      <div className="relative w-full overflow-visible flex flex-col gap-4 py-6">
         {/* Row 1 */}
-        <div className="flex gap-4 animate-marquee min-w-full">
+        <div 
+          className="flex gap-4 animate-marquee min-w-full overflow-visible"
+          style={{ animationPlayState: hoveredIndex !== null && hoveredIndex < 100 ? 'paused' : 'running' }}
+        >
           {[...languages, ...languages, ...languages, ...languages].map((lang, index) => (
             <div
               key={`row1-${index}`}
-              className="flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center bg-white rounded-2xl border border-black/10"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className={`
+                flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
+                transition-all duration-150 relative z-20
+                ${hoveredIndex === index 
+                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]' 
+                  : 'bg-white border border-black/10'
+                }
+              `}
             >
-              <span className="font-sans font-bold text-sm md:text-base text-black tracking-widest">
+              <span className={`font-sans font-bold text-sm md:text-base tracking-widest ${hoveredIndex === index ? 'text-white' : 'text-black'}`}>
                 {lang}
               </span>
             </div>
@@ -55,13 +73,25 @@ export default function Languages() {
         </div>
 
         {/* Row 2 (brick offset) */}
-        <div className="flex gap-4 animate-marquee min-w-full translate-x-[111px]">
+        <div 
+          className="flex gap-4 animate-marquee min-w-full translate-x-[111px] overflow-visible"
+          style={{ animationPlayState: hoveredIndex !== null && hoveredIndex >= 100 ? 'paused' : 'running' }}
+        >
           {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
             <div
               key={`row2-${index}`}
-              className="flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center bg-white rounded-2xl border border-black/10"
+              onMouseEnter={() => setHoveredIndex(index + 100)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className={`
+                flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
+                transition-all duration-150 relative z-20
+                ${hoveredIndex === index + 100 
+                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]' 
+                  : 'bg-white border border-black/10'
+                }
+              `}
             >
-              <span className="font-sans font-bold text-sm md:text-base text-black tracking-widest">
+              <span className={`font-sans font-bold text-sm md:text-base tracking-widest ${hoveredIndex === index + 100 ? 'text-white' : 'text-black'}`}>
                 {lang}
               </span>
             </div>

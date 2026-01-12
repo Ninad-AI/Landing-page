@@ -79,7 +79,7 @@ export default function Products() {
     };
   }, [activeProduct]);
 
-  const handleProductClick = (index: number) => {
+  const handleProductHover = (index: number) => {
     if (index !== activeProduct && !isTransitioning) {
       setIsTransitioning(true);
       
@@ -90,7 +90,7 @@ export default function Products() {
         setTimeout(() => {
           setIsTransitioning(false);
         }, 50);
-      }, 300);
+      }, 150);
     }
   };
 
@@ -133,7 +133,7 @@ export default function Products() {
                 {/* Product Item */}
                 <button
                   ref={(el) => { productRefs.current[index] = el; }}
-                  onClick={() => handleProductClick(index)}
+                  onClick={() => handleProductHover(index)}
                   className={`
                     w-full text-left py-4 md:py-6 group
                     transition-all duration-300 cursor-pointer 
@@ -156,7 +156,7 @@ export default function Products() {
 
           {/* Animated Line (Desktop only) */}
           <div 
-            className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-none z-10"
+            className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-none z-10"
             style={{ 
               transform: `translateY(${linePosition - 1}px)`,
               top: 0
@@ -173,8 +173,8 @@ export default function Products() {
           >
              <div 
                 className={`
-                    transition-all duration-500 ease-in-out h-full
-                    ${isTransitioning ? 'opacity-0 translate-y-4 blur-sm' : 'opacity-100 translate-y-0 blur-0'}
+                    transition-all duration-300 ease-out h-full
+                    ${isTransitioning ? 'opacity-0 translate-y-2 blur-sm' : 'opacity-100 translate-y-0 blur-0'}
                 `}
              >
                 {/* Above Line Container */}
