@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
@@ -13,12 +14,23 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showScrollDivider, setShowScrollDivider] = useState(false);
 
   const hasShownDividerRef = useRef(false);
   const hideDividerTimerRef = useRef<number | null>(null);
+
+  const handleLogoClick = () => {
+    const heroSection = document.getElementById("hero");
+    if (heroSection) {
+      heroSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // If hero section doesn't exist (we're on a different page), navigate to home with hero anchor
+      router.push("/#hero");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,7 +79,10 @@ export default function Header() {
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50">
+        <button
+          onClick={handleLogoClick}
+          className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50 cursor-pointer bg-none border-none p-0"
+        >
           <Image
             src="/assets/ninad-ai.png"
             alt="Ninad AI"
@@ -75,7 +90,7 @@ export default function Header() {
             className="object-contain object-left"
             priority
           />
-        </Link>
+        </button>
 
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-8">
