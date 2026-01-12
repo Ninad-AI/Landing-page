@@ -2,58 +2,55 @@
 
 import React from "react";
 
-const FEATURES = [
-  {
-    title: "Nothing goes live without your approval",
-    desc: "Ensure that every content and transaction is approved by you before it goes live on the platform.",
-  },
-  {
-    title: "Edit, pause, or turn it off anytime",
-    desc: "You have the power to edit, pause, or deactivate any content or transaction at your convenience.",
-  },
-  {
-    title: "No upfront cost or investment",
-    desc: "We do not require any upfront costs or investments; you can start using the platform freely.",
-  },
-  {
-    title: "Payments go to you automatically",
-    desc: "Receive payments directly and securely, while we take a small cut for maintaining the platform.",
-  }
-];
-
 export default function ControlAndSafety() {
   return (
-    <section className="relative py-20 md:py-32 px-6 overflow-hidden">
-      <div className="container mx-auto max-w-[1400px]">
-        <div className="text-center mb-16 md:mb-20">
-          <h2 className="font-roboto font-semibold text-4xl md:text-[64px] text-white mb-4">
-            Control & Safety
+    <section className="relative py-32 md:py-64 px-6 bg-[#05030b] overflow-hidden border-t border-white/5">
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <div className="mb-24 space-y-4">
+          <p className="text-xs font-mono text-white/30 uppercase tracking-[0.4em]">How We Protect You</p>
+          <h2 className="font-sans font-bold text-6xl md:text-7xl text-white tracking-tighter">
+            Immutable <span className="text-primary-light">Safety.</span>
           </h2>
-          <p className="font-roboto font-medium text-xl md:text-2xl text-[#c3c3c3]">
-            You're always in control
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          {FEATURES.map((feature, index) => (
+        {/* 2-Column Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+          {[
+            { 
+              title: "Your Approval", 
+              desc: "Your signature required. Nothing goes out without you."
+            },
+            { 
+              title: "Instant Control", 
+              desc: "Disconnect everything instantly with one command."
+            },
+            { 
+              title: "Your Knowledge", 
+              desc: "What you create stays yours. Forever yours."
+            },
+            { 
+              title: "Only You", 
+              desc: "Locked to your identity. Biometrically secure."
+            },
+            { 
+              title: "Bank-Level Security", 
+              desc: "Military-grade encryption on every message."
+            },
+            { 
+              title: "Complete Transparency", 
+              desc: "Every action logged. You see everything."
+            }
+          ].map((feature, i) => (
             <div 
-              key={index} 
-              className="relative min-h-[140px] md:min-h-[162px] flex items-start p-6 md:p-8 group bg-gradient-to-r from-[#1a1a2e]/60 to-[#0d0d1a]/60 border border-white/10 rounded-xl transition-all duration-300 hover:border-primary/40 hover:bg-[#1a1a2e]/80"
+              key={i} 
+              className="group p-8 rounded-2xl border border-white/10 hover:border-primary/50 bg-white/[0.01] hover:bg-primary/5 transition-all duration-300"
             >
-              {/* Checkmark Icon */}
-              <div className="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-primary/20 rounded-lg flex items-center justify-center mr-4 md:mr-6">
-                <svg className="w-5 h-5 md:w-6 md:h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              
-              <div className="flex flex-col justify-center space-y-2">
-                <h3 className="font-roboto font-normal text-xl md:text-2xl text-white">
-                  {feature.title}
-                </h3>
-                <p className="font-roboto font-light text-sm md:text-base text-[#c3c3c3] max-w-[480px]">
-                  {feature.desc}
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0 group-hover:scale-150 transition-transform duration-300" />
+                <div>
+                  <h3 className="text-white font-semibold text-lg group-hover:text-primary-light transition-colors">{feature.title}</h3>
+                  <p className="text-white/40 text-sm mt-3 leading-relaxed group-hover:text-white/60 transition-colors">{feature.desc}</p>
+                </div>
               </div>
             </div>
           ))}

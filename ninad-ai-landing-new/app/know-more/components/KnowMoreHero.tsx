@@ -5,53 +5,61 @@ import Image from "next/image";
 
 export default function KnowMoreHero() {
   return (
-    <section className="relative pt-32 pb-0 overflow-hidden min-h-[90vh] flex flex-col items-center justify-between text-center">
-      {/* Background Glow */}
-      <div className="absolute top-0 left-[-20%] w-[80%] h-[80%] -z-10 opacity-60 blur-3xl">
-        <div className="w-full h-full bg-linear-to-br from-primary/40 to-transparent rounded-full" />
+    <section className="relative pt-48 pb-32 overflow-hidden min-h-screen flex flex-col items-center bg-[#05030b]">
+      {/* Background Orbits */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] pointer-events-none opacity-20">
+        <div className="absolute inset-0 border border-primary/20 rounded-full animate-[spin_60s_linear_infinite]" />
+        <div className="absolute inset-[100px] border border-primary/10 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
       </div>
 
-      <div className="container mx-auto max-w-5xl z-10 px-6">
-        <h1 className="font-sans font-semibold text-4xl sm:text-5xl md:text-[64px] text-white mb-6 leading-tight">
-          Let your followers talk to you.
-        </h1>
-        
-        <div className="max-w-4xl mx-auto mb-4">
-          <p className="font-roboto text-lg md:text-2xl text-white/90 leading-relaxed">
-            Turn your digital presence into conversations through one simple link in your bio.
-          </p>
+      {/* Hero Glow */}
+      <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/20 blur-[120px] rounded-full -z-10" />
+
+      <div className="container mx-auto max-w-7xl px-6 z-10 text-center flex flex-col items-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 mb-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md opacity-0 animate-reveal">
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="text-white/60 text-xs font-bold tracking-[0.3em] uppercase">The Future of Interaction</span>
         </div>
         
-        <p className="font-roboto text-lg md:text-2xl text-white/80 mb-10">
-          Fans pay to chat. You stay in control. No upfront cost.
+        <h1 className="font-sans font-bold text-7xl md:text-[9vw] text-white mb-10 leading-[0.8] tracking-tighter opacity-0 animate-reveal [animation-delay:200ms]">
+          Meet your<br />
+          <span className="bg-linear-to-b from-white via-primary-light to-primary bg-clip-text text-transparent italic">Digital Soul.</span>
+        </h1>
+        
+        <p className="font-roboto text-xl md:text-2xl text-white/50 mb-16 leading-relaxed max-w-2xl opacity-0 animate-reveal [animation-delay:400ms]">
+          A high-fidelity AI persona that captures your essence, 
+          shares your wisdom, and engages your audience 24/7.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-6 mb-32 opacity-0 animate-reveal [animation-delay:600ms]">
           <Link
             href="#how-it-works"
-            className="w-full sm:w-auto px-8 py-4 rounded bg-[#6125d8] text-white font-roboto font-normal text-xl hover:bg-[#7a46f0] transition-colors"
+            className="px-12 py-5 rounded-full bg-primary text-white font-roboto font-bold text-lg hover:bg-primary/90 transition-all duration-300 hover:scale-110 shadow-[0_0_40px_rgba(var(--primary-rgb),0.5)]"
           >
-            See how it works
+            Create Your Persona
           </Link>
           <Link
             href="/book-demo"
-            className="w-full sm:w-auto px-8 py-4 rounded bg-white text-[#6125d8] font-roboto font-normal text-xl hover:bg-gray-100 transition-colors"
+            className="px-12 py-5 rounded-full border border-white/20 text-white font-roboto font-bold text-lg hover:bg-white/5 transition-all duration-300"
           >
-            Book A Demo
+            Watch Demo
           </Link>
         </div>
       </div>
 
-      {/* Hero Image - Extending from right to left */}
-      <div className="mt-16 w-full relative h-[350px] md:h-[500px] lg:h-[650px] xl:h-[750px]">
-        <Image
-          src="/assets/know-more/knowmore-hero-img.png"
-          alt="Hero Device"
-          fill
-          className="object-cover md:object-contain object-top"
-          priority
-        />
-      </div>
+      <style jsx global>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-30px) rotate(3deg); }
+        }
+        @keyframes reveal {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-reveal {
+          animation: reveal 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+      `}</style>
     </section>
   );
 }

@@ -5,53 +5,66 @@ import Image from "next/image";
 
 export default function WhatIsAIPersona() {
   return (
-    <section className="relative pt-20 pb-32 md:pt-32 md:pb-48 px-6 overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute top-[10%] left-[-20%] w-[60%] h-[60%] -z-10 opacity-40 blur-3xl">
-        <div className="w-full h-full bg-gradient-to-br from-primary/50 to-transparent rounded-full" />
+    <section className="relative py-32 md:py-48 px-6 bg-[#05030b] overflow-hidden border-y border-white/5">
+      {/* Background Text */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none opacity-[0.02] whitespace-nowrap">
+        <p className="text-[30vw] font-bold leading-none uppercase tracking-tighter">AUTHENTIC</p>
       </div>
 
-      <div className="container mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left side: Text */}
-          <div className="space-y-12">
-            <div className="text-white">
-              <p className="font-roboto text-4xl md:text-[60px] leading-tight">What is an</p>
-              <p className="text-6xl md:text-[100px] lg:text-[120px] font-bold text-white tracking-tight font-hand mt-[-10px]">
-                AI persona ?
-              </p>
-            </div>
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+          {/* Left Column: Human Head Image */}
+          <div className="lg:col-span-5 relative">
+            <div className="relative aspect-square rounded-3xl overflow-hidden group border border-white/10 bg-[#0a0a0f] shadow-2xl">
+              {/* Subtle Background Glow */}
+              <div className="absolute inset-0 bg-primary/5 blur-[100px] group-hover:bg-primary/10 transition-all duration-700" />
+              
+              {/* Image */}
+              <div className="relative w-full h-full flex items-center justify-center p-8">
+                <Image
+                  src="/assets/know-more/human-head.png"
+                  alt="Digital Soul"
+                  fill
+                  className="object-contain opacity-85 group-hover:opacity-100 brightness-105 contrast-110 transition-all duration-700"
+                />
+              </div>
 
-            <div className="max-w-[650px] space-y-8">
-              <p className="font-sans text-xl md:text-[24px] leading-relaxed text-[#dfdfdf]">
-                An <span className="font-bold text-white">AI persona</span> is a <span className="font-bold text-white">digital version</span> <span className="font-bold text-white">of you</span> that reflects your voice, personality, and knowledge so followers can talk to you anytime, even when youre offline.
-              </p>
-              <p className="font-sans text-2xl md:text-[27px] font-normal text-white">
-                Think of it as you, available 24/7.
-              </p>
+              <div className="absolute inset-0 border border-white/10 rounded-3xl z-20 pointer-events-none" />
             </div>
           </div>
 
-          {/* Right side: Human Head Image */}
-          <div className="relative flex items-center justify-center">
-            <div className="relative w-[350px] h-[350px] md:w-[600px] md:h-[600px] lg:w-[800px] lg:h-[800px] lg:mr-[-100px]">
-              <Image
-                src="/assets/know-more/human-head.png"
-                alt="AI Persona"
-                fill
-                className="object-contain"
-                priority
-              />
+          {/* Right Column: High-End Typography */}
+          <div className="lg:col-span-7 space-y-12">
+            <div>
+              <h2 className="font-sans font-bold text-5xl md:text-7xl text-white mb-6 tracking-tight">
+                Beyond an Assistant.<br />
+                <span className="text-primary-light">A Mirror of You.</span>
+              </h2>
+              <p className="font-roboto text-xl md:text-2xl text-white/50 leading-relaxed max-w-2xl">
+                An AI Persona isn't just a chatbot. It's a digital reflection built on your actual voice, knowledge, and intuition.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[
+                { title: "Voice DNA", text: "Captures the subtle nuances of how you speak and express ideas." },
+                { title: "Knowledge Vault", text: "Trained on your specific expertise to provide authentic value." },
+                { title: "Emotional Intelligence", text: "Maintains your unique personality and tone across every chat." },
+                { title: "Verified Identity", text: "100% controlled by you. Your digital self, your rules." }
+              ].map((item, i) => (
+                <div 
+                  key={i} 
+                  className="space-y-3 group p-6 rounded-2xl border border-white/0 hover:border-white/5 hover:bg-white/[0.02] transition-all duration-500"
+                  style={{ animationDelay: `${i * 150}ms` }}
+                >
+                  <div className="w-10 h-0.5 bg-primary/40 group-hover:w-full transition-all duration-700" />
+                  <h3 className="text-white font-bold text-xl group-hover:text-primary-light transition-colors">{item.title}</h3>
+                  <p className="text-white/40 text-base leading-snug group-hover:text-white/70 transition-colors">{item.text}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Wave Transition */}
-      <div className="absolute bottom-0 left-0 w-full leading-none">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-          <path d="M0 120V37.5C120 12.5 240 -12.5 360 7.5C480 27.5 600 92.5 720 102.5C840 112.5 960 67.5 1080 37.5C1200 7.5 1320 -7.5 1440 12.5V120H0Z" fill="#6125d8" />
-        </svg>
       </div>
     </section>
   );

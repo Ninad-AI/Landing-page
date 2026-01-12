@@ -2,78 +2,62 @@
 
 import React from "react";
 import Image from "next/image";
-
-const REASONS = [
-  {
-    title: "Scales your time without burning out",
-    desc: "Automate engagements and maximize your impact, allowing you to scale effectively without overwhelming yourself.",
-  },
-  {
-    title: "Deeper connection with followers",
-    desc: "Experience meaningful interactions that forge strong bonds with your audience, transforming followers into a community.",
-  },
-  {
-    title: "Adds new layers to your digital presence",
-    desc: "Enhance your online persona with innovative tools that expand your reach and amplify your distinctive voice.",
-  },
-  {
-    title: "Turns attention into income",
-    desc: "Leverage your audience's attention to generate income through strategic engagement and monetization techniques.",
-  }
-];
+import Link from "next/link";
 
 export default function WhyCreatorsLoveThis() {
   return (
-    <section className="relative py-20 md:py-32 px-6 overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute bottom-0 right-[-20%] w-[60%] h-[60%] -z-10 opacity-30 blur-3xl">
-        <div className="w-full h-full bg-gradient-to-tl from-primary/40 to-transparent rounded-full" />
-      </div>
+    <section className="relative py-24 md:py-48 px-6 bg-[#05030b] overflow-hidden border-t border-white/5">
+      {/* Background radial glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120vw] h-[120vw] bg-primary/10 rounded-full blur-[160px] pointer-events-none opacity-20" />
 
-      <div className="container mx-auto max-w-[1400px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left: Title and Visual */}
-          <div className="relative flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="mb-8 md:mb-12">
-              <p className="font-mono font-medium text-4xl md:text-[58px] text-[#fffafa] leading-tight">
-                Why
-              </p>
-              <p className="text-5xl md:text-[75px] font-bold text-white font-hand leading-tight">
-                Creators
-              </p>
-              <p className="font-mono font-bold text-4xl md:text-[58px] text-[#fffafa]">
-                loves this
-              </p>
+      <div className="container mx-auto max-w-7xl relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
+          {/* Left: Core Narrative */}
+          <div className="space-y-12">
+            <div className="space-y-6">
+              <p className="text-xs font-mono text-white/30 uppercase tracking-[0.4em]">The Endgame</p>
+              <h2 className="font-sans font-bold text-5xl md:text-6xl text-white leading-tight tracking-tighter">
+                You. Everywhere. <span className="text-primary-light">Always.</span>
+              </h2>
             </div>
-            
-            {/* Scribble Visual */}
-            <div className="relative w-[250px] h-[250px] md:w-[300px] md:h-[300px]">
-              <Image
-                src="/assets/know-more/scribbl.png"
-                alt=""
-                fill
-                className="object-contain"
-              />
+            <div className="space-y-8">
+              {[
+                { label: "Your Voice", desc: "Encoded in every response. No compromise on authenticity." },
+                { label: "Your Knowledge", desc: "Becomes a 24/7 asset generating passive value streams." },
+                { label: "Your Control", desc: "Not a black box. You maintain sovereign custody forever." }
+              ].map((item, i) => (
+                <div key={i} className="pb-8">
+                  <p className="text-white/40 text-xs uppercase tracking-[0.3em] font-mono mb-2">{item.label}</p>
+                  <p className="text-white/60 text-lg leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right: Grid of Reasons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {REASONS.map((reason, index) => (
-              <div 
-                key={index} 
-                className="relative p-5 md:p-6 flex flex-col space-y-3 group bg-gradient-to-br from-white/95 to-white/90 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-              >
-                <h3 className="font-mono font-bold text-base md:text-lg text-black leading-tight">
-                  {reason.title}
-                </h3>
-                <p className="font-mono font-normal text-sm md:text-[15px] text-black/80 tracking-tight leading-snug">
-                  {reason.desc}
-                </p>
-              </div>
-            ))}
+          {/* Right: Action & Metrics */}
+          <div className="bg-white/[0.02] border border-white/10 rounded-3xl p-12 space-y-12">
+            <div className="space-y-4">
+              <h3 className="font-sans font-bold text-3xl text-white">Ready?</h3>
+              <p className="text-white/40 text-lg leading-relaxed">
+                Join founders and creators who are already scaling their presence without sacrificing control.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <button className="w-full px-8 py-5 bg-primary hover:bg-primary-light text-black font-bold text-lg rounded-xl transition-all duration-300 hover:shadow-[0_0_60px_rgba(var(--primary-rgb),0.4)] active:scale-95">
+                Start Building
+              </button>
+              <Link href="/book-demo" className="block">
+                <button className="w-full px-8 py-5 border border-white/20 hover:border-white/40 text-white font-bold text-lg rounded-xl transition-all duration-300 hover:bg-white/5">
+                  Book Demo
+                </button>
+              </Link>
+            </div>
+
+
           </div>
         </div>
+
       </div>
     </section>
   );
