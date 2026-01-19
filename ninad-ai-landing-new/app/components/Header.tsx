@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
@@ -15,6 +15,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showScrollDivider, setShowScrollDivider] = useState(false);
@@ -59,6 +60,10 @@ export default function Header() {
         }, 700);
       }
     };
+
+    // Initialize scroll state on mount
+    handleScroll();
+
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -67,7 +72,7 @@ export default function Header() {
         hideDividerTimerRef.current = null;
       }
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <header 

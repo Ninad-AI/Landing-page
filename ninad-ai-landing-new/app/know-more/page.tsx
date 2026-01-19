@@ -1,4 +1,3 @@
-import Header from "../components/Header";
 import Footer from "../components/Footer";
 import KnowMoreHero from "./components/KnowMoreHero";
 import WhatIsAIPersona from "./components/WhatIsAIPersona";
@@ -9,7 +8,6 @@ import WhyCreatorsLoveThis from "./components/WhyCreatorsLoveThis";
 export default function KnowMorePage() {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#080017]">
-      <Header />
       <KnowMoreHero />
       <WhatIsAIPersona />
       <HowItWorks />

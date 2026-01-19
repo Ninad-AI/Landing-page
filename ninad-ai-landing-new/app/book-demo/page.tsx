@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Header from "../components/Header";
 import BookDemoForm from "./BookDemoForm";
 
 export const metadata = {
@@ -10,8 +9,6 @@ export const metadata = {
 export default function BookDemoPage() {
   return (
     <main className="relative h-[100svh] overflow-hidden bg-black">
-      <Header />
-
       <section className="relative w-full h-[100svh] pt-28 md:pt-32 flex items-center overflow-hidden">
         {/* Background glows to match homepage */}
         <div className="absolute inset-0 pointer-events-none opacity-50">
