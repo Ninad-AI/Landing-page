@@ -53,7 +53,7 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="relative py-20 md:py-32 overflow-hidden bg-black min-h-screen flex items-center"
+      className="relative py-20 md:py-32 overflow-hidden bg-black"
     >
       <div className="relative container mx-auto px-6 md:px-12 lg:px-20 max-w-[1600px]">
         {/* Header - Spans both columns */}
@@ -90,15 +90,30 @@ export default function Features() {
           className="relative grid grid-cols-1 md:grid-cols-2 gap-[12px] rounded-[24px] overflow-hidden"
         >
           {/* Cursor-following glow (Limited to the grid's area) */}
-          <div
-            className="pointer-events-none absolute w-[110px] h-[110px] rounded-full blur-[40px] transition-opacity duration-150 z-0 hidden md:block"
-            style={{
-              left: glowPos.x - 40,
-              top: glowPos.y - 40,
-              backgroundColor: "#B18BFF", // Brightest shade of purple
-              opacity: glowPos.visible ? 0.9 : 0,
-            }}
-          />
+          <>
+            {/* Core glow */}
+            <div
+              className="pointer-events-none absolute w-[90px] h-[90px] rounded-full blur-[25px] z-0 hidden md:block"
+              style={{
+                left: glowPos.x - 45,
+                top: glowPos.y - 45,
+                backgroundColor: "#B400FF",
+                opacity: glowPos.visible ? 1 : 0,
+              }}
+            />
+
+            {/* Outer glow */}
+            <div
+              className="pointer-events-none absolute w-[200px] h-[200px] rounded-full blur-[90px] z-0 hidden md:block"
+              style={{
+                left: glowPos.x - 100,
+                top: glowPos.y - 100,
+                backgroundColor: "#8A00C4",
+                opacity: glowPos.visible ? 0.85 : 0,
+              }}
+            />
+          </>
+
 
           {features.map((feature, index) => {
             // Gradient peaking at the center intersection relative to their position

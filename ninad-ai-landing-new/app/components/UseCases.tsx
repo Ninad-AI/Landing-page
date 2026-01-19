@@ -81,7 +81,7 @@ export default function UseCases() {
   ];
 
   return (
-    <section id="use-cases" className="relative py-24 md:py-32 bg-black overflow-hidden flex items-center min-h-screen">
+    <section id="use-cases" className="relative py-24 md:py-32 bg-black overflow-hidden">
       
       {/* Background Decor */}
       <div className="absolute left-0 bottom-0 w-full h-[500px] bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
@@ -90,7 +90,7 @@ export default function UseCases() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           
           {/* Left: Text Content & Sticky Header */}
-          <div className="lg:sticky lg:top-32">
+          <div className="lg:sticky lg:top-40 self-start">
             <h2 className="font-sans font-bold text-5xl md:text-7xl lg:text-8xl leading-tight text-white mb-8">
               <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#999999_100%)]">Empowering</span>{' '}
               <br />
