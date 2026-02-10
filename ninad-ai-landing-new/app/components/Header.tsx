@@ -9,8 +9,8 @@ const NAV_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#products", label: "Products" },
   { href: "/#use-cases", label: "Use Cases" },
-  { href: "/#pricing", label: "Pricing" },
   { href: "/know-more", label: "Know More" },
+  { href: "/creators", label: "Creators" },
 ];
 
 export default function Header() {
@@ -75,12 +75,11 @@ export default function Header() {
   }, [pathname]);
 
   return (
-    <header 
-      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${
-        isScrolled || isMobileMenuOpen
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isScrolled || isMobileMenuOpen
           ? `bg-black/55 backdrop-blur-xl py-4 ${showScrollDivider && !isMobileMenuOpen ? "border-b border-white/10" : "border-b border-transparent"}`
           : "bg-transparent py-6"
-      }`}
+        }`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
         {/* Logo */}
@@ -125,30 +124,26 @@ export default function Header() {
           className="lg:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 group"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          <span 
-            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
-              isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
-            }`} 
+          <span
+            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
           />
-          <span 
-            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
-              isMobileMenuOpen ? "opacity-0" : ""
-            }`} 
+          <span
+            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
+              }`}
           />
-          <span 
-            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${
-              isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`} 
+          <span
+            className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
           />
         </button>
 
         {/* Mobile Menu Content */}
-        <div 
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ${
-            isMobileMenuOpen 
-              ? "opacity-100 pointer-events-auto" 
+        <div
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ${isMobileMenuOpen
+              ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none"
-          }`}
+            }`}
         >
           <nav className="flex flex-col items-center gap-8">
             {NAV_LINKS.map((link) => (
