@@ -357,19 +357,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
                     }}
                 >
-                    {/* Full Background Image - with opacity or blend mode for glass effect usage if needed, 
-                        but usually profile cards show the image clearly. 
-                        User asked for "liquid glass" - typically this means the CARD ITSELF is glass. 
-                        If the image covers the whole card, the glass effect is lost unless the image IS the background 
-                        and the content is on a glass overlay, OR the card frame is glass.
-                        
-                        Given the previous design had a full image, I will make the image occupy the full height 
-                        but maybe put a glass overlay ON TOP of it at the bottom, OR make the whole card frame glassy 
-                        and the image sits inside.
-                        
-                        Lets keep the full image but add a glossy overlay.
-                    */}
                     <div className="absolute inset-0 z-0">
+
                         {avatarUrl ? (
                             <img
                                 src={avatarUrl}
