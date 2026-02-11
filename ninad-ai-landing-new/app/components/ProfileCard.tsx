@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 
 const ANIMATION_CONFIG = {
     INITIAL_DURATION: 1200,
@@ -57,7 +58,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     mobileTiltSensitivity = 5,
     name = 'Anna Lorenza',
     title = 'Through the lens, I create stories worth remembering.',
-    contactText = 'Follow +',
+
     followers = 114,
     following = 92,
     onContactClick,
@@ -292,13 +293,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         tiltEngine.beginInitial(ANIMATION_CONFIG.INITIAL_DURATION);
 
         return () => {
+            const enterTimer = enterTimerRef.current;
+            const leaveRaf = leaveRafRef.current;
             shell.removeEventListener('pointerenter', pointerEnterHandler);
             shell.removeEventListener('pointermove', pointerMoveHandler);
             shell.removeEventListener('pointerleave', pointerLeaveHandler);
             shell.removeEventListener('click', handleClick);
             window.removeEventListener('deviceorientation', deviceOrientationHandler);
-            if (enterTimerRef.current) window.clearTimeout(enterTimerRef.current);
-            if (leaveRafRef.current) cancelAnimationFrame(leaveRafRef.current);
+            if (enterTimer) window.clearTimeout(enterTimer);
+            if (leaveRaf) cancelAnimationFrame(leaveRaf);
             tiltEngine.cancel();
             shell.classList.remove('active');
         };
@@ -360,10 +363,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                     <div className="absolute inset-0 z-0">
 
                         {avatarUrl ? (
-                            <img
+                            <Image
                                 src={avatarUrl}
                                 alt={name || "Profile"}
-                                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                                fill
+                                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                             />
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black" />

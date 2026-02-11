@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 
 export default function KnowMoreHero() {
   return (
@@ -20,14 +19,14 @@ export default function KnowMoreHero() {
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <span className="text-white/60 text-xs font-bold tracking-[0.3em] uppercase">The Future of Interaction</span>
         </div>
-        
+
         <h1 className="font-sans font-bold text-7xl md:text-[9vw] text-white mb-10 leading-[0.8] tracking-tighter opacity-0 animate-reveal [animation-delay:200ms]">
           Meet your<br />
           <span className="bg-linear-to-b from-white via-primary-light to-primary bg-clip-text text-transparent italic">Digital Soul.</span>
         </h1>
-        
+
         <p className="font-roboto text-xl md:text-2xl text-white/50 mb-16 leading-relaxed max-w-2xl opacity-0 animate-reveal [animation-delay:400ms]">
-          A high-fidelity AI persona that captures your essence, 
+          A high-fidelity AI persona that captures your essence,
           shares your wisdom, and engages your audience 24/7.
         </p>
 

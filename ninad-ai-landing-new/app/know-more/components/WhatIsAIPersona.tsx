@@ -18,7 +18,7 @@ export default function WhatIsAIPersona() {
             <div className="relative aspect-square rounded-3xl overflow-hidden group border border-white/10 bg-[#0a0a0f] shadow-2xl">
               {/* Subtle Background Glow */}
               <div className="absolute inset-0 bg-primary/5 blur-[100px] group-hover:bg-primary/10 transition-all duration-700" />
-              
+
               {/* Image */}
               <div className="relative w-full h-full flex items-center justify-center p-8">
                 <Image
@@ -41,7 +41,7 @@ export default function WhatIsAIPersona() {
                 <span className="text-primary-light">A Mirror of You.</span>
               </h2>
               <p className="font-roboto text-xl md:text-2xl text-white/50 leading-relaxed max-w-2xl">
-                An AI Persona isn't just a chatbot. It's a digital reflection built on your actual voice, knowledge, and intuition.
+                An AI Persona isn&apos;t just a chatbot. It&apos;s a digital reflection built on your actual voice, knowledge, and intuition.
               </p>
             </div>
 
@@ -52,8 +52,8 @@ export default function WhatIsAIPersona() {
                 { title: "Emotional Intelligence", text: "Maintains your unique personality and tone across every chat." },
                 { title: "Verified Identity", text: "100% controlled by you. Your digital self, your rules." }
               ].map((item, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className="space-y-3 group p-6 rounded-2xl border border-white/0 hover:border-white/5 hover:bg-white/[0.02] transition-all duration-500"
                   style={{ animationDelay: `${i * 150}ms` }}
                 >

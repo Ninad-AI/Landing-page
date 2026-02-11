@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Hero() {
   return (
     <section id="hero" className="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center pt-32 pb-20">
@@ -48,7 +50,7 @@ export default function Hero() {
             style={{ transform: 'translateX(-10px)' }}
           >
             {/* Ambient glow behind orb */}
-            <div 
+            <div
               className="
                 absolute inset-0 
                 bg-primary/30 blur-[60px] rounded-full 
@@ -57,11 +59,12 @@ export default function Hero() {
                 group-hover:bg-primary/60 group-hover:blur-[100px] group-hover:scale-100
               "
             />
-            
-            <img
+
+            <Image
               src="/assets/hero-orb.png"
               alt="Voice Orb"
-              className="absolute inset-0 w-full h-full object-contain scale-125 z-10 transition-all duration-700 group-hover:brightness-150"
+              fill
+              className="object-contain scale-125 z-10 transition-all duration-700 group-hover:brightness-150"
             />
           </div>
 

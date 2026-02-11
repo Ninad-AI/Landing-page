@@ -106,7 +106,7 @@ export default function Waitlist() {
             ) : null}
             {status.type === "idle" || status.type === "loading" ? (
               <p className="mt-3 text-[14px] font-inter text-[#6125d8] opacity-80 leading-relaxed">
-                We'll email you as soon as the waitlist opens. Automated messaging service coming soon.
+                We&apos;ll email you as soon as the waitlist opens. Automated messaging service coming soon.
               </p>
             ) : null}
           </div>

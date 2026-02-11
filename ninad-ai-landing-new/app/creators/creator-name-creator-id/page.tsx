@@ -28,6 +28,9 @@ export default function CreatorVoiceChatPage() {
     const [timeLeft, setTimeLeft] = useState(0);
     const [isSpeaking, setIsSpeaking] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [waveformHeights, setWaveformHeights] = useState<number[]>(
+        Array.from({ length: 16 }, (_, i) => 4 + (i % 3) * 2)
+    );
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const creatorName = "Scarlett Johansson";
@@ -62,6 +65,9 @@ export default function CreatorVoiceChatPage() {
         if (flowState !== "active") return;
         const interval = setInterval(() => {
             setIsSpeaking((p) => !p);
+            setWaveformHeights(
+                Array.from({ length: 16 }, () => 10 + Math.random() * 40)
+            );
         }, 2000 + Math.random() * 2000);
         return () => clearInterval(interval);
     }, [flowState]);
@@ -185,7 +191,7 @@ export default function CreatorVoiceChatPage() {
                                         className="w-1.5 rounded-full bg-gradient-to-t from-primary via-accent-blue to-white transition-all duration-200"
                                         style={{
                                             height: isSpeaking
-                                                ? `${10 + Math.random() * 40}px`
+                                                ? `${waveformHeights[i]}px`
                                                 : `${4 + (i % 3) * 2}px`,
                                             opacity: isSpeaking ? 0.9 : 0.3,
                                             animationDelay: `${i * 0.05}s`

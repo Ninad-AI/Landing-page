@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 
 export default function HowItWorks() {
   return (
@@ -25,24 +24,24 @@ export default function HowItWorks() {
           {/* Right Column: Scrolling Steps */}
           <div className="lg:w-2/3 space-y-32">
             {[
-              { 
+              {
                 num: "01",
-                title: "Deep Ingestion", 
+                title: "Deep Ingestion",
                 desc: "Our neural engines analyze your existing content—videos, writing, voice, and unique mannerisms—to understand your linguistic DNA."
               },
-              { 
+              {
                 num: "02",
-                title: "Verification & Shaping", 
+                title: "Verification & Shaping",
                 desc: "Interact with your nascent persona in a secure environment. Refine its responses, set ethical boundaries, and ensure it represents you with 100% fidelity."
               },
-              { 
+              {
                 num: "03",
-                title: "Gateway Deployment", 
+                title: "Gateway Deployment",
                 desc: "Once you approve, we deploy your unique portal. A simple link allows your global audience to connect with you through our high-fidelity interface."
               },
-              { 
+              {
                 num: "04",
-                title: "Exponential Resonance", 
+                title: "Exponential Resonance",
                 desc: "Scale your impact. While you focus on creating, your digital self generates passive revenue and builds deep community loyalty with every word."
               }
             ].map((step, i) => (
