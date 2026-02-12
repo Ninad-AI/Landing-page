@@ -119,33 +119,7 @@ export default function CreatorVoiceChatPage() {
                 className={`relative z-10 flex flex-col items-center justify-center min-h-screen px-6 pt-32 pb-12 transition-all duration-700 ease-out ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
                     }`}
             >
-                {/* Back Button - Enhanced */}
-                <button
-                    onClick={() => router.push("/creators")}
-                    className="
-            absolute top-24 left-6 md:top-28 md:left-12 
-            flex items-center gap-2.5 
-            px-4 py-2 rounded-full 
-            bg-white/5 border border-white/10 backdrop-blur-md
-            text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20
-            transition-all duration-300 group
-          "
-                >
-                    <svg
-                        className="w-4 h-4 transition-transform group-hover:-translate-x-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 19l-7-7 7-7"
-                        />
-                    </svg>
-                    <span className="text-sm font-medium tracking-wide">Creators</span>
-                </button>
+
 
                 {flowState === "active" ? (
                     /* ===== ACTIVE VOICE CHAT UI ===== */

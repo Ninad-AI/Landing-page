@@ -28,7 +28,6 @@ export default function Header() {
     if (heroSection) {
       heroSection.scrollIntoView({ behavior: "smooth" });
     } else {
-      // If hero section doesn't exist (we're on a different page), navigate to home with hero anchor
       router.push("/#hero");
     }
   };
@@ -61,7 +60,6 @@ export default function Header() {
       }
     };
 
-    // Initialize scroll state on mount
     handleScroll();
 
     window.addEventListener("scroll", handleScroll);
@@ -77,8 +75,8 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isScrolled || isMobileMenuOpen
-          ? `bg-black/55 backdrop-blur-xl py-4 ${showScrollDivider && !isMobileMenuOpen ? "border-b border-white/10" : "border-b border-transparent"}`
-          : "bg-transparent py-6"
+        ? `bg-black/55 backdrop-blur-xl py-4 ${showScrollDivider && !isMobileMenuOpen ? "border-b border-white/10" : "border-b border-transparent"}`
+        : "bg-transparent py-6"
         }`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
@@ -141,8 +139,8 @@ export default function Header() {
         {/* Mobile Menu Content */}
         <div
           className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ${isMobileMenuOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
             }`}
         >
           <nav className="flex flex-col items-center gap-8">
