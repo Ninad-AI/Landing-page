@@ -138,7 +138,7 @@ export default function Header() {
 
         {/* Mobile Menu Content */}
         <div
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-center gap-8 transition-all duration-300 ${isMobileMenuOpen
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-32 gap-8 transition-opacity duration-300 overflow-y-auto min-h-screen ${isMobileMenuOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
             }`}
