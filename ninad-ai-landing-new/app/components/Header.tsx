@@ -138,9 +138,9 @@ export default function Header() {
 
         {/* Mobile Menu Content */}
         <div
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-32 gap-8 transition-opacity duration-300 overflow-y-auto min-h-screen ${isMobileMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-32 gap-8 transition-transform duration-500 ease-in-out overflow-y-auto min-h-screen ${isMobileMenuOpen
+            ? "translate-x-0"
+            : "translate-x-full"
             }`}
         >
           <nav className="flex flex-col items-center gap-8">
