@@ -65,7 +65,7 @@ export default function Waitlist() {
       <div className="relative container mx-auto px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-10">
 
         <div className="md:w-1/2 text-left">
-          <h2 className="font-sans font-extrabold text-[52px] md:text-[66px] leading-[1.0] text-[#2a105d] tracking-tight">
+          <h2 className="font-sans font-extrabold text-[40px] md:text-[66px] leading-[1.0] text-[#2a105d] tracking-tight">
             JOIN THE<br />
             WAITLIST NOW
           </h2>
@@ -75,20 +75,20 @@ export default function Waitlist() {
           <div className="w-full max-w-[560px]">
             <form
               onSubmit={onSubmit}
-              className="group flex items-center h-[46px] rounded-full border border-[#6125d8]/50 bg-white shadow-[0_6px_16px_rgba(97,37,216,0.12)] overflow-hidden transition-all duration-200 focus-within:shadow-[0_10px_26px_rgba(97,37,216,0.18)]"
+              className="group flex flex-col sm:flex-row items-center gap-2 sm:gap-0 h-auto sm:h-[46px] rounded-[24px] sm:rounded-full border border-transparent sm:border-[#6125d8]/50 bg-transparent sm:bg-white shadow-none sm:shadow-[0_6px_16px_rgba(97,37,216,0.12)] overflow-visible sm:overflow-hidden transition-all duration-200 sm:focus-within:shadow-[0_10px_26px_rgba(97,37,216,0.18)]"
             >
               <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 h-full px-6 text-[15px] font-light font-ibm text-[#2a2a2a] placeholder:text-[#6b6b6b] bg-transparent outline-none"
+                className="w-full sm:flex-1 h-[46px] sm:h-full px-6 text-[15px] font-light font-ibm text-[#2a2a2a] placeholder:text-[#6b6b6b] bg-white sm:bg-transparent outline-none border border-[#6125d8]/50 sm:border-none rounded-full"
                 required
               />
               <button
                 type="submit"
                 disabled={!canSubmit || status.type === "loading"}
-                className="h-full px-8 bg-[#6125d8] text-white font-inter font-medium text-[15px] hover:bg-[#5012b8] transition-colors duration-200 whitespace-nowrap"
+                className="w-full sm:w-auto h-[46px] sm:h-full px-8 bg-[#6125d8] text-white font-inter font-medium text-[15px] hover:bg-[#5012b8] transition-colors duration-200 whitespace-nowrap rounded-full sm:rounded-none"
               >
                 {status.type === "loading" ? "Joining…" : "Join Waitlist"}
               </button>

@@ -26,7 +26,7 @@ export default function Languages() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <section className="relative py-24 md:py-32 overflow-hidden bg-black">
+    <section className="relative py-16 md:py-32 overflow-hidden bg-black">
       {/* Background Decor */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
@@ -47,7 +47,7 @@ export default function Languages() {
       {/* Marquee Container */}
       <div className="relative w-full overflow-visible flex flex-col gap-4 py-6">
         {/* Row 1 */}
-        <div 
+        <div
           className="flex gap-4 animate-marquee min-w-full overflow-visible"
           style={{ animationPlayState: hoveredIndex !== null && hoveredIndex < 100 ? 'paused' : 'running' }}
         >
@@ -59,8 +59,8 @@ export default function Languages() {
               className={`
                 flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
                 transition-all duration-150 relative z-20
-                ${hoveredIndex === index 
-                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]' 
+                ${hoveredIndex === index
+                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
                   : 'bg-white border border-black/10'
                 }
               `}
@@ -73,7 +73,7 @@ export default function Languages() {
         </div>
 
         {/* Row 2 (brick offset) */}
-        <div 
+        <div
           className="flex gap-4 animate-marquee min-w-full translate-x-[111px] overflow-visible"
           style={{ animationPlayState: hoveredIndex !== null && hoveredIndex >= 100 ? 'paused' : 'running' }}
         >
@@ -85,8 +85,8 @@ export default function Languages() {
               className={`
                 flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
                 transition-all duration-150 relative z-20
-                ${hoveredIndex === index + 100 
-                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]' 
+                ${hoveredIndex === index + 100
+                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
                   : 'bg-white border border-black/10'
                 }
               `}

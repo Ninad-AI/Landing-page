@@ -20,7 +20,7 @@ export default function KnowMoreHero() {
           <span className="text-white/60 text-xs font-bold tracking-[0.3em] uppercase">The Future of Interaction</span>
         </div>
 
-        <h1 className="font-sans font-bold text-7xl md:text-[9vw] text-white mb-10 leading-[0.8] tracking-tighter opacity-0 animate-reveal [animation-delay:200ms]">
+        <h1 className="font-sans font-bold text-5xl md:text-7xl lg:text-[9vw] text-white mb-10 leading-[0.9] md:leading-[0.8] tracking-tighter opacity-0 animate-reveal [animation-delay:200ms]">
           Meet your<br />
           <span className="bg-linear-to-b from-white via-primary-light to-primary bg-clip-text text-transparent italic">Digital Soul.</span>
         </h1>

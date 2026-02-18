@@ -53,15 +53,14 @@ function VoiceCard({ title, subtitle, isPrimary = false }: VoiceCardProps) {
     }
   })();
 
-  const outerSize = isPrimary ? 'max-w-[375px] h-[477px]' : 'max-w-[360px] h-[450px]';
+  const outerSize = isPrimary ? 'w-full max-w-[375px] h-[477px]' : 'w-full max-w-[360px] h-[450px]';
   const topPanelHeight = isPrimary ? 'h-[364px]' : 'h-[327px]';
   const subtitleClass = 'text-black/60';
 
   return (
     <div
-      className={`relative w-full ${outerSize} rounded-[20px] bg-[#E0EBF6] ${
-        isPrimary ? 'lg:scale-110 shadow-[0_24px_60px_rgba(0,0,0,0.45)] z-20' : 'shadow-[0_20px_50px_rgba(0,0,0,0.35)]'
-      }`}
+      className={`relative w-full ${outerSize} rounded-[20px] bg-[#E0EBF6] ${isPrimary ? 'lg:scale-110 shadow-[0_24px_60px_rgba(0,0,0,0.45)] z-20' : 'shadow-[0_20px_50px_rgba(0,0,0,0.35)]'
+        }`}
     >
       <div className="p-3">
         {/* Inner glass panel (Figma V5) */}
@@ -101,46 +100,46 @@ function VoiceCard({ title, subtitle, isPrimary = false }: VoiceCardProps) {
 
 export default function Comparison() {
   return (
-    <section className="relative py-24 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
+    <section className="relative py-16 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
       {/* Background Glows (Recreating Figma nodes 292:393 and 292:394) */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Large Central Background Glow (node 292:393) */}
-        <div 
+        <div
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-250 h-250 bg-[#1A0B2E] rounded-full blur-[180px] opacity-40"
           style={{ mixBlendMode: 'plus-lighter' }}
         />
-        
+
         {/* Top Glow Effect (node 292:394) */}
-        <div 
+        <div
           className="absolute left-[20%] -top-25 w-150 h-125 bg-primary/20 rounded-full blur-[140px] opacity-50"
           style={{ rotate: '15deg' }}
         />
 
         {/* Subtle Bottom Glow */}
-        <div 
+        <div
           className="absolute right-[10%] -bottom-50 w-200 h-150 bg-[#0F0524] rounded-full blur-[160px] opacity-30"
         />
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 relative z-10">
-        
+      <div className="container mx-auto px-6 max-w-[1600px] relative z-10">
+
         {/* Header */}
         <div className="text-center mb-16">
-            <h2 
+          <h2
             className="
                 font-sans font-black text-4xl md:text-6xl lg:text-[110px] 
                 leading-none tracking-tighter text-transparent bg-clip-text 
               bg-linear-to-b from-white via-white/90 to-white/40 mb-4
             "
-            >
+          >
             VOICE COMPARISON
-            </h2>
-            <p className="font-sans text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+          </h2>
+          <p className="font-sans text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
             Listen to the difference. Our AI captures the soul of the original voice.
-            </p>
-            
-            {/* <button className="bg-white text-black font-sans font-bold px-10 py-4 rounded-full hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mx-auto text-base shadow-[0_4px_20px_rgba(255,255,255,0.2)] group">
+          </p>
+
+          {/* <button className="bg-white text-black font-sans font-bold px-10 py-4 rounded-full hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mx-auto text-base shadow-[0_4px_20px_rgba(255,255,255,0.2)] group">
               Create Your Clone 
               <span className="transition-transform group-hover:translate-x-1 text-xl">→</span>
             </button> */}
@@ -148,20 +147,20 @@ export default function Comparison() {
 
         {/* Comparison Grid */}
         <div className="flex flex-col lg:flex-row items-end justify-center gap-4 lg:gap-10 mt-16">
-          
-          <VoiceCard 
-            title="ORIGINAL" 
+
+          <VoiceCard
+            title="ORIGINAL"
             subtitle="VOICE"
           />
 
-          <VoiceCard 
-            title="NINAD AI" 
-            subtitle="CLONE" 
+          <VoiceCard
+            title="NINAD AI"
+            subtitle="CLONE"
             isPrimary
           />
 
-          <VoiceCard 
-            title="MARKET" 
+          <VoiceCard
+            title="MARKET"
             subtitle="CLONE"
           />
 

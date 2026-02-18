@@ -16,51 +16,11 @@ interface Creator {
 const CREATORS: Creator[] = [
     {
         id: 1,
-        name: "Leonardo DiCaprio",
-        role: "Actor & Environmentalist",
-        imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1887&auto=format&fit=crop",
-        handle: "leo",
-        status: "Action"
-    },
-    {
-        id: 2,
-        name: "Scarlett Johansson",
-        role: "Actress & Producer",
-        imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1888&auto=format&fit=crop",
-        handle: "scarlett",
-        status: "On Set"
-    },
-    {
-        id: 3,
-        name: "Robert Downey Jr.",
-        role: "Actor & Producer",
-        imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1887&auto=format&fit=crop",
-        handle: "rdj",
-        status: "Filming"
-    },
-    {
-        id: 4,
-        name: "Natalie Portman",
-        role: "Actress & Director",
-        imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop",
-        handle: "natalie",
-        status: "Directing"
-    },
-    {
-        id: 5,
-        name: "Keanu Reeves",
-        role: "Actor & Musician",
-        imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1887&auto=format&fit=crop",
-        handle: "keanu",
-        status: "Rehearsing"
-    },
-    {
-        id: 6,
-        name: "Emma Watson",
-        role: "Actress & Activist",
-        imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1887&auto=format&fit=crop",
-        handle: "emma",
-        status: "Reading"
+        name: "Sreemukhi",
+        role: "Actor & Anchor",
+        imageUrl: "/assets/creators/sreemukhi card.jpg",
+        handle: "sreemukhi",
+        status: "Active"
     }
 ];
 
@@ -109,7 +69,7 @@ export default function CreatorsPage() {
                     {CREATORS.map((creator) => (
                         <Link
                             key={creator.id}
-                            href="/creators/creator-name-creator-id"
+                            href="/sreemukhi"
                             className="w-full max-w-[400px] flex justify-center"
                         >
                             <ProfileCard

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#products", label: "Products" },
   { href: "/#use-cases", label: "Use Cases" },
-  { href: "/know-more", label: "Know More" },
   { href: "/creators", label: "Creators" },
 ];
 
@@ -18,10 +17,6 @@ export default function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showScrollDivider, setShowScrollDivider] = useState(false);
-
-  const hasShownDividerRef = useRef(false);
-  const hideDividerTimerRef = useRef<number | null>(null);
 
   const handleLogoClick = () => {
     const heroSection = document.getElementById("hero");
@@ -34,30 +29,8 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrolled = window.scrollY > 20;
-      setIsScrolled(scrolled);
-
-      if (!scrolled) {
-        hasShownDividerRef.current = false;
-        setShowScrollDivider(false);
-        if (hideDividerTimerRef.current) {
-          window.clearTimeout(hideDividerTimerRef.current);
-          hideDividerTimerRef.current = null;
-        }
-        return;
-      }
-
-      if (!hasShownDividerRef.current) {
-        hasShownDividerRef.current = true;
-        setShowScrollDivider(true);
-        if (hideDividerTimerRef.current) {
-          window.clearTimeout(hideDividerTimerRef.current);
-        }
-        hideDividerTimerRef.current = window.setTimeout(() => {
-          setShowScrollDivider(false);
-          hideDividerTimerRef.current = null;
-        }, 700);
-      }
+      const currentScroll = window.scrollY || document.documentElement.scrollTop;
+      setIsScrolled(currentScroll > 10);
     };
 
     handleScroll();
@@ -65,25 +38,23 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      if (hideDividerTimerRef.current) {
-        window.clearTimeout(hideDividerTimerRef.current);
-        hideDividerTimerRef.current = null;
-      }
     };
   }, [pathname]);
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isScrolled || isMobileMenuOpen
-        ? `bg-black/55 backdrop-blur-xl py-4 ${showScrollDivider && !isMobileMenuOpen ? "border-b border-white/10" : "border-b border-transparent"}`
-        : "bg-transparent py-6"
+      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isMobileMenuOpen
+        ? "bg-transparent py-4 border-b border-transparent"
+        : isScrolled
+          ? "bg-black/55 backdrop-blur-xl py-4 border-b border-white/10"
+          : "bg-transparent py-6 border-b border-transparent"
         }`}
     >
-      <div className="container mx-auto px-6 md:px-12 lg:px-20 flex items-center justify-between">
+      <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-center justify-between lg:justify-center relative">
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50 cursor-pointer bg-none border-none p-0"
+          className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50 cursor-pointer bg-none border-none p-0 lg:absolute lg:left-12 xl:left-20"
         >
           <Image
             src="/assets/ninad-ai.png"
@@ -95,7 +66,7 @@ export default function Header() {
         </button>
 
         {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
@@ -108,7 +79,7 @@ export default function Header() {
         </nav>
 
         {/* Desktop CTA */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:block lg:absolute lg:right-12 xl:right-20">
           <Link
             href="/book-demo"
             className="px-6 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:scale-110"

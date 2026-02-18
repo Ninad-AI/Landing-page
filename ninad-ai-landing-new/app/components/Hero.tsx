@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center pt-32 pb-20">
+    <section id="hero" className="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center pt-24 md:pt-32 pb-16 md:pb-20">
       {/* ===== Background glows ===== */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         <div className="absolute h-[780px] w-[760px] left-[-260px] top-[-220px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
@@ -11,9 +11,9 @@ export default function Hero() {
       </div>
 
       {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[1700px] px-6 space-y-8 lg:space-y-12">
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[1700px] px-4 md:px-6 space-y-6 md:space-y-8 lg:space-y-12">
         {/* REAL-TIME */}
-        <h1 className="font-sans font-extrabold text-[clamp(40px,7vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
+        <h1 className="font-sans font-extrabold text-[clamp(32px,8vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
           REAL-TIME
         </h1>
 
@@ -24,13 +24,13 @@ export default function Hero() {
             className="
               font-sans
               font-extrabold
-              text-[clamp(80px,18vw,280px)]
+              text-[clamp(60px,18vw,280px)]
               leading-[0.85]
               tracking-tighter
               bg-gradient-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
-              pr-2
+              pr-1
             "
           >
             AI V
@@ -40,14 +40,14 @@ export default function Hero() {
           <div
             className="
               relative
-              w-[clamp(80px,14vw,280px)]
-              h-[clamp(80px,14vw,280px)]
+              w-[clamp(60px,18vw,280px)]
+              h-[clamp(60px,18vw,280px)]
               flex-shrink-0
               cursor-pointer
-              mx-0 md:mx-0
+              mx-[0.15em]
               group
+              z-20
             "
-            style={{ transform: 'translateX(-10px)' }}
           >
             {/* Ambient glow behind orb */}
             <div
@@ -64,7 +64,7 @@ export default function Hero() {
               src="/assets/hero-orb.png"
               alt="Voice Orb"
               fill
-              className="object-contain scale-125 z-10 transition-all duration-700 group-hover:brightness-150"
+              className="object-contain scale-110 z-10 transition-all duration-700 group-hover:brightness-150"
             />
           </div>
 
@@ -73,12 +73,13 @@ export default function Hero() {
             className="
               font-sans
               font-extrabold
-              text-[clamp(80px,18vw,280px)]
+              text-[clamp(60px,18vw,280px)]
               leading-[0.85]
               tracking-tighter
               bg-gradient-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
+              pl-1
             "
           >
             ICE
@@ -86,12 +87,12 @@ export default function Hero() {
         </div>
 
         {/* TAGLINE */}
-        <h2 className="font-sans font-extrabold text-[clamp(24px,4vw,44px)] text-white/90 uppercase leading-none text-center tracking-tight">
+        <h2 className="font-sans font-extrabold text-[clamp(20px,5vw,44px)] text-white/90 uppercase leading-none text-center tracking-tight">
           THAT FEELS HUMAN
         </h2>
 
         {/* SUBTEXT */}
-        <p className="font-roboto font-light text-base md:text-xl text-muted text-center leading-relaxed max-w-4xl tracking-wide px-4">
+        <p className="font-roboto font-light text-sm md:text-xl text-muted text-center leading-relaxed max-w-4xl tracking-wide px-2 md:px-4">
           Low-latency, expressive speech for apps, agents, and experiences ready to
           integrate in minutes.
         </p>

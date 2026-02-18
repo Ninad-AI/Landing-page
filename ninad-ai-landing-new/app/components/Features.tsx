@@ -83,7 +83,7 @@ export default function Features() {
         </div>
 
         {/* Features Grid Wrapper */}
-        <div 
+        <div
           ref={gridRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
@@ -117,18 +117,18 @@ export default function Features() {
 
           {features.map((feature, index) => {
             // Gradient peaking at the center intersection relative to their position
-            const borderGradient = 
+            const borderGradient =
               index === 0 ? "bg-gradient-to-br from-transparent via-primary/10 to-primary-light" :
-              index === 1 ? "bg-gradient-to-bl from-transparent via-primary/10 to-primary-light" :
-              index === 2 ? "bg-gradient-to-tr from-transparent via-primary/10 to-primary-light" :
-              "bg-gradient-to-tl from-transparent via-primary/10 to-primary-light";
+                index === 1 ? "bg-gradient-to-bl from-transparent via-primary/10 to-primary-light" :
+                  index === 2 ? "bg-gradient-to-tr from-transparent via-primary/10 to-primary-light" :
+                    "bg-gradient-to-tl from-transparent via-primary/10 to-primary-light";
 
             return (
               <div
                 key={index}
                 className={`relative p-[1px] rounded-[24px] z-10 ${borderGradient} flex`}
               >
-                <div className="w-full h-full px-8 py-12 md:px-16 md:py-20 flex items-center justify-center bg-black rounded-[23px]">
+                <div className="w-full h-full px-6 py-8 md:px-16 md:py-20 flex items-center justify-center bg-black rounded-[23px]">
                   <div className="w-full space-y-6 text-center flex flex-col items-center max-w-md">
                     <h3
                       className="

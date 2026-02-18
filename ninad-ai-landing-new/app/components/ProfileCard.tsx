@@ -320,7 +320,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     return (
         <div
             ref={wrapRef}
-            className={`relative touch-none ${className}`.trim()}
+            className={`relative touch-pan-y ${className}`.trim()}
             style={{
                 perspective: '1000px',
                 transformStyle: 'preserve-3d',

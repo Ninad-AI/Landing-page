@@ -51,7 +51,7 @@ export default function Products() {
   useEffect(() => {
     const updatePositions = () => {
       setIsDesktop(window.innerWidth >= 1024);
-      
+
       // Calculate line position based on active product
       if (productRefs.current[activeProduct] && containerRef.current) {
         const button = productRefs.current[activeProduct];
@@ -82,7 +82,7 @@ export default function Products() {
   const handleProductHover = (index: number) => {
     if (index !== activeProduct && !isTransitioning) {
       setIsTransitioning(true);
-      
+
       // Wait for fade out before switching content
       setTimeout(() => {
         setActiveProduct(index);
@@ -95,14 +95,14 @@ export default function Products() {
   };
 
   return (
-    <section id="products" className="relative py-20 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
+    <section id="products" className="relative py-16 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
       {/* Background Elements */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
 
       {/* Content */}
-      <div className="relative container mx-auto px-6 max-w-7xl">
+      <div className="relative container mx-auto px-6 max-w-[1600px]">
         {/* Section Title */}
-        <h2 
+        <h2
           className="
             font-sans font-black 
             text-4xl md:text-6xl lg:text-[110px] 
@@ -129,7 +129,7 @@ export default function Products() {
               <div key={index} className="relative">
                 {/* Divider Line Above (skip first) */}
                 {index !== 0 && <div className="w-full h-[1px] bg-gradient-to-r from-white/20 to-primary/20" />}
-                
+
                 {/* Product Item */}
                 <button
                   ref={(el) => { productRefs.current[index] = el; }}
@@ -149,64 +149,64 @@ export default function Products() {
                 </button>
               </div>
             ))}
-            
+
             {/* Bottom divider */}
             <div className="w-full h-[1px] bg-gradient-to-r from-white/20 to-primary/20" />
           </div>
 
           {/* Animated Line (Desktop only) */}
-          <div 
+          <div
             className="hidden lg:block absolute left-0 w-full h-[2px] bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)] transition-all duration-400 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-none z-10"
-            style={{ 
+            style={{
               transform: `translateY(${linePosition - 1}px)`,
               top: 0
             }}
           />
 
           {/* Product Description - Right Side */}
-          <div 
+          <div
             className="flex-1 lg:pl-20 relative"
-            style={{ 
+            style={{
               minHeight: '400px',
               height: listHeight > 0 && isDesktop ? `${listHeight}px` : 'auto'
             }}
           >
-             <div 
-                className={`
+            <div
+              className={`
                     transition-all duration-300 ease-out h-full
                     ${isTransitioning ? 'opacity-0 translate-y-2 blur-sm' : 'opacity-100 translate-y-0 blur-0'}
                 `}
-             >
-                {/* Above Line Container */}
-                {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
-                    <div 
-                        className="lg:absolute lg:left-0 lg:right-0 lg:pb-6 mb-4 lg:mb-0"
-                        style={{ 
-                            bottom: `calc(100% - ${linePosition}px)`
-                        }}
-                    >
-                        <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
-                            {products[activeProduct].description}
-                        </p>
-                    </div>
-                )}
+            >
+              {/* Above Line Container */}
+              {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
+                <div
+                  className="lg:absolute lg:left-0 lg:right-0 lg:pb-6 mb-4 lg:mb-0"
+                  style={{
+                    bottom: `calc(100% - ${linePosition}px)`
+                  }}
+                >
+                  <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                    {products[activeProduct].description}
+                  </p>
+                </div>
+              )}
 
-                {/* Below Line Container */}
-                {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
-                    <div 
-                        className="lg:absolute lg:left-0 lg:right-0 lg:pt-6"
-                        style={{ 
-                            top: `${linePosition}px`
-                        }}
-                    >
-                        <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
-                            {products[activeProduct].descriptionPosition === 'split' 
-                                ? products[activeProduct].descriptionPart2 
-                                : products[activeProduct].description}
-                        </p>
-                    </div>
-                )}
-             </div>
+              {/* Below Line Container */}
+              {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
+                <div
+                  className="lg:absolute lg:left-0 lg:right-0 lg:pt-6"
+                  style={{
+                    top: `${linePosition}px`
+                  }}
+                >
+                  <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                    {products[activeProduct].descriptionPosition === 'split'
+                      ? products[activeProduct].descriptionPart2
+                      : products[activeProduct].description}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

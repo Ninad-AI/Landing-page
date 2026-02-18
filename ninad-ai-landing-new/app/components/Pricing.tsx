@@ -13,10 +13,10 @@ function CheckIcon({ highlighted = false }: { highlighted?: boolean }) {
       xmlns="http://www.w3.org/2000/svg"
       className="flex-shrink-0"
     >
-      <circle 
-        cx="10" 
-        cy="10" 
-        r="9" 
+      <circle
+        cx="10"
+        cy="10"
+        r="9"
         className={highlighted ? "fill-white" : "fill-primary"}
       />
       <path
@@ -89,10 +89,9 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
   return (
     <div
       className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 hover:-translate-y-2 transform-gpu origin-bottom lg:min-h-[540px] ${sizeClass}
-        ${
-          isHighlighted
-            ? "bg-primary shadow-[0_20px_40px_-10px_rgba(97,37,216,0.4)] border border-primary"
-            : "bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 hover:bg-white/10"
+        ${isHighlighted
+          ? "bg-primary shadow-[0_20px_40px_-10px_rgba(97,37,216,0.4)] border border-primary"
+          : "bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 hover:bg-white/10"
         }
       `}
     >
@@ -111,9 +110,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
           {plan.price}
         </span>
         <span
-          className={`font-sans text-sm ${
-            isHighlighted ? "text-white/80" : "text-muted"
-          }`}
+          className={`font-sans text-sm ${isHighlighted ? "text-white/80" : "text-muted"
+            }`}
         >
           {plan.period}
         </span>
@@ -121,9 +119,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
       {/* Plan Name */}
       <h3
-        className={`font-sans font-bold text-xl mb-6 ${
-          isHighlighted ? "text-white" : "text-primary"
-        }`}
+        className={`font-sans font-bold text-xl mb-6 ${isHighlighted ? "text-white" : "text-primary"
+          }`}
       >
         {plan.name}
       </h3>
@@ -136,9 +133,8 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
               <CheckIcon highlighted={isHighlighted} />
             </div>
             <span
-              className={`font-roboto text-sm leading-relaxed ${
-                isHighlighted ? "text-white/95" : "text-gray-300"
-              }`}
+              className={`font-roboto text-sm leading-relaxed ${isHighlighted ? "text-white/95" : "text-gray-300"
+                }`}
             >
               {feature.text}
             </span>
@@ -149,10 +145,9 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       {/* CTA Button */}
       <button
         className={`w-full py-3.5 rounded-xl font-sans font-bold text-sm transition-colors duration-300 shadow-lg
-          ${
-            isHighlighted
-              ? "bg-white text-primary hover:bg-gray-100"
-              : "bg-primary text-white hover:bg-primary-dark"
+          ${isHighlighted
+            ? "bg-white text-primary hover:bg-gray-100"
+            : "bg-primary text-white hover:bg-primary-dark"
           }
         `}
       >
@@ -188,12 +183,12 @@ export default function Pricing() {
   });
 
   return (
-    <section id="pricing" className="relative py-24 md:py-32 bg-black flex items-center justify-center overflow-hidden">
+    <section id="pricing" className="relative py-16 md:py-32 bg-black flex items-center justify-center overflow-hidden">
       {/* Background glow */}
       <div className="absolute w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
       {/* Content */}
-      <div className="relative container mx-auto px-6 max-w-7xl z-10 w-full">
+      <div className="relative container mx-auto px-6 max-w-[1600px] z-10 w-full">
         {/* Main wrapper */}
         <div className="w-full max-w-6xl mx-auto">
           {/* Header: title left, toggle right */}
@@ -207,30 +202,26 @@ export default function Pricing() {
               <div className="relative inline-grid grid-cols-2 items-center p-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
                 <div
                   aria-hidden
-                  className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg transition-transform duration-300 ease-out will-change-transform ${
-                    isYearly ? "translate-x-full" : "translate-x-0"
-                  }`}
+                  className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-primary shadow-lg transition-transform duration-300 ease-out will-change-transform ${isYearly ? "translate-x-full" : "translate-x-0"
+                    }`}
                 />
 
                 <button
                   onClick={() => setIsYearly(false)}
-                  className={`relative z-10 px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-colors duration-300 ${
-                    !isYearly ? "text-white" : "text-white/60 hover:text-white"
-                  }`}
+                  className={`relative z-10 px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-colors duration-300 ${!isYearly ? "text-white" : "text-white/60 hover:text-white"
+                    }`}
                 >
                   MONTHLY
                 </button>
                 <button
                   onClick={() => setIsYearly(true)}
-                  className={`relative z-10 px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-colors duration-300 flex items-center justify-center gap-2 ${
-                    isYearly ? "text-white" : "text-white/60 hover:text-white"
-                  }`}
+                  className={`relative z-10 px-6 py-2 rounded-full text-xs md:text-sm font-bold transition-colors duration-300 flex items-center justify-center gap-2 ${isYearly ? "text-white" : "text-white/60 hover:text-white"
+                    }`}
                 >
                   ANNUAL
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded transition-colors duration-300 ${
-                      isYearly ? "bg-white/20" : "bg-primary/20 text-primary"
-                    }`}
+                    className={`text-[10px] px-1.5 py-0.5 rounded transition-colors duration-300 ${isYearly ? "bg-white/20" : "bg-primary/20 text-primary"
+                      }`}
                   >
                     -20%
                   </span>
@@ -250,7 +241,7 @@ export default function Pricing() {
               className="pointer-events-none absolute inset-0 rounded-[32px] ring-1 ring-white/10"
             />
 
-            <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-4 w-full items-end">
+            <div className="relative grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-4 w-full items-end">
               <PricingCard plan={displayedPlans[0]} />
               <PricingCard plan={displayedPlans[1]} />
               <PricingCard plan={displayedPlans[2]} />
