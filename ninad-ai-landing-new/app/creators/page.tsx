@@ -14,14 +14,14 @@ interface Creator {
 }
 
 const CREATORS: Creator[] = [
-    {
-        id: 1,
-        name: "Sreemukhi",
-        role: "Actor & Anchor",
-        imageUrl: "/assets/creators/sreemukhi card.jpg",
-        handle: "sreemukhi",
-        status: "Active"
-    }
+    // {
+    //     id: 1,
+    //     name: "Sreemukhi",
+    //     role: "Actor & Anchor",
+    //     imageUrl: "/assets/creators/sreemukhi card.jpg",
+    //     handle: "sreemukhi",
+    //     status: "Active"
+    // }
 ];
 
 export default function CreatorsPage() {

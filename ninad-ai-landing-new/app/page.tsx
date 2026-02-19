@@ -16,7 +16,7 @@ export default function Home() {
       <Languages />
       <UseCases />
       <Waitlist />
-
+      
       <Footer />
     </main>
   );

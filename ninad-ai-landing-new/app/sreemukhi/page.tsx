@@ -12,7 +12,10 @@ function formatTime(totalSeconds: number): string {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
+import { notFound } from "next/navigation";
+
 export default function SreemukhiVoiceChatPage() {
+    return notFound();
     const router = useRouter();
 
     const [flowState, setFlowState] = useState<FlowState>("idle");
