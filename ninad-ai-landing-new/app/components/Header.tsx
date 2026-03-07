@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#products", label: "Products" },
   { href: "/#use-cases", label: "Use Cases" },
-  { href: "/creators", label: "Creators" },
+  // { href: "/creators", label: "Creators" },
 ];
 
 export default function Header() {
@@ -44,10 +44,10 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isMobileMenuOpen
-        ? "bg-transparent py-4 border-b border-transparent"
+        ? "bg-transparent py-6 border-b border-transparent"
         : isScrolled
-          ? "bg-black/55 backdrop-blur-xl py-4 border-b border-white/10"
-          : "bg-transparent py-6 border-b border-transparent"
+          ? "bg-black/55 backdrop-blur-xl py-6 border-b border-white/10"
+          : "bg-transparent py-8 border-b border-transparent"
         }`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-center justify-between lg:justify-center relative">
