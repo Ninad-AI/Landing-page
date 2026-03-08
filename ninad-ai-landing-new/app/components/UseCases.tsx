@@ -158,6 +158,6 @@ export default function UseCases() {
 
         </div>
       </div>
-    </section>
+    </section >
   );
 }
