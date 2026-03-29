@@ -17,10 +17,10 @@ interface RecentBooking {
 
 
 const MOCK_BOOKINGS: RecentBooking[] = [
-  { id: '1', userName: 'Arjun K.', creatorName: 'Sreemukhi', duration: 15, status: 'completed', time: '2 min ago' },
-  { id: '2', userName: 'Priya M.', creatorName: 'Sreemukhi', duration: 30, status: 'active', time: '8 min ago' },
-  { id: '3', userName: 'Rahul S.', creatorName: 'Sreemukhi', duration: 20, status: 'completed', time: '15 min ago' },
-  { id: '4', userName: 'Ananya D.', creatorName: 'Sreemukhi', duration: 60, status: 'completed', time: '32 min ago' },
+  { id: '1', userName: 'Arjun K.', creatorName: 'Pawan Kumar', duration: 15, status: 'completed', time: '2 min ago' },
+  { id: '2', userName: 'Priya M.', creatorName: 'Pawan Kumar', duration: 30, status: 'active', time: '8 min ago' },
+  { id: '3', userName: 'Rahul S.', creatorName: 'Pawan Kumar', duration: 20, status: 'completed', time: '15 min ago' },
+  { id: '4', userName: 'Ananya D.', creatorName: 'Pawan Kumar', duration: 60, status: 'completed', time: '32 min ago' },
 ];
 
 const STATS = [

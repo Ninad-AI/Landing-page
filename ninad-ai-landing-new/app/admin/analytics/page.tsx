@@ -47,7 +47,7 @@ const BOOKING_DAILY = [
 ];
 
 const TOP_CREATORS = [
-  { name: 'Sreemukhi', bookings: 847, revenue: 254100 },
+  { name: 'Pawan Kumar', bookings: 847, revenue: 254100 },
   { name: 'Creator B', bookings: 412, revenue: 123600 },
   { name: 'Creator C', bookings: 298, revenue: 89400 },
 ];

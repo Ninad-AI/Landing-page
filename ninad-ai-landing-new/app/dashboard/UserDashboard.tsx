@@ -48,9 +48,9 @@ export default function UserDashboard() {
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center text-xs font-bold text-white">S</div>
+              <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center text-xs font-bold text-white">P</div>
               <div>
-                <div className="text-sm font-semibold text-white">Sreemukhi</div>
+                <div className="text-sm font-semibold text-white">Pawan Kumar</div>
                 <div className="text-xs text-white/30">15 min session</div>
               </div>
             </div>
