@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import Header from "./components/Header";
 import Providers from "./components/Providers";
@@ -24,6 +25,19 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=IBM+Plex+Mono:wght@300;400&family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;700&family=Caveat:wght@700&display=swap"
           rel="stylesheet"
         />
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-4QKDPLWJ8V"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-4QKDPLWJ8V');
+          `}
+        </Script>
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
