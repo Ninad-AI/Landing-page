@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/Header";
+import Providers from "./components/Providers";
 
 export const metadata: Metadata = {
   title: "Ninad AI - Real-Time AI Voice That Feels Human",
@@ -25,8 +26,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        <Header />
-        {children}
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );
