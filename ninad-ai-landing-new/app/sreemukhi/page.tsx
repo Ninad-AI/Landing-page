@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-type FlowState = "idle" | "auth" | "payment" | "active";
+type FlowState = "idle" | "payment" | "active";
 
 function formatTime(totalSeconds: number): string {
     const m = Math.floor(totalSeconds / 60);
@@ -84,7 +84,7 @@ export default function SreemukhiVoiceChatPage() {
         return () => clearInterval(interval);
     }, [flowState]);
 
-    const handleStartTalking = () => setFlowState("auth");
+    const handleStartTalking = () => setFlowState("payment");
 
     const handleSelectTime = (minutes: number) => {
         setSelectedMinutes(minutes);
@@ -252,7 +252,7 @@ export default function SreemukhiVoiceChatPage() {
             </div>
 
             {/* ===== ORGANIC MODAL ===== */}
-            {(flowState === "auth" || flowState === "payment") && (
+            {flowState === "payment" && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-black/60 backdrop-blur-xl transition-all duration-500"
@@ -270,20 +270,11 @@ export default function SreemukhiVoiceChatPage() {
 
                             <div className="relative z-10">
                                 <h3 className="text-3xl font-black mb-2 text-white">
-                                    {flowState === "auth" ? "Identification." : "Duration."}
+                                    Duration.
                                 </h3>
                                 <p className="text-white/50 mb-8">
-                                    {flowState === "auth" ? "Choose how you would like to proceed." : "Select your preferred session length."}
+                                    Select your preferred session length.
                                 </p>
-
-                                {flowState === "auth" && (
-                                    <button
-                                        onClick={() => setFlowState("payment")}
-                                        className="w-full py-5 bg-white hover:bg-white/90 text-black font-bold text-lg rounded-2xl transition-all hover:scale-[1.02] shadow-xl"
-                                    >
-                                        Continue as Guest
-                                    </button>
-                                )}
 
                                 {flowState === "payment" && (
                                     <div className="space-y-3">
