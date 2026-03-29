@@ -1,0 +1,137 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import ProtectedRoute from '../../components/ProtectedRoute';
+
+
+
+interface RecentBooking {
+  id: string;
+  userName: string;
+  creatorName: string;
+  duration: number;
+  status: string;
+  time: string;
+}
+
+
+
+const MOCK_BOOKINGS: RecentBooking[] = [
+  { id: '1', userName: 'Arjun K.', creatorName: 'Sreemukhi', duration: 15, status: 'completed', time: '2 min ago' },
+  { id: '2', userName: 'Priya M.', creatorName: 'Sreemukhi', duration: 30, status: 'active', time: '8 min ago' },
+  { id: '3', userName: 'Rahul S.', creatorName: 'Sreemukhi', duration: 20, status: 'completed', time: '15 min ago' },
+  { id: '4', userName: 'Ananya D.', creatorName: 'Sreemukhi', duration: 60, status: 'completed', time: '32 min ago' },
+];
+
+const STATS = [
+  { label: 'Total Sessions', value: '2,847', change: '+12%', icon: '🎙️' },
+  { label: 'Active Users', value: '891', change: '+8%', icon: '👤' },
+  { label: 'Revenue (₹)', value: '4,82,500', change: '+23%', icon: '💰' },
+  { label: 'Avg Duration', value: '18m', change: '+4%', icon: '⏱️' },
+];
+
+function AdminDashboardContent() {
+
+  return (
+    <main className="relative min-h-screen overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 pointer-events-none opacity-25">
+        <div className="absolute h-[700px] w-[700px] left-[-200px] top-[50px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
+        <div className="absolute h-[500px] w-[500px] right-[-150px] top-[300px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 max-w-[1400px] pt-32 md:pt-40 pb-24">
+        {/* Page Header */}
+        <div className="mb-10 animate-fade-in-up">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80] animate-pulse" />
+            <span className="text-xs font-bold text-green-400/80 uppercase tracking-wider">Live</span>
+          </div>
+          <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="font-sans text-base text-white/40">
+            Real-time system overview and monitoring
+          </p>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 animate-fade-in-up delay-100">
+          {STATS.map((stat) => (
+            <div
+              key={stat.label}
+              className="glass border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all duration-300"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-2xl">{stat.icon}</span>
+                <span className="text-xs font-bold text-green-400/80 bg-green-500/10 px-2 py-0.5 rounded-full">
+                  {stat.change}
+                </span>
+              </div>
+              <div className="font-sans font-extrabold text-2xl text-white mb-1 tabular-nums">
+                {stat.value}
+              </div>
+              <div className="text-xs text-white/40 font-medium uppercase tracking-wider">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 max-w-4xl mx-auto">
+
+          {/* Recent Bookings */}
+          <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-300">
+            <h3 className="font-sans font-bold text-lg text-white mb-6 flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Recent Bookings
+            </h3>
+
+            <div className="space-y-3">
+              {MOCK_BOOKINGS.map((booking) => (
+                <div
+                  key={booking.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/5 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary-light">
+                      {booking.userName.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{booking.userName}</div>
+                      <div className="text-xs text-white/30">
+                        {booking.creatorName} • {booking.duration}m
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                        booking.status === 'active'
+                          ? 'text-green-400 bg-green-500/10'
+                          : 'text-white/30 bg-white/5'
+                      }`}
+                    >
+                      {booking.status}
+                    </span>
+                    <div className="text-[10px] text-white/20 mt-1">{booking.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
+  );
+}
