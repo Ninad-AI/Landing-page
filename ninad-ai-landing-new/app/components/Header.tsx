@@ -5,13 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "../lib/stores";
-import { roleBadgeLabel, roleBadgeClasses } from "../lib/auth";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#products", label: "Products" },
-  { href: "/#use-cases", label: "Use Cases" },
-  { href: "/#safety", label: "Safety" },
   { href: "/creators", label: "Creators" },
 ];
 
@@ -138,7 +135,7 @@ export default function Header() {
 
         {/* Desktop Nav */}
         {!isMinimalHeader && (
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
@@ -164,35 +161,9 @@ export default function Header() {
             </button>
           </div>
         ) : (
-          <div className="hidden lg:flex items-center gap-3 lg:absolute lg:right-12 xl:right-20">
+          <div className="hidden lg:flex items-center gap-2 lg:absolute lg:right-12 xl:right-20">
             {isHydrated && isAuthenticated && user ? (
               <>
-                {/* Role Badge — admin only */}
-                {user.role === 'admin' && (
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${roleBadgeClasses(user.role)}`}
-                  >
-                    {roleBadgeLabel(user.role)}
-                  </span>
-                )}
-
-                {/* Avatar */}
-                <div className="w-8 h-8 rounded-full overflow-hidden border border-white/20 flex-shrink-0">
-                  {user.avatar_url ? (
-                    <Image
-                      src={user.avatar_url}
-                      alt={user.name}
-                      width={32}
-                      height={32}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-primary/40 flex items-center justify-center text-white text-xs font-bold">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-
                 {/* Dashboard Link */}
                 <Link
                   href="/dashboard"
@@ -204,22 +175,33 @@ export default function Header() {
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-full bg-transparent border border-white/15 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white hover:border-white/40 cursor-pointer"
+                  aria-label="Logout"
+                  className="w-9 h-9 rounded-full bg-transparent border border-white/15 text-white/70 transition-all duration-300 hover:text-white hover:border-white/40 flex items-center justify-center cursor-pointer"
                 >
-                  Logout
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H9" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 20H6a2 2 0 01-2-2V6a2 2 0 012-2h7" />
+                  </svg>
                 </button>
               </>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-sans font-semibold text-sm transition-all duration-300 hover:bg-white/20 hover:border-white/40"
+                  className="px-3 py-2 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/book-demo"
-                  className="px-6 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:scale-110"
+                  className="px-5 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]"
                 >
                   Book Demo
                 </Link>
@@ -251,18 +233,18 @@ export default function Header() {
 
         {/* Mobile Menu Content */}
         <div
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-32 gap-8 transition-transform duration-500 ease-in-out overflow-y-auto min-h-screen ${isMobileMenuOpen
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-28 gap-6 transition-transform duration-500 ease-in-out overflow-y-auto min-h-screen ${isMobileMenuOpen
             ? "translate-x-0"
             : "translate-x-full"
             }`}
         >
-          <nav className="flex flex-col items-center gap-8">
+          <nav className="flex flex-col items-center gap-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="font-sans text-2xl font-bold text-white hover:text-primary transition-colors"
+                className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
               >
                 {link.label}
               </Link>
@@ -271,15 +253,6 @@ export default function Header() {
 
           {isHydrated && isAuthenticated && user ? (
             <div className="flex flex-col items-center gap-4">
-              {/* Role Badge — admin only */}
-              {user.role === 'admin' && (
-                <span
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${roleBadgeClasses(user.role)}`}
-                >
-                  {roleBadgeLabel(user.role)}
-                </span>
-              )}
-
               <Link
                 href="/dashboard"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -295,20 +268,20 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4">
-              <Link
-                href="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-8 py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-sans font-bold text-lg shadow-lg hover:bg-white/20 transition-colors"
-              >
-                Sign In
-              </Link>
+            <div className="flex flex-col items-center gap-3">
               <Link
                 href="/book-demo"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
               >
                 Book Demo
+              </Link>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-sm font-sans font-medium text-white/70 hover:text-white transition-colors"
+              >
+                Sign In
               </Link>
             </div>
           )}

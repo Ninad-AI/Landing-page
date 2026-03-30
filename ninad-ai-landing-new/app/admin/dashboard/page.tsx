@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
 
 
@@ -14,6 +14,13 @@ interface RecentBooking {
   time: string;
 }
 
+interface StatCard {
+  label: string;
+  value: string;
+  change: string;
+  icon: React.ReactNode;
+}
+
 
 
 const MOCK_BOOKINGS: RecentBooking[] = [
@@ -23,24 +30,67 @@ const MOCK_BOOKINGS: RecentBooking[] = [
   { id: '4', userName: 'Ananya D.', creatorName: 'Pawan Kumar', duration: 60, status: 'completed', time: '32 min ago' },
 ];
 
-const STATS = [
-  { label: 'Total Sessions', value: '2,847', change: '+12%', icon: '🎙️' },
-  { label: 'Active Users', value: '891', change: '+8%', icon: '👤' },
-  { label: 'Revenue (₹)', value: '4,82,500', change: '+23%', icon: '💰' },
-  { label: 'Avg Duration', value: '18m', change: '+4%', icon: '⏱️' },
+const STATS: StatCard[] = [
+  {
+    label: 'Total Sessions',
+    value: '2,847',
+    change: '+12%',
+    icon: (
+      <svg className="w-5 h-5 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a6 6 0 006-6V7a6 6 0 10-12 0v5a6 6 0 006 6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12a7 7 0 0014 0M12 19v3m-3 0h6" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Active Users',
+    value: '891',
+    change: '+8%',
+    icon: (
+      <svg className="w-5 h-5 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19v-1a4 4 0 00-4-4H6a4 4 0 00-4 4v1" />
+        <circle cx="8.5" cy="7" r="3" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M22 19v-1a4 4 0 00-3-3.87" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 4.13a3 3 0 010 5.74" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Revenue (₹)',
+    value: '4,82,500',
+    change: '+23%',
+    icon: (
+      <svg className="w-5 h-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h9a3 3 0 010 6H9a3 3 0 000 6h8" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 4v16" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Avg Duration',
+    value: '18m',
+    change: '+4%',
+    icon: (
+      <svg className="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <circle cx="12" cy="13" r="8" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 13V9m0 4l3 2" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 2h6" />
+      </svg>
+    ),
+  },
 ];
 
 function AdminDashboardContent() {
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none opacity-25">
-        <div className="absolute h-[700px] w-[700px] left-[-200px] top-[50px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
-        <div className="absolute h-[500px] w-[500px] right-[-150px] top-[300px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
+        <div className="absolute left-[-24vw] top-[4vw] h-[clamp(260px,52vw,700px)] w-[clamp(260px,52vw,700px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
+        <div className="absolute right-[-20vw] top-[22vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 max-w-[1400px] pt-32 md:pt-40 pb-24">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Page Header */}
         <div className="mb-10 animate-fade-in-up">
           <div className="flex items-center gap-3 mb-3">
@@ -63,7 +113,9 @@ function AdminDashboardContent() {
               className="glass border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all duration-300"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-2xl">{stat.icon}</span>
+                <span className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                  {stat.icon}
+                </span>
                 <span className="text-xs font-bold text-green-400/80 bg-green-500/10 px-2 py-0.5 rounded-full">
                   {stat.change}
                 </span>
