@@ -328,8 +328,9 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 '--rotate-y': '0deg',
                 '--pointer-x': '50%',
                 '--pointer-y': '50%',
-                width: '400px',
-                height: '600px',
+                width: 'min(100%, 400px)',
+                maxHeight: '600px',
+                aspectRatio: '2 / 3',
             } as React.CSSProperties}
         >
             {/* Behind Glow (Soft Shadow) */}

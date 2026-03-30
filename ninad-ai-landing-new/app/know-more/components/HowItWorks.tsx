@@ -4,25 +4,25 @@ import React from "react";
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative py-32 md:py-48 px-6 bg-[#05030b] overflow-hidden border-t border-white/5">
+    <section id="how-it-works" className="relative py-16 sm:py-24 md:py-32 lg:py-48 px-4 sm:px-6 md:px-10 bg-[#05030b] overflow-hidden border-t border-white/5">
       <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="flex flex-col lg:flex-row gap-20 items-start">
+        <div className="flex flex-col lg:flex-row gap-10 sm:gap-14 md:gap-16 lg:gap-20 items-start">
           {/* Left Column: Fixed Header */}
-          <div className="lg:w-1/3 lg:sticky lg:top-32 space-y-8 group">
+          <div className="lg:w-1/3 lg:sticky lg:top-32 space-y-5 sm:space-y-6 md:space-y-8 group">
             <div className="inline-block px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-bold tracking-[0.3em] uppercase transition-all duration-500 group-hover:bg-primary/20">
               How It Works
             </div>
-            <h2 className="font-sans font-bold text-5xl md:text-7xl text-white leading-[0.9] tracking-tighter transition-all duration-500 group-hover:translate-x-2">
+            <h2 className="font-sans font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white leading-[0.9] tracking-tighter transition-all duration-500 group-hover:translate-x-2">
               A Path to <br />
               <span className="italic text-primary-light">Ascension.</span>
             </h2>
-            <p className="font-roboto text-xl text-white/40 leading-relaxed max-w-sm">
+            <p className="font-roboto text-base sm:text-lg md:text-xl text-white/40 leading-relaxed max-w-sm">
               Transforming your digital legacy into a living, breathing persona takes four deliberate steps.
             </p>
           </div>
 
           {/* Right Column: Scrolling Steps */}
-          <div className="lg:w-2/3 space-y-32">
+          <div className="lg:w-2/3 space-y-16 sm:space-y-20 md:space-y-24 lg:space-y-32">
             {[
               {
                 num: "01",
@@ -45,16 +45,16 @@ export default function HowItWorks() {
                 desc: "Scale your impact. While you focus on creating, your digital self generates passive revenue and builds deep community loyalty with every word."
               }
             ].map((step, i) => (
-              <div key={i} className="group flex flex-col md:flex-row gap-8 md:gap-16 items-start transition-all duration-700 hover:opacity-100">
-                <div className="text-white/10 text-8xl md:text-9xl font-bold font-sans tracking-tighter transition-all duration-700 group-hover:text-primary group-hover:scale-110 leading-none">
+              <div key={i} className="group flex flex-col md:flex-row gap-5 sm:gap-7 md:gap-12 lg:gap-16 items-start transition-all duration-700 hover:opacity-100">
+                <div className="text-white/10 text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold font-sans tracking-tighter transition-all duration-700 group-hover:text-primary group-hover:scale-110 leading-none">
                   {step.num}
                 </div>
-                <div className="space-y-6 pt-2">
-                  <h3 className="text-white font-bold text-3xl md:text-5xl tracking-tight transition-all duration-500 group-hover:translate-x-4">
+                <div className="space-y-4 sm:space-y-5 md:space-y-6 pt-2">
+                  <h3 className="text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight transition-all duration-500 group-hover:translate-x-4">
                     {step.title}
                   </h3>
                   <div className="w-12 h-1 bg-primary/20 group-hover:w-full transition-all duration-700" />
-                  <p className="text-white/50 text-xl leading-relaxed max-w-xl transition-colors duration-500 group-hover:text-white/80">
+                  <p className="text-white/50 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl transition-colors duration-500 group-hover:text-white/80">
                     {step.desc}
                   </p>
                 </div>

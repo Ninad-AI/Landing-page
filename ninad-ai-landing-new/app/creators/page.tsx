@@ -45,23 +45,23 @@ export default function CreatorsPage() {
     <main className="relative min-h-screen overflow-hidden bg-black selection:bg-primary/30">
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <div
-          className="absolute h-[700px] w-[700px] left-[-200px] top-[-100px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.6)_0%,transparent_70%)] animate-glow-drift"
+          className="absolute left-[-26vw] top-[-12vw] h-[clamp(260px,56vw,700px)] w-[clamp(260px,56vw,700px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.6)_0%,transparent_70%)] animate-glow-drift"
         />
         <div
-          className="absolute h-[500px] w-[500px] right-[-150px] top-[200px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.45)_0%,transparent_70%)] animate-glow-drift-reverse"
+          className="absolute right-[-20vw] top-[16vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.45)_0%,transparent_70%)] animate-glow-drift-reverse"
         />
-        <div className="absolute h-[600px] w-[800px] left-[30%] bottom-[-200px] rounded-full blur-[160px] bg-[radial-gradient(circle,rgba(147,51,234,0.4)_0%,transparent_70%)]" />
+        <div className="absolute left-[20%] bottom-[-18vw] h-[clamp(260px,46vw,600px)] w-[clamp(360px,62vw,800px)] rounded-full blur-[160px] bg-[radial-gradient(circle,rgba(147,51,234,0.4)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 max-w-[1600px] pt-36 md:pt-44 pb-24">
+      <div className="relative z-10 container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16 pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         <div className={`text-center mb-8 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
-          <h1 className="font-sans font-black text-4xl md:text-6xl lg:text-[110px] leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 pb-4">
+          <h1 className="font-sans font-black text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 pb-3 sm:pb-4">
             CREATORS
           </h1>
         </div>
 
         <div
-          className={`font-sans font-medium text-lg md:text-xl text-center text-muted tracking-tight mb-20 md:mb-28 max-w-3xl mx-auto ${
+          className={`font-sans font-medium text-base sm:text-lg md:text-xl text-center text-muted tracking-tight mb-12 sm:mb-16 md:mb-24 max-w-3xl mx-auto px-1 ${
             isVisible ? "animate-fade-in-up delay-100" : "opacity-0"
           }`}
         >
@@ -70,7 +70,7 @@ export default function CreatorsPage() {
         </div>
 
         <div
-          className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10 justify-items-center ${
+          className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 md:gap-10 justify-items-center ${
             isVisible ? "animate-fade-in-up delay-200" : "opacity-0"
           }`}
         >

@@ -21,14 +21,14 @@ function DashboardContent() {
   if (!user) return null;
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute h-[600px] w-[600px] left-[-200px] top-[100px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
-        <div className="absolute h-[500px] w-[500px] right-[-150px] bottom-[100px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
+        <div className="absolute left-[-24vw] top-[8vw] h-[clamp(240px,48vw,600px)] w-[clamp(240px,48vw,600px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
+        <div className="absolute right-[-20vw] bottom-[6vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 max-w-[1400px] pt-32 md:pt-40 pb-24">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Header */}
         <div className="mb-12 animate-fade-in-up">
           <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-3">

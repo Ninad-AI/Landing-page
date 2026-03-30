@@ -5,14 +5,14 @@ import Image from "next/image";
 
 export default function WhatIsAIPersona() {
   return (
-    <section className="relative py-32 md:py-48 px-6 bg-[#05030b] overflow-hidden border-y border-white/5">
+    <section className="relative py-16 sm:py-24 md:py-32 lg:py-48 px-4 sm:px-6 md:px-10 bg-[#05030b] overflow-hidden border-y border-white/5">
       {/* Background Text */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none opacity-[0.02] whitespace-nowrap">
         <p className="text-[30vw] font-bold leading-none uppercase tracking-tighter">AUTHENTIC</p>
       </div>
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
           {/* Left Column: Human Head Image */}
           <div className="lg:col-span-5 relative">
             <div className="relative aspect-square rounded-3xl overflow-hidden group border border-white/10 bg-[#0a0a0f] shadow-2xl">
@@ -34,18 +34,18 @@ export default function WhatIsAIPersona() {
           </div>
 
           {/* Right Column: High-End Typography */}
-          <div className="lg:col-span-7 space-y-12">
+          <div className="lg:col-span-7 space-y-8 sm:space-y-10 md:space-y-12">
             <div>
-              <h2 className="font-sans font-bold text-5xl md:text-7xl text-white mb-6 tracking-tight">
+              <h2 className="font-sans font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white mb-4 sm:mb-6 tracking-tight">
                 Beyond an Assistant.<br />
                 <span className="text-primary-light">A Mirror of You.</span>
               </h2>
-              <p className="font-roboto text-xl md:text-2xl text-white/50 leading-relaxed max-w-2xl">
+              <p className="font-roboto text-base sm:text-lg md:text-2xl text-white/50 leading-relaxed max-w-2xl">
                 An AI Persona isn&apos;t just a chatbot. It&apos;s a digital reflection built on your actual voice, knowledge, and intuition.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 md:gap-8">
               {[
                 { title: "Voice DNA", text: "Captures the subtle nuances of how you speak and express ideas." },
                 { title: "Knowledge Vault", text: "Trained on your specific expertise to provide authentic value." },
@@ -54,12 +54,12 @@ export default function WhatIsAIPersona() {
               ].map((item, i) => (
                 <div
                   key={i}
-                  className="space-y-3 group p-6 rounded-2xl border border-white/0 hover:border-white/5 hover:bg-white/[0.02] transition-all duration-500"
+                  className="space-y-3 group p-5 sm:p-6 rounded-2xl border border-white/0 hover:border-white/5 hover:bg-white/[0.02] transition-all duration-500"
                   style={{ animationDelay: `${i * 150}ms` }}
                 >
                   <div className="w-10 h-0.5 bg-primary/40 group-hover:w-full transition-all duration-700" />
-                  <h3 className="text-white font-bold text-xl group-hover:text-primary-light transition-colors">{item.title}</h3>
-                  <p className="text-white/40 text-base leading-snug group-hover:text-white/70 transition-colors">{item.text}</p>
+                  <h3 className="text-white font-bold text-lg sm:text-xl group-hover:text-primary-light transition-colors">{item.title}</h3>
+                  <p className="text-white/40 text-sm sm:text-base leading-snug group-hover:text-white/70 transition-colors">{item.text}</p>
                 </div>
               ))}
             </div>

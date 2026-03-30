@@ -8,18 +8,18 @@ export const metadata = {
 
 export default function BookDemoPage() {
   return (
-    <main className="relative min-h-screen w-full lg:h-screen lg:overflow-hidden bg-black">
-      <section className="relative w-full min-h-screen lg:h-full pt-28 md:pt-32 pb-20 lg:pb-0 flex items-center justify-center">
+    <main className="relative min-h-screen w-full bg-black overflow-hidden">
+      <section className="relative w-full min-h-screen pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-20 flex items-center justify-center">
         {/* Background glows to match homepage */}
         <div className="absolute inset-0 pointer-events-none opacity-50 overflow-hidden">
-          <div className="absolute h-[780px] w-[760px] left-[-260px] top-[-220px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
-          <div className="absolute h-[650px] w-[670px] right-[-240px] top-[60px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.55)_0%,transparent_70%)]" />
-          <div className="absolute h-[460px] w-[900px] left-[-450px] bottom-[-140px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(147,51,234,0.55)_0%,transparent_70%)]" />
+          <div className="absolute left-[-30vw] top-[-18vw] h-[clamp(280px,62vw,780px)] w-[clamp(280px,60vw,760px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
+          <div className="absolute right-[-28vw] top-[4vw] h-[clamp(250px,52vw,650px)] w-[clamp(260px,54vw,670px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.55)_0%,transparent_70%)]" />
+          <div className="absolute bottom-[-14vw] left-[-42vw] h-[clamp(220px,38vw,460px)] w-[clamp(380px,78vw,900px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(147,51,234,0.55)_0%,transparent_70%)]" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20">
-          <div className="mx-auto w-full max-w-6xl -translate-y-4 md:-translate-y-6 lg:-translate-y-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
+          <div className="mx-auto w-full max-w-6xl -translate-y-2 sm:-translate-y-4 md:-translate-y-6 lg:-translate-y-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-14 items-center">
               <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
                 <p className="text-white/60 font-inter text-sm tracking-widest uppercase">
                   Book a demo

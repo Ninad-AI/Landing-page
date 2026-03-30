@@ -70,16 +70,16 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 py-24">
+    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 py-20 sm:py-24">
       {/* Background glows */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
-        <div className="absolute h-[600px] w-[600px] left-[-200px] top-[-100px] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.55)_0%,transparent_70%)] animate-glow-drift" />
-        <div className="absolute h-[500px] w-[500px] right-[-150px] bottom-[-100px] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.35)_0%,transparent_70%)] animate-glow-drift-reverse" />
+        <div className="absolute left-[-24vw] top-[-10vw] h-[clamp(240px,48vw,600px)] w-[clamp(240px,48vw,600px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.55)_0%,transparent_70%)] animate-glow-drift" />
+        <div className="absolute right-[-20vw] bottom-[-8vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.35)_0%,transparent_70%)] animate-glow-drift-reverse" />
       </div>
 
       <div className="relative z-10 w-full max-w-md page-enter">
         {/* Glass Card */}
-        <div className="glass-card border border-white/15 rounded-3xl p-8 md:p-10 shadow-2xl">
+        <div className="glass-card border border-white/15 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl">
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="font-sans font-extrabold text-3xl md:text-4xl text-white tracking-tight mb-2">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
@@ -200,7 +199,11 @@ export default function CreatorProfilePage() {
           if (msg.type === "tts_end") {
             const pending = [...sourceEndPromisesRef.current];
             const done = () => { ttsActiveRef.current = false; setIsSpeaking(false); setCallPhase("listening"); };
-            pending.length > 0 ? Promise.all(pending).then(done) : done();
+            if (pending.length > 0) {
+              Promise.all(pending).then(done);
+            } else {
+              done();
+            }
           }
         } catch { /* non-JSON */ }
       }
@@ -216,6 +219,14 @@ export default function CreatorProfilePage() {
     };
   }, [flowState, processBinaryChunk, stopPlayback]);
 
+  const handleEndCall = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    micControllerRef.current?.stop(); micControllerRef.current = null;
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) wsRef.current.close();
+    wsRef.current = null; stopPlayback(); ttsActiveRef.current = false;
+    setFlowState("idle"); setTimeLeft(0); setSelectedMinutes(null); setIsSpeaking(false); setCallPhase("connecting");
+  }, [stopPlayback]);
+
   /* ═══════════════════════════════════════
      Countdown timer
      ═══════════════════════════════════════ */
@@ -229,7 +240,7 @@ export default function CreatorProfilePage() {
       });
     }, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [flowState, timeLeft]);
+  }, [flowState, timeLeft, handleEndCall]);
 
   /* ═══════════════════════════════════════
      Handlers
@@ -278,14 +289,6 @@ export default function CreatorProfilePage() {
     setFlowState("active");
   };
 
-  const handleEndCall = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    micControllerRef.current?.stop(); micControllerRef.current = null;
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) wsRef.current.close();
-    wsRef.current = null; stopPlayback(); ttsActiveRef.current = false;
-    setFlowState("idle"); setTimeLeft(0); setSelectedMinutes(null); setIsSpeaking(false); setCallPhase("connecting");
-  }, [stopPlayback]);
-
   const closeModal = () => {
     setFlowState("idle"); setSelectedMinutes(null);
     setAuthEmail(""); setAuthPassword(""); setAuthName("");
@@ -303,7 +306,7 @@ export default function CreatorProfilePage() {
       </div>
 
       {/* Main Content */}
-      <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-6 sm:px-10 py-16 sm:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+      <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 py-14 sm:py-16 md:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
         {flowState === "active" ? (
           <CreatorVoiceSessionUI
             isSpeaking={isSpeaking} callPhase={callPhase} timeLeft={timeLeft}
@@ -312,14 +315,14 @@ export default function CreatorProfilePage() {
           />
         ) : (
           /* ── Hero ── */
-          <div className="relative w-full max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-16">
+          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
             {/* Text */}
             <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
               <h2 className="text-[10px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-2 sm:mb-4 animate-fade-in-up">
                 • {creatorRole}
               </h2>
               <br />
-              <h1 className="text-[2.6rem] xs:text-[3.2rem] sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion mt-2">
+              <h1 className="mt-2 text-[2.4rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
                 <span className="block">{creatorName.split(" ")[0]}</span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
                   {creatorName.split(" ").slice(1).join(" ")}.
@@ -329,7 +332,7 @@ export default function CreatorProfilePage() {
 
               {/* Desktop CTA */}
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[220px] h-14 sm:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                   <span className="flex items-center gap-3">
                     Start Session
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -341,7 +344,7 @@ export default function CreatorProfilePage() {
             </div>
 
             {/* Image */}
-            <div className="relative w-[200px] h-[200px] xs:w-[240px] xs:h-[240px] sm:w-[300px] sm:h-[300px] md:w-[500px] md:h-[600px] flex-shrink-0">
+            <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
               <div
                 ref={(el) => { avatarRefs.current[1] = el; }}
                 className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
@@ -356,7 +359,7 @@ export default function CreatorProfilePage() {
 
             {/* Mobile CTA */}
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
-              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] xs:w-[200px] h-13 sm:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                 Start Session
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
