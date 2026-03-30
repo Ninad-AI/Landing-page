@@ -26,26 +26,26 @@ export default function Languages() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <section className="relative py-16 md:py-32 overflow-hidden bg-black">
+    <section className="relative overflow-hidden bg-black py-16 sm:py-20 md:py-28">
       {/* Background Decor */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
+        <div className="absolute top-1/2 left-1/2 h-[clamp(260px,52vw,500px)] w-[clamp(260px,52vw,500px)] bg-primary/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30" />
       </div>
 
       {/* Content */}
-      <div className="relative container mx-auto px-6 text-center z-10 mb-16">
-        <h2 className="font-sans font-bold text-4xl md:text-6xl lg:text-[110px] mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
+      <div className="relative z-10 mb-12 sm:mb-14 md:mb-16 container mx-auto px-4 sm:px-6 md:px-10 text-center">
+        <h2 className="font-sans font-bold text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] mb-4 sm:mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
           Speak Every Language
         </h2>
 
-        <div className="font-roboto text-lg md:text-2xl text-muted max-w-3xl mx-auto">
+        <div className="font-roboto text-base sm:text-lg md:text-2xl text-muted max-w-3xl mx-auto px-1">
           <p>Ninad AI supports native speech in multiple languages.</p>
           <p>Localize any voice to any accent or language seamlessly.</p>
         </div>
       </div>
 
       {/* Marquee Container */}
-      <div className="relative w-full overflow-visible flex flex-col gap-4 py-6">
+      <div className="relative flex w-full flex-col gap-3 sm:gap-4 overflow-hidden py-4 sm:py-6">
         {/* Row 1 */}
         <div
           className="flex gap-4 animate-marquee min-w-full overflow-visible"
@@ -57,7 +57,7 @@ export default function Languages() {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`
-                flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
+                flex-shrink-0 w-[150px] sm:w-[180px] md:w-[206px] h-12 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
                 transition-all duration-150 relative z-20
                 ${hoveredIndex === index
                   ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
@@ -74,7 +74,7 @@ export default function Languages() {
 
         {/* Row 2 (brick offset) */}
         <div
-          className="flex gap-4 animate-marquee min-w-full translate-x-[111px] overflow-visible"
+          className="flex gap-4 animate-marquee min-w-full translate-x-10 sm:translate-x-16 md:translate-x-[111px] overflow-visible"
           style={{ animationPlayState: hoveredIndex !== null && hoveredIndex >= 100 ? 'paused' : 'running' }}
         >
           {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
@@ -83,7 +83,7 @@ export default function Languages() {
               onMouseEnter={() => setHoveredIndex(index + 100)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`
-                flex-shrink-0 w-[206px] h-[61px] flex items-center justify-center rounded-2xl 
+                flex-shrink-0 w-[150px] sm:w-[180px] md:w-[206px] h-12 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
                 transition-all duration-150 relative z-20
                 ${hoveredIndex === index + 100
                   ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'

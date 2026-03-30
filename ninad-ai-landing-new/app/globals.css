@@ -36,6 +36,12 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 /* Smooth page transitions */
 body {
   transition: background-color 0.3s var(--ease-smooth);
@@ -86,6 +92,23 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: anywhere;
 }
 
 /* ═══════════════════════════════════════════════

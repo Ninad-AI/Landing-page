@@ -53,16 +53,16 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="relative py-20 md:py-32 overflow-hidden bg-black"
+      className="relative overflow-hidden bg-black py-16 sm:py-20 md:py-24 lg:py-32"
     >
-      <div className="relative container mx-auto px-6 md:px-12 lg:px-20 max-w-[1600px]">
+      <div className="relative container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16">
         {/* Header - Spans both columns */}
-        <div className="text-center mb-16">
-          <div className="flex justify-center mb-8">
+        <div className="text-center mb-12 sm:mb-14 md:mb-16">
+          <div className="flex justify-center mb-6 sm:mb-8">
             <h2
               className="
                 font-sans font-bold
-                text-4xl md:text-6xl lg:text-[110px]
+                text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px]
                 leading-none tracking-tighter
                 bg-clip-text text-transparent
                 bg-gradient-to-b from-white via-gray-300 to-gray-500
@@ -73,7 +73,7 @@ export default function Features() {
             </h2>
           </div>
 
-          <div className="font-sans font-medium text-lg md:text-2xl text-muted max-w-4xl mx-auto">
+          <div className="font-sans font-medium text-base sm:text-lg md:text-2xl text-muted max-w-4xl mx-auto px-1">
             <p className="mb-1">Experience the next evolution in voice AI.</p>
             <p>
               Ninad AI understands tone, emotion, and context to create voices
@@ -87,7 +87,7 @@ export default function Features() {
           ref={gridRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
-          className="relative grid grid-cols-1 md:grid-cols-2 gap-[12px] rounded-[24px] overflow-hidden"
+          className="relative grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 rounded-[24px] overflow-hidden"
         >
           {/* Cursor-following glow (Limited to the grid's area) */}
           <>
@@ -128,12 +128,12 @@ export default function Features() {
                 key={index}
                 className={`relative p-[1px] rounded-[24px] z-10 ${borderGradient} flex`}
               >
-                <div className="w-full h-full px-6 py-8 md:px-16 md:py-20 flex items-center justify-center bg-black rounded-[23px]">
-                  <div className="w-full space-y-6 text-center flex flex-col items-center max-w-md">
+                <div className="w-full h-full px-5 py-7 sm:px-6 sm:py-8 md:px-10 md:py-12 lg:px-14 lg:py-16 flex items-center justify-center bg-black rounded-[23px]">
+                  <div className="w-full space-y-4 sm:space-y-5 md:space-y-6 text-center flex flex-col items-center max-w-md">
                     <h3
                       className="
                         font-sans font-extrabold
-                        text-[30px] leading-[0.98] tracking-[-0.6px]
+                        text-2xl sm:text-[28px] md:text-[30px] leading-[0.98] tracking-[-0.6px]
                         bg-clip-text text-transparent
                         bg-gradient-to-b from-[#FFFFFF] to-[#B18BFF]
                         mb-4
@@ -141,7 +141,7 @@ export default function Features() {
                     >
                       {feature.title}
                     </h3>
-                    <p className="font-sans font-normal text-sm md:text-base leading-relaxed text-[#949494] max-w-[85%]">
+                    <p className="font-sans font-normal text-sm md:text-base leading-relaxed text-[#949494] max-w-full sm:max-w-[85%]">
                       {feature.description}
                     </p>
                   </div>

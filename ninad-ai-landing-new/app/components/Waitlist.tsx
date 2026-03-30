@@ -57,21 +57,21 @@ export default function Waitlist() {
   return (
     <section
       id="waitlist"
-      className="relative w-full py-8 md:py-10 overflow-hidden bg-[#f5f5f5] flex items-center justify-center"
+      className="relative flex w-full items-center justify-center overflow-hidden bg-[#f5f5f5] py-10 md:py-12"
     >
       {/* background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),rgba(255,255,255,0))] pointer-events-none" />
 
-      <div className="relative container mx-auto px-6 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-10">
+      <div className="relative container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-10">
 
-        <div className="md:w-1/2 text-left">
-          <h2 className="font-sans font-extrabold text-[40px] md:text-[66px] leading-[1.0] text-[#2a105d] tracking-tight">
+        <div className="w-full md:w-1/2 text-center md:text-left">
+          <h2 className="font-sans font-extrabold text-[clamp(32px,9vw,66px)] leading-[1.0] text-[#2a105d] tracking-tight">
             JOIN THE<br />
             WAITLIST NOW
           </h2>
         </div>
 
-        <div className="md:w-1/2 flex justify-end">
+        <div className="w-full md:w-1/2 flex justify-center md:justify-end">
           <div className="w-full max-w-[560px]">
             <form
               onSubmit={onSubmit}

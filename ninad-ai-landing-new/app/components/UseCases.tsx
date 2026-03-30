@@ -81,22 +81,22 @@ export default function UseCases() {
   ];
 
   return (
-    <section id="use-cases" className="relative py-24 md:py-32 bg-black overflow-hidden">
+    <section id="use-cases" className="relative overflow-hidden bg-black py-16 sm:py-20 md:py-28 lg:py-32">
 
       {/* Background Decor */}
-      <div className="absolute left-0 bottom-0 w-full h-[500px] bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
+      <div className="absolute left-0 bottom-0 w-full h-[320px] sm:h-[420px] md:h-[500px] bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10 max-w-[1600px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
+      <div className="container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 relative z-10 max-w-[1600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-12 md:gap-16 lg:gap-24 items-start">
 
           {/* Left: Text Content & Sticky Header */}
           <div className="lg:sticky lg:top-40 self-start">
-            <h2 className="font-sans font-bold text-5xl md:text-6xl lg:text-8xl leading-tight text-white mb-8">
+            <h2 className="font-sans font-bold text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl leading-tight text-white mb-6 sm:mb-8">
               <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#999999_100%)]">Empowering</span>{' '}
               <br />
               <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,#FFFFFF_0%,#999999_100%)]">Every Interaction</span>
             </h2>
-            <p className="font-roboto text-lg md:text-xl text-muted leading-relaxed max-w-lg mb-12">
+            <p className="font-roboto text-base sm:text-lg md:text-xl text-muted leading-relaxed max-w-lg mb-10 sm:mb-12">
               From enterprise solutions to creative projects, Ninad AI adapts to your specific needs with uncompromised quality and emotion.
             </p>
 
@@ -117,11 +117,11 @@ export default function UseCases() {
               >
                 <button
                   onClick={() => setOpenIndex(prev => prev === index ? null : index)}
-                  className="w-full flex items-center justify-between p-6 md:p-8 text-left"
+                  className="w-full flex items-center justify-between gap-3 p-5 sm:p-6 md:p-8 text-left"
                 >
-                  <div className="flex items-center gap-4 md:gap-6">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4 md:gap-6">
                     <CaseIcon index={index} />
-                    <h3 className={`font-sans font-bold text-lg md:text-2xl ${openIndex === index ? 'text-white' : 'text-white/60'}`}>
+                    <h3 className={`font-sans font-bold text-base sm:text-lg md:text-2xl leading-snug ${openIndex === index ? 'text-white' : 'text-white/60'}`}>
                       {item.name}
                     </h3>
                   </div>
@@ -140,10 +140,10 @@ export default function UseCases() {
                     className="min-h-0 cursor-pointer"
                     onClick={() => setOpenIndex(null)}
                   >
-                    <div className="px-6 md:px-8 pb-8 pl-[80px] md:pl-[104px]">
+                    <div className="px-5 sm:px-6 md:px-8 pb-6 sm:pb-8 pl-5 sm:pl-[80px] md:pl-[104px]">
                       <ul className="space-y-3">
                         {item.items.map((sub, i) => (
-                          <li key={i} className="flex items-center gap-3 text-white/80 font-roboto">
+                          <li key={i} className="flex items-center gap-3 text-sm sm:text-base text-white/80 font-roboto">
                             <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                             {sub}
                           </li>

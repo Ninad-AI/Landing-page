@@ -95,19 +95,19 @@ export default function Products() {
   };
 
   return (
-    <section id="products" className="relative py-16 md:py-32 overflow-hidden bg-black min-h-screen flex items-center">
+    <section id="products" className="relative flex min-h-screen items-center overflow-hidden bg-black py-16 md:py-24 lg:py-28">
       {/* Background Elements */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
 
       {/* Content */}
-      <div className="relative container mx-auto px-6 max-w-[1600px]">
+      <div className="relative container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16">
         {/* Section Title */}
         <h2
           className="
             font-sans font-black 
-            text-4xl md:text-6xl lg:text-[110px] 
+            text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] 
             leading-none tracking-tight 
-            text-center mb-4 
+            text-center mb-4 sm:mb-5 
             bg-clip-text text-transparent 
             bg-gradient-to-b from-white to-white/40
           "
@@ -116,15 +116,15 @@ export default function Products() {
         </h2>
 
         {/* Subtitle */}
-        <div className="font-sans font-medium text-lg md:text-xl text-center text-muted tracking-tight mb-16 md:mb-24 max-w-3xl mx-auto uppercase">
+        <div className="font-sans font-medium text-base sm:text-lg md:text-xl text-center text-muted tracking-tight mb-12 sm:mb-14 md:mb-20 lg:mb-24 max-w-3xl mx-auto uppercase px-1">
           <p className="mb-1">Experience expressive, adaptable, and high-fidelity voice technology</p>
           <p>built for real-world impact.</p>
         </div>
 
         {/* Products Layout */}
-        <div className="flex flex-col lg:flex-row relative" ref={containerRef}>
+        <div className="relative flex flex-col lg:flex-row" ref={containerRef}>
           {/* Product List - Left Side */}
-          <div ref={listRef} className="flex-shrink-0 w-full lg:w-[450px] relative mb-12 lg:mb-0">
+          <div ref={listRef} className="relative mb-10 sm:mb-12 flex-shrink-0 w-full lg:mb-0 lg:w-[420px] xl:w-[450px]">
             {products.map((product, index) => (
               <div key={index} className="relative">
                 {/* Divider Line Above (skip first) */}
@@ -135,13 +135,13 @@ export default function Products() {
                   ref={(el) => { productRefs.current[index] = el; }}
                   onClick={() => handleProductHover(index)}
                   className={`
-                    w-full text-left py-4 md:py-6 group
+                    w-full text-left py-4 sm:py-5 md:py-6 group
                     transition-all duration-300 cursor-pointer 
                     ${activeProduct === index ? 'opacity-100 pl-4' : 'opacity-40 hover:opacity-70 hover:pl-2'}
                   `}
                 >
                   <h3 className={`
-                    font-sans font-bold text-2xl md:text-4xl leading-none uppercase transition-colors
+                    font-sans font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none uppercase transition-colors
                     ${activeProduct === index ? 'text-white' : 'text-white/60 group-hover:text-white/80'}
                   `}>
                     {product.name}
@@ -165,9 +165,9 @@ export default function Products() {
 
           {/* Product Description - Right Side */}
           <div
-            className="flex-1 lg:pl-20 relative"
+            className="relative flex-1 lg:pl-10 xl:pl-20"
             style={{
-              minHeight: '400px',
+              minHeight: isDesktop ? '400px' : 'auto',
               height: listHeight > 0 && isDesktop ? `${listHeight}px` : 'auto'
             }}
           >
@@ -185,7 +185,7 @@ export default function Products() {
                     bottom: `calc(100% - ${linePosition}px)`
                   }}
                 >
-                  <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                  <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
                     {products[activeProduct].description}
                   </p>
                 </div>
@@ -199,7 +199,7 @@ export default function Products() {
                     top: `${linePosition}px`
                   }}
                 >
-                  <p className="font-anonymous text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                  <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
                     {products[activeProduct].descriptionPosition === 'split'
                       ? products[activeProduct].descriptionPart2
                       : products[activeProduct].description}
