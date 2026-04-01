@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useAuthStore } from '../lib/stores';
 import { useRouter } from 'next/navigation';
 import { getVoiceWsUrl } from '../lib/api';
+import { openAppWebSocket } from '../lib/websocket';
 
 interface VoiceChatProps {
   creatorId: string;
@@ -82,7 +83,7 @@ export default function VoiceChat({
     const token = localStorage.getItem('ninad_access_token');
     const wsUrl = getVoiceWsUrl(creatorId) + (token ? `&token=${token}` : '');
 
-    const ws = new WebSocket(wsUrl);
+    const ws = openAppWebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {

@@ -96,7 +96,11 @@ Create a local env file (not committed):
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_API_URL=...
 ```
+
+`NEXT_PUBLIC_API_URL` is used for both HTTP API requests and WebSocket URL construction.
+In development, if `NEXT_PUBLIC_API_URL` is not set, the app falls back to `http://localhost:8000`.
 
 Use [.env.example](.env.example) as a template.
 

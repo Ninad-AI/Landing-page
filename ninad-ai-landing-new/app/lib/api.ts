@@ -15,7 +15,7 @@ import type {
   BookingAnalytics,
   Creator,
 } from './types';
-import { API_BASE, API_WS_BASE } from './config';
+import { API_BASE, buildVoiceWsUrl } from './config';
 
 // ─── Base Axios Instance ───
 export const api = axios.create({
@@ -107,5 +107,5 @@ export const creatorsApi = {
 
 // ─── WebSocket URL builder ───
 export function getVoiceWsUrl(influencerId: string): string {
-  return `${API_WS_BASE}/ws/voice?influencer_id=${encodeURIComponent(influencerId)}`;
+  return buildVoiceWsUrl(influencerId);
 }

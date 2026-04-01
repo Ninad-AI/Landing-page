@@ -8,14 +8,13 @@ import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { API_WS_BASE } from "../../lib/config";
+import { buildVoiceWsUrl } from "../../lib/config";
+import { openAppWebSocket } from "../../lib/websocket";
 
 /* ── Flow: idle → auth (if needed) → duration → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
-
-const WS_URL = `${API_WS_BASE}/ws/audio`;
 
 const TIME_OPTIONS = [
   { minutes: 0.5, price: 49, label: "30 sec" },
@@ -172,7 +171,7 @@ export default function CreatorProfilePage() {
     setIsSpeaking(false);
     setCallPhase("connecting");
 
-    const ws = new WebSocket(WS_URL);
+    const ws = openAppWebSocket(buildVoiceWsUrl(slug));
     ws.binaryType = "arraybuffer";
     wsRef.current = ws;
 
@@ -218,7 +217,7 @@ export default function CreatorProfilePage() {
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
       wsRef.current = null; ttsActiveRef.current = false; stopPlayback();
     };
-  }, [flowState, processBinaryChunk, stopPlayback]);
+  }, [flowState, processBinaryChunk, slug, stopPlayback]);
 
   const handleEndCall = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
