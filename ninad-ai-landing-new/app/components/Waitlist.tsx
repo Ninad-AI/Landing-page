@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { API_BASE } from "../lib/config";
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
@@ -26,7 +27,7 @@ export default function Waitlist() {
     setStatus({ type: "loading" });
 
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(`${API_BASE}/api/waitlist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, source: "homepage-waitlist" }),

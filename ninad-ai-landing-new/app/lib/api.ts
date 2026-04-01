@@ -15,10 +15,9 @@ import type {
   BookingAnalytics,
   Creator,
 } from './types';
+import { API_BASE, API_WS_BASE } from './config';
 
 // ─── Base Axios Instance ───
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 export const api = axios.create({
   baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
@@ -108,6 +107,5 @@ export const creatorsApi = {
 
 // ─── WebSocket URL builder ───
 export function getVoiceWsUrl(influencerId: string): string {
-  const wsBase = API_BASE.replace(/^http/, 'ws');
-  return `${wsBase}/ws/voice?influencer_id=${encodeURIComponent(influencerId)}`;
+  return `${API_WS_BASE}/ws/voice?influencer_id=${encodeURIComponent(influencerId)}`;
 }

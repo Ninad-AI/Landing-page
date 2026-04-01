@@ -8,13 +8,14 @@ import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
+import { API_WS_BASE } from "../../lib/config";
 
 /* ── Flow: idle → auth (if needed) → duration → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
 
-const WS_URL = process.env.NEXT_PUBLIC_BACKEND_WS_URL || "ws://localhost:8000/ws/audio";
+const WS_URL = `${API_WS_BASE}/ws/audio`;
 
 const TIME_OPTIONS = [
   { minutes: 0.5, price: 49, label: "30 sec" },
