@@ -1,4 +1,3 @@
-import Link from "next/link";
 import BookDemoForm from "./BookDemoForm";
 
 export const metadata = {
@@ -30,15 +29,6 @@ export default function BookDemoPage() {
                 <p className="mt-5 text-white/70 font-roboto text-base md:text-lg leading-relaxed">
                   Tell us a bit about your use case and we’ll reach out to schedule a live demo.
                 </p>
-
-                <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                  <Link
-                    href="/#waitlist"
-                    className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm hover:bg-gray-200 transition-colors"
-                  >
-                    Join waitlist
-                  </Link>
-                </div>
               </div>
 
               <div className="w-full max-w-2xl mx-auto lg:mx-0 lg:max-w-none lg:pt-2">
