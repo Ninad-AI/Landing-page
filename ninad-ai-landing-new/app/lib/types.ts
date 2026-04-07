@@ -81,6 +81,35 @@ export interface CheckoutResponse {
   session_id: string;
 }
 
+export type AllowedDurationMinutes = 3 | 5 | 10 | 15 | 20 | 30;
+
+export interface RazorpayCreateOrderRequest {
+  duration_minutes: AllowedDurationMinutes;
+  influencer_id: string;
+  provider_name?: string;
+}
+
+export interface RazorpayCreateOrderResponse {
+  order_id: string;
+  amount: number;
+  currency: string;
+  receipt?: string;
+  status?: string;
+  key_id: string;
+}
+
+export interface RazorpayVerifyPaymentRequest {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export interface RazorpayVerifyPaymentResponse {
+  success?: boolean;
+  message?: string;
+  booking_id?: string;
+}
+
 // ─── Voice ───
 export interface VoiceRegistration {
   name: string;

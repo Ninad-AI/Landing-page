@@ -1,66 +1,62 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
+import TermsAgreement from "../../components/auth/TermsAgreement";
+import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
+import { authApi } from "../../lib/api";
 import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
+import type { AllowedDurationMinutes } from "../../lib/types";
 
 /* ── Flow: idle → auth (if needed) → duration → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
 
-const TIME_OPTIONS = [
-  { minutes: 0.5, price: 49, label: "30 sec" },
-  { minutes: 15, price: 299, label: "15 min" },
-  { minutes: 20, price: 399, label: "20 min" },
-  { minutes: 30, price: 599, label: "30 min" },
-  { minutes: 60, price: 999, label: "60 min" },
-];
+// Defaults for quick testing
+const DEFAULT_INFLUENCER_ID = "influencer_8";
+const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
-/* ── Hardcoded credentials (temporary) ── */
-const HARDCODED_USERS = [
-  {
-    email: "yash@gmail.com",
-    password: "yash@123",
-    user: { id: "user-001", email: "yash@gmail.com", name: "Yash", role: "user" as const, avatar_url: "", created_at: new Date().toISOString() },
-  },
-  {
-    email: "admin@gmail.com",
-    password: "admin@123",
-    user: { id: "admin-001", email: "admin@gmail.com", name: "Admin", role: "admin" as const, avatar_url: "", created_at: new Date().toISOString() },
-  },
-];
+function getAuthErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
+  return apiError.response?.data?.detail || apiError.response?.data?.message || fallback;
+}
 
 /* ── Creator data ── */
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string }> = {
+const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
   "pawan-kumar": {
     name: "Pawan Kumar",
     image: "/assets/creators/pavan.png",
     role: "Influencer & Actor",
+    influencerId: DEFAULT_INFLUENCER_ID,
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
 
 export default function CreatorProfilePage() {
+  const router = useRouter();
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
   const creatorRole = creatorData?.role ?? "Creator";
+  const creatorInfluencerId = creatorData?.influencerId ?? DEFAULT_INFLUENCER_ID;
+  const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
 
   /* ── Auth store ── */
-  const { isAuthenticated, isHydrated, login: authLogin } = useAuthStore();
+  const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
 
   /* ── UI state ── */
   const [flowState, setFlowState] = useState<FlowState>("idle");
-  const [selectedMinutes, setSelectedMinutes] = useState<number | null>(null);
+  const [selectedMinutes, setSelectedMinutes] = useState<AllowedDurationMinutes | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
@@ -71,6 +67,7 @@ export default function CreatorProfilePage() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authName, setAuthName] = useState("");
+  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
 
   /* ── Parallax refs ── */
@@ -114,7 +111,11 @@ export default function CreatorProfilePage() {
     };
     window.addEventListener("mousemove", handleMouseMove);
     animate();
-    return () => { clearTimeout(timeout); window.removeEventListener("mousemove", handleMouseMove); cancelAnimationFrame(frameId); };
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(frameId);
+    };
   }, []);
 
   /* ═══════════════════════════════════════
@@ -136,7 +137,12 @@ export default function CreatorProfilePage() {
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.connect(ctx.destination);
-    const p = new Promise<void>((resolve) => { src.onended = () => { sourceNodesRef.current = sourceNodesRef.current.filter((n) => n !== src); resolve(); }; });
+    const p = new Promise<void>((resolve) => {
+      src.onended = () => {
+        sourceNodesRef.current = sourceNodesRef.current.filter((n) => n !== src);
+        resolve();
+      };
+    });
     sourceEndPromisesRef.current.push(p);
     sourceNodesRef.current.push(src);
     if (playHeadRef.current < ctx.currentTime) playHeadRef.current = ctx.currentTime;
@@ -145,10 +151,19 @@ export default function CreatorProfilePage() {
   }, [getAudioContext]);
 
   const stopPlayback = useCallback(() => {
-    sourceNodesRef.current.forEach((n) => { try { n.stop(0); } catch { /* already stopped */ } });
+    sourceNodesRef.current.forEach((n) => {
+      try {
+        n.stop(0);
+      } catch {
+        // already stopped
+      }
+    });
     sourceNodesRef.current = [];
     sourceEndPromisesRef.current = [];
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") { audioContextRef.current.close(); audioContextRef.current = null; }
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
     playHeadRef.current = 0;
   }, []);
 
@@ -168,63 +183,137 @@ export default function CreatorProfilePage() {
 
   useEffect(() => {
     if (flowState !== "active") return;
+    let disposed = false;
+
     setIsSpeaking(false);
     setCallPhase("connecting");
 
-    const ws = openAppWebSocket(buildVoiceWsUrl(slug));
+    const wsUrl = new URL(buildVoiceWsUrl(creatorInfluencerId));
+    wsUrl.searchParams.set("preferred_provider", preferredProvider);
+    wsUrl.searchParams.set("provider", preferredProvider);
+    wsUrl.searchParams.set("creator_slug", slug);
+    const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
+    if (typeof window !== "undefined" && authToken) {
+      wsUrl.searchParams.set("token", authToken);
+    }
+
+    const ws = openAppWebSocket(wsUrl.toString());
     ws.binaryType = "arraybuffer";
     wsRef.current = ws;
 
     ws.onopen = async () => {
+      if (disposed) return;
       setCallPhase("listening");
       ttsActiveRef.current = false;
+
+      if (ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(
+            JSON.stringify({
+              type: "session_init",
+              action: "session_init",
+              influencer_id: creatorInfluencerId,
+              preferred_provider: preferredProvider,
+              provider: preferredProvider,
+              creator_slug: slug,
+              token: authToken,
+            })
+          );
+        } catch {
+          // Ignore init-message failures; connection state handlers already cover retry UX.
+        }
+      }
+
       try {
-        micControllerRef.current = await startStreamingMic(ws, () => {}, {
+        const micHandle = await startStreamingMic(ws, () => {}, {
           energyThreshold: 0.01,
           silenceMs: 600,
-          onSpeechStart: () => { if (!ttsActiveRef.current) setCallPhase("listening"); },
-          onSpeechEnd: () => { if (!ttsActiveRef.current) setCallPhase("listening"); },
+          onSpeechStart: () => {
+            if (!ttsActiveRef.current) setCallPhase("listening");
+          },
+          onSpeechEnd: () => {
+            if (!ttsActiveRef.current) setCallPhase("listening");
+          },
         });
-      } catch { /* mic failed */ }
+        if (disposed) {
+          micHandle.stop();
+          return;
+        }
+        micControllerRef.current = micHandle;
+      } catch {
+        // mic failed
+      }
     };
 
     ws.onmessage = (event: MessageEvent) => {
       if (event.data instanceof ArrayBuffer) {
-        ttsActiveRef.current = true; setIsSpeaking(true); setCallPhase("speaking");
+        ttsActiveRef.current = true;
+        setIsSpeaking(true);
+        setCallPhase("speaking");
         processBinaryChunk(event.data);
       } else {
         try {
           const msg = JSON.parse(event.data as string);
-          if (msg.type === "tts_start") { ttsActiveRef.current = true; setIsSpeaking(true); setCallPhase("speaking"); }
+          if (msg.type === "tts_start") {
+            ttsActiveRef.current = true;
+            setIsSpeaking(true);
+            setCallPhase("speaking");
+          }
           if (msg.type === "tts_end") {
             const pending = [...sourceEndPromisesRef.current];
-            const done = () => { ttsActiveRef.current = false; setIsSpeaking(false); setCallPhase("listening"); };
+            const done = () => {
+              ttsActiveRef.current = false;
+              setIsSpeaking(false);
+              setCallPhase("listening");
+            };
             if (pending.length > 0) {
               Promise.all(pending).then(done);
             } else {
               done();
             }
           }
-        } catch { /* non-JSON */ }
+        } catch {
+          // non-JSON
+        }
       }
     };
 
-    ws.onerror = () => setCallPhase("connecting");
-    ws.onclose = () => { setIsSpeaking(false); setCallPhase("connecting"); };
+    ws.onerror = () => {
+      if (!disposed) setCallPhase("connecting");
+    };
+
+    ws.onclose = () => {
+      if (disposed) return;
+      setIsSpeaking(false);
+      setCallPhase("connecting");
+    };
 
     return () => {
-      micControllerRef.current?.stop(); micControllerRef.current = null;
+      disposed = true;
+      micControllerRef.current?.stop();
+      micControllerRef.current = null;
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
-      wsRef.current = null; ttsActiveRef.current = false; stopPlayback();
+      wsRef.current = null;
+      ttsActiveRef.current = false;
+      stopPlayback();
     };
-  }, [flowState, processBinaryChunk, slug, stopPlayback]);
+  }, [creatorInfluencerId, flowState, preferredProvider, processBinaryChunk, slug, stopPlayback]);
 
   const handleEndCall = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    micControllerRef.current?.stop(); micControllerRef.current = null;
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) wsRef.current.close();
-    wsRef.current = null; stopPlayback(); ttsActiveRef.current = false;
-    setFlowState("idle"); setTimeLeft(0); setSelectedMinutes(null); setIsSpeaking(false); setCallPhase("connecting");
+    micControllerRef.current?.stop();
+    micControllerRef.current = null;
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+      wsRef.current.close();
+    }
+    wsRef.current = null;
+    stopPlayback();
+    ttsActiveRef.current = false;
+    setFlowState("idle");
+    setTimeLeft(0);
+    setSelectedMinutes(null);
+    setIsSpeaking(false);
+    setCallPhase("connecting");
   }, [stopPlayback]);
 
   /* ═══════════════════════════════════════
@@ -235,11 +324,17 @@ export default function CreatorProfilePage() {
     if (flowState !== "active" || timeLeft <= 0) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current!); handleEndCall(); return 0; }
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          handleEndCall();
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [flowState, timeLeft, handleEndCall]);
 
   /* ═══════════════════════════════════════
@@ -256,42 +351,69 @@ export default function CreatorProfilePage() {
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authTab === "login" && (!authEmail || !authPassword)) { toast.error("Please fill in all fields"); return; }
-    if (authTab === "signup" && (!authEmail || !authPassword || !authName)) { toast.error("Please fill in all fields"); return; }
-
-    setAuthLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
-
-    if (authTab === "login") {
-      const match = HARDCODED_USERS.find((u) => u.email === authEmail.trim().toLowerCase() && u.password === authPassword);
-      if (match) {
-        authLogin(match.user, `hardcoded-token-${match.user.role}`);
-        toast.success(`Welcome back, ${match.user.name}!`);
-        setFlowState("duration");
-      } else {
-        toast.error("Invalid credentials.");
-      }
-    } else {
-      // Signup — create mock user
-      const mockUser = { id: `user-${Date.now()}`, email: authEmail.trim().toLowerCase(), name: authName.trim(), role: "user" as const, avatar_url: "", created_at: new Date().toISOString() };
-      authLogin(mockUser, "hardcoded-token-user");
-      toast.success(`Welcome, ${mockUser.name}!`);
-      setFlowState("duration");
+    if (authTab === "login" && (!authEmail || !authPassword)) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (authTab === "signup" && (!authEmail || !authPassword || !authName)) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    if (authTab === "signup" && !authAcceptedTerms) {
+      toast.error("Please review and accept the Terms & Conditions to continue.");
+      return;
     }
 
-    setAuthLoading(false);
-    setAuthEmail(""); setAuthPassword(""); setAuthName("");
+    setAuthLoading(true);
+
+    try {
+      if (authTab === "login") {
+        const response = await authApi.login({
+          email: authEmail.trim().toLowerCase(),
+          password: authPassword,
+        });
+        authLogin(response.user, response.tokens.access_token);
+        toast.success(`Welcome back, ${response.user.name}!`);
+      } else {
+        const response = await authApi.register({
+          name: authName.trim(),
+          email: authEmail.trim().toLowerCase(),
+          password: authPassword,
+          role: "user",
+        });
+        authLogin(response.user, response.tokens.access_token);
+        toast.success(`Welcome, ${response.user.name}!`);
+      }
+
+      setFlowState("duration");
+      setAuthEmail("");
+      setAuthPassword("");
+      setAuthName("");
+      setAuthAcceptedTerms(false);
+    } catch (error) {
+      const fallback = authTab === "login" ? "Login failed. Please try again." : "Could not create account.";
+      toast.error(getAuthErrorMessage(error, fallback));
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
-  const handlePayAndStart = () => {
-    if (!selectedMinutes) return;
-    setTimeLeft(selectedMinutes * 60);
-    setFlowState("active");
+  const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
+    const query = new URLSearchParams({ duration: String(durationMinutes) });
+    if (bookingId) {
+      query.set("booking_id", bookingId);
+    }
+
+    router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
   const closeModal = () => {
-    setFlowState("idle"); setSelectedMinutes(null);
-    setAuthEmail(""); setAuthPassword(""); setAuthName("");
+    setFlowState("idle");
+    setSelectedMinutes(null);
+    setAuthEmail("");
+    setAuthPassword("");
+    setAuthName("");
+    setAuthAcceptedTerms(false);
   };
 
   /* ═══════════════════════════════════════
@@ -309,14 +431,16 @@ export default function CreatorProfilePage() {
       <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 py-14 sm:py-16 md:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
         {flowState === "active" ? (
           <CreatorVoiceSessionUI
-            isSpeaking={isSpeaking} callPhase={callPhase} timeLeft={timeLeft}
+            isSpeaking={isSpeaking}
+            callPhase={callPhase}
+            timeLeft={timeLeft}
             totalTime={selectedMinutes ? selectedMinutes * 60 : 0}
-            onEndCall={handleEndCall} creatorName={creatorName} creatorImage={creatorImage}
+            onEndCall={handleEndCall}
+            creatorName={creatorName}
+            creatorImage={creatorImage}
           />
         ) : (
-          /* ── Hero ── */
           <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
-            {/* Text */}
             <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
               <h2 className="text-[10px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-2 sm:mb-4 animate-fade-in-up">
                 • {creatorRole}
@@ -330,7 +454,6 @@ export default function CreatorProfilePage() {
               </h1>
               <br /><br />
 
-              {/* Desktop CTA */}
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
                 <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                   <span className="flex items-center gap-3">
@@ -343,7 +466,6 @@ export default function CreatorProfilePage() {
               </div>
             </div>
 
-            {/* Image */}
             <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
               <div
                 ref={(el) => { avatarRefs.current[1] = el; }}
@@ -357,7 +479,6 @@ export default function CreatorProfilePage() {
               <div className="absolute bottom-16 -left-4 sm:-left-16 w-14 h-14 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
             </div>
 
-            {/* Mobile CTA */}
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
               <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                 Start Session
@@ -370,20 +491,15 @@ export default function CreatorProfilePage() {
         )}
       </div>
 
-      {/* ═══════════════════════════════════════
-         AUTH MODAL
-         ═══════════════════════════════════════ */}
       {flowState === "auth" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeModal} />
           <div className="relative w-[92vw] max-w-[380px] sm:w-full sm:max-w-md animate-fade-in-up">
             <div className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 py-8 sm:py-10 overflow-hidden" style={{ borderRadius: "1.5rem" }}>
-              {/* Glow */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
 
               <div className="relative z-10">
-                {/* Tab switcher */}
                 <div className="flex items-center justify-center gap-1 mb-8 p-1 rounded-full bg-white/5 border border-white/10">
                   <button onClick={() => setAuthTab("login")} className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${authTab === "login" ? "bg-white text-black" : "text-white/50 hover:text-white"}`}>
                     Login
@@ -409,7 +525,11 @@ export default function CreatorProfilePage() {
                     <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium outline-none focus:border-white/30 transition-colors" required />
                   </div>
 
-                  <button type="submit" disabled={authLoading} className="w-full py-3.5 rounded-xl bg-white text-black font-bold text-sm transition-all duration-300 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed mt-2">
+                  {authTab === "signup" && (
+                    <TermsAgreement checked={authAcceptedTerms} onCheckedChange={setAuthAcceptedTerms} />
+                  )}
+
+                  <button type="submit" disabled={authLoading || (authTab === "signup" && !authAcceptedTerms)} className="w-full py-3.5 rounded-xl bg-white text-black font-bold text-sm transition-all duration-300 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed mt-2">
                     {authLoading ? (
                       <span className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
@@ -433,65 +553,15 @@ export default function CreatorProfilePage() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════
-         DURATION MODAL
-         ═══════════════════════════════════════ */}
-      {flowState === "duration" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeModal} />
-          <div className="relative w-[92vw] max-w-[360px] sm:w-full sm:max-w-md animate-fade-in-up">
-            <div className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[400px] sm:min-h-[440px] flex flex-col justify-center overflow-hidden" style={{ borderRadius: "1.5rem" }}>
-              {/* Glow */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
-
-              <div className="relative z-10 flex flex-col h-full justify-center items-center">
-                <div className="w-full max-w-[340px] flex flex-col justify-center">
-                  <div className="text-left w-full sm:w-[320px] mx-auto px-4 sm:px-6">
-                    <h3 className="text-[30px] sm:text-[32px] md:text-[34px] font-black mb-1.5 sm:mb-2 text-white tracking-tight leading-tight">
-                      Duration.
-                    </h3>
-                    <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#A1A1A1] mb-8 sm:mb-9 font-medium leading-snug">
-                      Select your preferred session length.
-                    </p>
-                  </div>
-
-                  <div className="w-full animate-fade-in-up flex flex-col items-center gap-4 sm:gap-5 mt-1 sm:mt-2">
-                    {/* Duration grid: 3 cols top, 2 cols bottom */}
-                    <div className="w-[86%] sm:w-full max-w-[280px] sm:max-w-[320px] self-center grid grid-cols-6 gap-x-2.5 gap-y-2.5 sm:gap-x-3 sm:gap-y-3">
-                      {TIME_OPTIONS.map((opt, index) => {
-                        const isSelected = selectedMinutes === opt.minutes;
-                        const colSpan = index < 3 ? "col-span-2" : "col-span-3";
-                        return (
-                          <button
-                            key={opt.minutes}
-                            onClick={() => setSelectedMinutes(opt.minutes)}
-                            className={`${colSpan} h-[62px] sm:h-[68px] rounded-xl sm:rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center ${isSelected ? "border-white bg-white/10 text-white shadow-lg" : "border-white/20 bg-white/[0.02] text-white/70 hover:border-white/50"}`}
-                          >
-                            <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold mb-0.5">{opt.label.toUpperCase()}</span>
-                            <span className="text-xs sm:text-sm font-bold leading-none">₹{opt.price}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Begin */}
-                    <div className="w-full flex justify-center pt-1 sm:pt-2">
-                      <button
-                        onClick={handlePayAndStart}
-                        disabled={!selectedMinutes}
-                        className={`w-[86%] sm:w-[320px] h-[64px] rounded-2xl font-semibold text-lg transition-all duration-500 ${selectedMinutes ? "bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 text-white shadow-[0_10px_40px_rgba(255,80,80,0.35)] hover:scale-[1.02]" : "bg-white/10 text-white/30 border border-white/10 cursor-not-allowed"}`}
-                      >
-                        Begin Session
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <PaymentModal
+        isOpen={flowState === "duration"}
+        onClose={closeModal}
+        influencerId={creatorInfluencerId}
+        userName={user?.name}
+        userEmail={user?.email}
+        providerName={preferredProvider}
+        onPaymentVerified={handlePaymentVerified}
+      />
     </main>
   );
 }
