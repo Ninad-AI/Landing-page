@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import Header from "./components/Header";
@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   title: "Ninad AI - Real-Time AI Voice That Feels Human",
   description:
     "Low-latency, expressive speech for apps, agents, and experiences ready to integrate in minutes. Experience the next evolution in voice AI.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#05030b",
 };
 
 export default function RootLayout({

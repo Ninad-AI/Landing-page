@@ -50,7 +50,11 @@ export const startStreamingMic = async (
     },
   });
 
-  const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+  const audioWindow = window as Window & { webkitAudioContext?: typeof AudioContext };
+  const AudioContextCtor = window.AudioContext || audioWindow.webkitAudioContext;
+  if (!AudioContextCtor) {
+    throw new Error("AudioContext is not supported in this browser.");
+  }
   const audioContext: AudioContext = new AudioContextCtor({ sampleRate: 48000 });
 
   // MUST resume after user gesture
@@ -59,11 +63,8 @@ export const startStreamingMic = async (
   }
 
   const source = audioContext.createMediaStreamSource(stream);
-  const processor = audioContext.createScriptProcessor(1024, 1, 1);
-
-  // Connect the graph
-  source.connect(processor);
-  processor.connect(audioContext.destination);
+  let processor: ScriptProcessorNode | null = null;
+  let workletNode: AudioWorkletNode | null = null;
 
   /* ── VAD state ── */
   let isSpeaking = false;
@@ -72,11 +73,21 @@ export const startStreamingMic = async (
   let noiseCount = 0;
   const calibrationMs = 500;    // first 0.5 s used for noise-floor estimation
   const streamStartTime = performance.now();
+  const FRAME_SIZE = 320;       // 20 ms @ 16 kHz
+  let pcmRemainder = new Int16Array(0);
 
-  processor.onaudioprocess = (event: AudioProcessingEvent) => {
+  const safeSend = (payload: string | ArrayBuffer): boolean => {
+    if (ws.readyState !== WebSocket.OPEN) return false;
+    try {
+      ws.send(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const processInputChunk = (input: Float32Array) => {
     if (ws.readyState !== WebSocket.OPEN) return;
-
-    const input = event.inputBuffer.getChannelData(0);
 
     // ── Downsample to 16 kHz ──
     const targetSampleRate = 16000;
@@ -116,14 +127,14 @@ export const startStreamingMic = async (
 
       if (!isSpeaking) {
         isSpeaking = true;
-        ws.send(JSON.stringify({ type: "speech_start" }));
+        safeSend(JSON.stringify({ type: "speech_start" }));
         if (typeof onSpeechStart === "function") onSpeechStart();
       }
     } else if (isSpeaking) {
       const silenceElapsed = now - lastSpeechTs;
       if (silenceElapsed >= silenceMs) {
         isSpeaking = false;
-        ws.send(JSON.stringify({ type: "speech_end" }));
+        safeSend(JSON.stringify({ type: "speech_end" }));
         if (typeof onSpeechEnd === "function") onSpeechEnd();
       }
     }
@@ -135,15 +146,18 @@ export const startStreamingMic = async (
       pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
     }
 
-    // ── 20 ms frame chunking (REQUIRED FOR VAD) ──
-    const FRAME_SIZE = 320; // 20 ms @ 16 kHz
+    // ── 20 ms frame chunking with carry-over ──
+    const combined = new Int16Array(pcmRemainder.length + pcm16.length);
+    combined.set(pcmRemainder, 0);
+    combined.set(pcm16, pcmRemainder.length);
 
-    for (let i = 0; i < pcm16.length; i += FRAME_SIZE) {
-      const frame = pcm16.slice(i, i + FRAME_SIZE);
-      if (frame.length === FRAME_SIZE) {
-        ws.send(frame.buffer);
-      }
+    let offset = 0;
+    while (offset + FRAME_SIZE <= combined.length) {
+      const frame = combined.slice(offset, offset + FRAME_SIZE);
+      safeSend(frame.buffer as ArrayBuffer);
+      offset += FRAME_SIZE;
     }
+    pcmRemainder = combined.slice(offset);
 
     // ── Optional audio level callback ──
     if (typeof onAudioLevel === "function") {
@@ -151,17 +165,66 @@ export const startStreamingMic = async (
     }
   };
 
+  const setupWorklet = async (): Promise<boolean> => {
+    if (!audioContext.audioWorklet || typeof AudioWorkletNode === "undefined") {
+      return false;
+    }
+
+    try {
+      await audioContext.audioWorklet.addModule("/worklets/pcm-capture-processor.js");
+      workletNode = new AudioWorkletNode(audioContext, "pcm-capture-processor", {
+        numberOfInputs: 1,
+        numberOfOutputs: 0,
+        channelCount: 1,
+      });
+
+      workletNode.port.onmessage = (event: MessageEvent<Float32Array | number[]>) => {
+        const payload = event.data;
+        if (payload instanceof Float32Array) {
+          processInputChunk(payload);
+          return;
+        }
+        if (Array.isArray(payload)) {
+          processInputChunk(Float32Array.from(payload));
+        }
+      };
+
+      source.connect(workletNode);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const usingWorklet = await setupWorklet();
+
+  if (!usingWorklet) {
+    processor = audioContext.createScriptProcessor(1024, 1, 1);
+    source.connect(processor);
+    processor.connect(audioContext.destination);
+    processor.onaudioprocess = (event: AudioProcessingEvent) => {
+      processInputChunk(event.inputBuffer.getChannelData(0));
+    };
+  }
+
   return {
     stop: () => {
       // If still speaking when stopped, send a final speech_end
       if (isSpeaking && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: "speech_end" }));
+        safeSend(JSON.stringify({ type: "speech_end" }));
         if (typeof onSpeechEnd === "function") onSpeechEnd();
       }
-      processor.disconnect();
+      if (processor) {
+        processor.onaudioprocess = null;
+        processor.disconnect();
+      }
+      if (workletNode) {
+        workletNode.port.onmessage = null;
+        workletNode.disconnect();
+      }
       source.disconnect();
       stream.getTracks().forEach((t) => t.stop());
-      audioContext.close();
+      audioContext.close().catch(() => {});
     },
   };
 };

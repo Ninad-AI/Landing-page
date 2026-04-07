@@ -22,9 +22,14 @@ export default function Header() {
 
   // Page type detection
   const isAdminPage = pathname.startsWith('/admin');
+  const isVoiceChatPage = /^\/creators\/[^/]+\/voice-chat\/?$/.test(pathname);
   // Match /creators/some-slug but NOT /creators or /creators/creator-name-creator-id (the old static route)
   const isCreatorSlugPage = /^\/creators\/[^/]+$/.test(pathname) && pathname !== '/creators/creator-name-creator-id';
   const isMinimalHeader = isAdminPage || isCreatorSlugPage;
+
+  if (isVoiceChatPage) {
+    return null;
+  }
 
   const handleLogoClick = () => {
     if (isCreatorSlugPage) {
@@ -53,6 +58,25 @@ export default function Header() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousTouchAction = document.body.style.touchAction;
+
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouchAction;
+    };
+  }, [isMobileMenuOpen]);
+
   const handleLogout = () => {
     logout();
     router.push("/");
@@ -70,7 +94,7 @@ export default function Header() {
           {/* Logo */}
           <button
             onClick={handleLogoClick}
-            className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50 cursor-pointer bg-none border-none p-0"
+            className="relative w-32 h-8 md:w-40 md:h-10 shrink-0 z-50 cursor-pointer bg-none border-none p-0"
           >
             <Image
               src="/assets/ninad-ai.png"
@@ -122,7 +146,7 @@ export default function Header() {
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="relative w-32 h-8 md:w-40 md:h-10 flex-shrink-0 z-50 cursor-pointer bg-none border-none p-0 lg:absolute lg:left-12 xl:left-20"
+          className="relative w-32 h-8 md:w-40 md:h-10 shrink-0 z-50 cursor-pointer bg-none border-none p-0 lg:absolute lg:left-12 xl:left-20"
         >
           <Image
             src="/assets/ninad-ai.png"
@@ -213,7 +237,9 @@ export default function Header() {
         {/* Mobile Menu Toggle */}
         {!isMinimalHeader && (
           <button
-            className="lg:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 group"
+            aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMobileMenuOpen}
+            className="lg:hidden relative z-50 h-11 w-11 flex flex-col items-center justify-center gap-1.5 group"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             <span
@@ -233,7 +259,7 @@ export default function Header() {
 
         {/* Mobile Menu Content */}
         <div
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex flex-col items-center justify-start pt-28 gap-6 transition-transform duration-500 ease-in-out overflow-y-auto min-h-screen ${isMobileMenuOpen
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex min-h-dvh flex-col items-center justify-start gap-6 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+5.5rem)] transition-transform duration-500 ease-in-out ${isMobileMenuOpen
             ? "translate-x-0"
             : "translate-x-full"
             }`}

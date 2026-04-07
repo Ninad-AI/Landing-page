@@ -6,6 +6,13 @@ import { voiceApi, providerApi, knowledgeApi } from '../lib/api';
 
 type Tab = 'knowledge' | 'voice' | 'provider';
 
+// Defaults for quick testing
+const DEFAULT_INFLUENCER_ID = 'influencer_8';
+const DEFAULT_PREFERRED_PROVIDER = 'deepgram';
+const INFLUENCER_LABELS: Record<string, string> = {
+  influencer_8: 'Pawan Kumar',
+};
+
 export default function InfluencerDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('knowledge');
 
@@ -81,11 +88,11 @@ function KnowledgeBaseTab() {
     setSaving(true);
     try {
       await knowledgeApi.save({
-        influencer_id: 'current',
+        influencer_id: DEFAULT_INFLUENCER_ID,
         content: content.trim(),
         category,
       });
-      toast.success('Knowledge saved successfully!');
+      toast.success(`Knowledge saved for ${INFLUENCER_LABELS[DEFAULT_INFLUENCER_ID] || 'the selected influencer'} successfully!`);
       setContent('');
     } catch {
       toast.error('Failed to save knowledge entry');
@@ -146,7 +153,7 @@ function KnowledgeBaseTab() {
 function VoiceRegistrationTab() {
   const [voiceName, setVoiceName] = useState('');
   const [sampleUrl, setSampleUrl] = useState('');
-  const [provider, setProvider] = useState('deepgram');
+  const [provider, setProvider] = useState(DEFAULT_PREFERRED_PROVIDER);
   const [saving, setSaving] = useState(false);
 
   const handleRegister = async () => {
@@ -227,7 +234,7 @@ function VoiceRegistrationTab() {
 }
 
 function ProviderConfigTab() {
-  const [providerName, setProviderName] = useState('deepgram');
+  const [providerName, setProviderName] = useState(DEFAULT_PREFERRED_PROVIDER);
   const [apiKey, setApiKey] = useState('');
   const [saving, setSaving] = useState(false);
 

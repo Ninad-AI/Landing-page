@@ -66,11 +66,24 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     behindGlowColor = 'rgba(97, 37, 216, 0.4)',
     behindGlowSize = '60%',
 }) => {
+    const isInteractive = typeof onContactClick === 'function';
+
     // ... refs (wrapRef, shellRef, etc.)
     const wrapRef = useRef<HTMLDivElement>(null);
     const shellRef = useRef<HTMLDivElement>(null);
     const enterTimerRef = useRef<number | null>(null);
     const leaveRafRef = useRef<number | null>(null);
+
+    const handleCardKeyDown = useCallback(
+        (event: React.KeyboardEvent<HTMLDivElement>): void => {
+            if (!isInteractive) return;
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onContactClick?.();
+            }
+        },
+        [isInteractive, onContactClick]
+    );
 
     const tiltEngine = useMemo<TiltEngine | null>(() => {
         if (!enableTilt) return null;
@@ -347,7 +360,15 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
             )}
 
             {/* Main Card Shell - Liquid Glass Effect */}
-            <div ref={shellRef} className="relative z-[1] h-full w-full group cursor-default">
+            <div
+                ref={shellRef}
+                className={`relative z-1 h-full w-full group ${isInteractive ? 'cursor-pointer' : 'cursor-default'}`}
+                onClick={onContactClick}
+                onKeyDown={handleCardKeyDown}
+                role={isInteractive ? 'button' : undefined}
+                tabIndex={isInteractive ? 0 : undefined}
+                aria-label={isInteractive ? `Open ${name} profile` : undefined}
+            >
                 <div
                     className="relative h-full w-full overflow-hidden transition-all duration-300 ease-out"
                     style={{
@@ -371,13 +392,13 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                                 className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                             />
                         ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black" />
+                            <div className="w-full h-full bg-linear-to-br from-gray-800 to-black" />
                         )}
                     </div>
 
                     {/* Glossy Overlay / Reflection */}
                     <div
-                        className="absolute inset-0 pointer-events-none z-[2]"
+                        className="absolute inset-0 pointer-events-none z-2"
                         style={{
                             background: 'linear-gradient(125deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 40%, transparent 100%)',
                             opacity: 0.8
@@ -386,49 +407,44 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
                     {/* Gradient Overlay for Text Readability */}
                     <div
-                        className="absolute inset-0 pointer-events-none z-[1]"
+                        className="absolute inset-0 pointer-events-none z-1"
                         style={{
                             background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%)'
                         }}
                     />
 
-                    {/* Content Section */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col justify-end h-full z-10">
-
-                        {/* Name & Bio */}
-                        <div className="mb-6 transform translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h2 className="text-2xl font-bold text-white tracking-wide drop-shadow-md">{name}</h2>
-                                {/* Verified Badge Icon */}
-                                <svg className="w-4 h-4 text-blue-400 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
-                            </div>
-                            <p className="text-sm text-gray-200 font-medium leading-relaxed opacity-90 line-clamp-2 drop-shadow-sm">
-                                {title}
-                            </p>
+                    {/* Name & Role pinned to bottom-left */}
+                    <div className="absolute left-6 bottom-6 z-10 max-w-[calc(100%-9.5rem)] text-left transform translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+                        <div className="mb-1 flex items-center gap-2 min-w-0">
+                            <h2 className="text-2xl font-bold leading-tight tracking-[0.01em] text-white drop-shadow-md truncate">{name}</h2>
+                            {/* Verified Badge Icon */}
+                            <svg className="w-4 h-4 shrink-0 text-blue-400 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
                         </div>
+                        <p className="text-left text-sm font-medium leading-relaxed text-gray-200 opacity-90 line-clamp-2 drop-shadow-sm">
+                            {title}
+                        </p>
+                    </div>
 
-                        {/* Footer: Action */}
-                        <div className="flex items-center justify-end">
-                            {/* Talk Button */}
-                            <button
-                                onClick={onContactClick}
-                                className="
-                                    group/btn relative overflow-hidden
-                                    bg-white/10 backdrop-blur-md border border-white/20
-                                    text-white px-5 py-2 rounded-full text-xs font-bold
-                                    hover:bg-white/20 hover:border-white/40 transition-all duration-300
-                                    shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)]
-                                    active:scale-95 flex items-center gap-2
-                                "
-                            >
-                                <span>Talk</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 group-hover/btn:animate-pulse">
-                                    <path d="M8.25 4.5a3.75 3.75 0 117.5 0v8.25a3.75 3.75 0 11-7.5 0V4.5z" />
-                                    <path d="M6 10.5a.75.75 0 01.75.75v1.5a5.25 5.25 0 1010.5 0v-1.5a.75.75 0 011.5 0v1.5a6.751 6.751 0 01-6 9.375v.375h3a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5h3v-.375c-3.328-.182-6-2.957-6-6.375v-1.5A.75.75 0 016 10.5z" />
-                                </svg>
-                                {/* Shine Effect */}
-                                <div className="absolute inset-0 -translate-x-[100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                            </button>
+                    {/* Talk pill pinned to bottom-right */}
+                    <div className="absolute right-6 bottom-6 z-10">
+                        <div
+                            aria-hidden="true"
+                            className="
+                                group/btn relative overflow-hidden
+                                bg-white/10 backdrop-blur-md border border-white/20
+                                text-white px-5 py-2 rounded-full text-xs font-bold
+                                hover:bg-white/20 hover:border-white/40 transition-all duration-300
+                                shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)]
+                                active:scale-95 flex items-center gap-2
+                            "
+                        >
+                            <span>Talk</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 group-hover/btn:animate-pulse">
+                                <path d="M8.25 4.5a3.75 3.75 0 117.5 0v8.25a3.75 3.75 0 11-7.5 0V4.5z" />
+                                <path d="M6 10.5a.75.75 0 01.75.75v1.5a5.25 5.25 0 1010.5 0v-1.5a.75.75 0 011.5 0v1.5a6.751 6.751 0 01-6 9.375v.375h3a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5h3v-.375c-3.328-.182-6-2.957-6-6.375v-1.5A.75.75 0 016 10.5z" />
+                            </svg>
+                            {/* Shine Effect */}
+                            <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
                         </div>
                     </div>
 

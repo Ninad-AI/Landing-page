@@ -21,16 +21,9 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (!isHydrated) {
-    // Smooth skeleton screen instead of blank white/flash
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div
-            className="w-10 h-10 rounded-full border-2 border-white/10 border-t-primary animate-spin"
-            style={{ animationDuration: '0.8s' }}
-          />
-          <div className="w-24 h-1 rounded-full loading-shimmer" />
-        </div>
+        <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-primary animate-spin" />
       </div>
     );
   }

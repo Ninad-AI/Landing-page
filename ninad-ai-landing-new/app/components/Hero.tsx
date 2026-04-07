@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative flex w-full min-h-screen flex-col items-center justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-16 md:pb-20">
+    <section id="hero" className="relative flex w-full min-h-svh md:min-h-screen flex-col items-center justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-16 md:pb-20">
       {/* ===== Background glows ===== */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         <div className="absolute left-[-30vw] top-[-18vw] h-[clamp(280px,62vw,780px)] w-[clamp(280px,60vw,760px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
@@ -11,7 +11,7 @@ export default function Hero() {
       </div>
 
       {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex w-full max-w-[1700px] flex-col items-center justify-center space-y-6 px-4 sm:px-6 md:space-y-8 md:px-8 lg:space-y-12">
+      <div className="relative z-10 flex w-full max-w-425 flex-col items-center justify-center space-y-6 px-4 sm:px-6 md:space-y-8 md:px-8 lg:space-y-12">
         {/* REAL-TIME */}
         <h1 className="font-sans font-extrabold text-[clamp(32px,8vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
           REAL-TIME
@@ -27,7 +27,7 @@ export default function Hero() {
               text-[clamp(60px,18vw,280px)]
               leading-[0.85]
               tracking-tighter
-              bg-gradient-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
+              bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
               pr-1
@@ -42,7 +42,7 @@ export default function Hero() {
               relative
               w-[clamp(60px,18vw,280px)]
               h-[clamp(60px,18vw,280px)]
-              flex-shrink-0
+              shrink-0
               cursor-pointer
               mx-[0.15em]
               group
@@ -76,7 +76,7 @@ export default function Hero() {
               text-[clamp(60px,18vw,280px)]
               leading-[0.85]
               tracking-tighter
-              bg-gradient-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
+              bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
               pl-1

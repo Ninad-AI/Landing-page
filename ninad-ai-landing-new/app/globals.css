@@ -34,6 +34,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -90,8 +91,45 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter);
   overflow-x: hidden;
+  overscroll-behavior-x: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 768px) {
+  .min-h-screen {
+    min-height: 100svh;
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    .min-h-screen {
+      min-height: 100dvh;
+    }
+  }
+}
+
+@media (pointer: coarse) {
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation-duration: 42s;
+  }
+
+  .glass,
+  .glass-card {
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 img,
