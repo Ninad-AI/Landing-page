@@ -88,7 +88,6 @@ export default function PaymentModal({
   const [bookingUnavailableMessage, setBookingUnavailableMessage] = useState<string | null>(null);
 
   const { openCheckout } = useRazorpay();
-  const disclaimerText = "This is AI persona of Pavan Kumar and not him really talking.";
 
   const selectedDuration = selectedMinutes;
 
@@ -204,12 +203,6 @@ export default function PaymentModal({
                 <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#A1A1A1] mb-8 sm:mb-9 font-medium leading-snug">
                   Select your preferred session length.
                 </p>
-
-                <div className="mb-5 rounded-xl border border-amber-200/30 bg-amber-500/10 px-3.5 py-3">
-                  <p className="text-[12px] sm:text-[13px] font-medium leading-relaxed text-amber-100">
-                    {disclaimerText}
-                  </p>
-                </div>
               </div>
 
               <div className="w-full animate-fade-in-up flex flex-col items-center gap-4 sm:gap-5 mt-1 sm:mt-2">

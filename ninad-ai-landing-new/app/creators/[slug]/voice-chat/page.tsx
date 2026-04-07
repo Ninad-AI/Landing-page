@@ -432,7 +432,7 @@ function VoiceChatContent() {
         />
       </div>
 
-      <p className="pointer-events-none fixed bottom-12 left-1/2 z-110 -translate-x-1/2 rounded-full border border-white/10 bg-black/35 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-white/65 backdrop-blur-sm sm:bottom-14 sm:text-xs">
+      <p className="pointer-events-none fixed bottom-12 left-1/2 z-110 -translate-x-1/2 rounded-full border border-white/10 bg-black/35 px-3.5 py-1.5 text-[10px] font-normal tracking-wide text-white/60 backdrop-blur-sm sm:bottom-14 sm:text-[11px]">
         Ninad AI can make mistakes.
       </p>
     </main>
