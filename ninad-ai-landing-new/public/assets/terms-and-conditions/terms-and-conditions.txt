@@ -1,0 +1,134 @@
+End User Terms and Conditions (Voice Conversation Service) 
+Last Updated: March 19, 2026 
+Effective Date: Immediately upon acceptance (before any payment) 
+These Terms and Conditions (“Terms”) form a legally binding agreement between you (“you” or 
+“User”) and Ninad AI Private Limited (including its affiliates, “we”, “us”, or “Service”), the 
+operator of the voice-to-voice AI conversation platform. 
+IMPORTANT: BY CLICKING “PAY & START SESSION”, ENTERING PAYMENT DETAILS, OR 
+OTHERWISE ACCESSING OR USING THE SERVICE, YOU ACKNOWLEDGE THAT YOU 
+HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS. IF YOU DO 
+NOT AGREE, DO NOT PROCEED WITH PAYMENT OR USE. 
+1. The Service 
+We provide a voice-to-voice only pay-as-you-go service where you can speak with an 
+AI-generated voice clone (the “Persona”) of a famous personality or public figure (our “Client”) 
+who has separately signed a Memorandum of Understanding with us and granted explicit 
+consent for their voice and public persona to be used. 
+● The interaction is purely audio (voice input from you → AI voice output). There is no 
+text chat, no video, and no live human involvement. 
+● The Persona is an artificial intelligence simulation trained on consented voice 
+samples. It is not the real Client. The Client does not hear, see, or interact with you in 
+any way. 
+● Every session begins with an on-screen disclaimer: “This is an AI clone of [Client Name]. 
+I am not the real person.” Sessions are charged on a pay-as-you-go basis only (no 
+free tier, no subscriptions). Pricing is displayed before payment and may change. 
+2. Eligibility 
+● You represent and warrant that you are at least 18 years old (or the age of majority in 
+your jurisdiction, whichever is higher). 
+● The Service is not intended for, and is not directed at, individuals under 18 years 
+of age. If you are under 18, you are strictly prohibited from using the Service. 
+● By proceeding to payment and using the Service, you confirm that you meet the age 
+requirement.. Any use by a person under 18 is a material breach of these Terms. 
+● If you are a parent or guardian and discover that your minor child is using the Service, 
+you must immediately notify us at ninad.company@gmail.com and ensure they stop. You 
+agree to be responsible for any use of the Service by minors under your care. 
+3. Payments & Billing 
+● All sessions are prepaid. You pay before starting. 
+● Payments are processed securely via third-party gateways. We do not store full card 
+details. 
+● No refunds for dissatisfaction, emotional response, session length, or perceived quality 
+unless the session fails due to a technical fault on our side (in which case we may issue 
+credit at our discretion). 
+● You are responsible for all charges on your account. We may suspend access for unpaid 
+or disputed charges. 
+● Taxes are added where applicable. You are responsible for any additional local taxes or 
+fees. 
+4. Acceptable Use & Prohibited Conduct 
+You agree to use the Service only for lawful, personal entertainment purposes. You shall not: 
+● Record, screenshot, download, share, or redistribute any part of a session. 
+● Claim or imply that the conversation was with the real Client or that the Client endorsed 
+any statement. 
+● Use the Service for medical, legal, financial, therapeutic, investment, or professional 
+advice (we provide none). 
+● Attempt to elicit harmful, illegal, hateful, explicit, or dangerous content. Our AI filters will 
+try to block and terminate such attempts. 
+● Harass, stalk, or attempt to obtain personal information from the Persona. 
+● Use the Service in a way that could cause emotional distress, addiction, or harm to 
+yourself or others (we monitor for crisis indicators). 
+● Reverse-engineer, attempt to clone the voice yourself, paste false audio recordings and 
+claim that this platform or use outputs for commercial purposes. 
+● Circumvent any technical protections or disclaimers. 
+Violation may result in immediate session termination, account ban, and legal action. We and 
+the Client reserve the right to pursue damages. 
+5. Intellectual Property & Licenses 
+● The Persona, voice model, and all outputs are owned by us and/or licensed exclusively 
+from the Client. You receive only a limited, non-exclusive, revocable license to listen 
+during your paid session. 
+● You grant us a worldwide, royalty-free license to process your voice input solely to 
+generate the response and improve the Service (anonymized where possible). 
+● You may not use any output for commercial, political, defamatory, or public purposes. 
+6. Disclaimers & No Warranties 
+THE SERVICE IS PROVIDED “AS IS”. 
+● The Persona is entertainment only and simulates a personality based on public 
+information and consented voice data. It is not the real Client and cannot act on their 
+behalf. 
+● We make no representations about accuracy, emotional authenticity, or suitability for 
+any purpose. 
+● We are not responsible for any emotional attachment, addiction, heartbreak, financial 
+loss, or psychological effects you may experience. 
+● We and the Client disclaim all liability for any advice, statements, or content generated 
+by the AI. 
+● Voice quality, latency, or session length may vary. No guarantee of continuous 
+availability. 
+IMPORTANT SAFETY NOTICE: If you are experiencing distress, please contact a professional 
+helpline immediately. The Service is not a substitute for human support. 
+7. Limitation of Liability 
+To the fullest extent permitted by law: 
+● Our total liability to you shall not exceed the total amount you paid for sessions in the 12 
+months preceding the claim. 
+● We and the Client are not liable for any indirect, incidental, consequential, emotional, or 
+punitive damages (including loss of profits, data, or emotional distress). 
+● This includes any claims arising from your interaction with the Persona, even if we were 
+advised of the possibility. 
+8. Indemnification 
+You agree to indemnify, defend, and hold harmless us, our officers, employees, and the Client 
+(and their representatives) from any claims, losses, damages, or expenses (including legal fees) 
+arising from: 
+● Your misuse of the Service or outputs. 
+● Your violation of these Terms (including any use by a person under 18). 
+● Any claim that you recorded or misrepresented the conversation as real. 
+Parents/Guardians: If a minor uses the Service in violation of these Terms, the parent or 
+guardian agrees to be fully liable and to reimburse us for any costs, damages, or legal fees 
+incurred. 
+9. Termination & Suspension 
+We may terminate or suspend your access at any time for any reason (including suspected 
+violation or age ineligibility). Paid but unused session credit may be forfeited. You may stop 
+using the Service at any time, but no refunds. 
+10. Privacy & Data 
+Your voice inputs and session data are processed in accordance with our Privacy Policy 
+(linked at checkout) and the Digital Personal Data Protection Act, 2023 (India). Sessions are 
+encrypted and auto-deleted after a short retention period unless you request otherwise. We do 
+not share identifiable session content with the Client. 
+11. Dispute Resolution – Mandatory Arbitration & Class Action Waiver 
+PLEASE READ CAREFULLY 
+Any dispute arising out of or relating to these Terms, the Service, or your use (including claims 
+against the Client) shall be resolved by binding arbitration in Bengaluru, Karnataka, India, 
+under the rules of the Indian Council of Arbitration (or a mutually agreed arbitrator). 
+● You waive any right to a jury trial or to participate in a class action, consolidated, or 
+representative proceeding. 
+● Small claims (under ₹50,000) may be filed in a local court in Bengaluru. 
+● Governing law: Laws of India, without regard to conflict of laws principles. 
+This clause survives termination. 
+12. Changes to Terms 
+We may update these Terms. Continued use after changes constitutes acceptance. Material 
+changes will be notified at checkout or via email. 
+13. Miscellaneous 
+● These Terms constitute the entire agreement. 
+● If any provision is invalid, the rest remain enforceable. 
+● We may assign these Terms; you may not. 
+● Contact: [legal@yourcompany.com] or the in-app support (pre-payment only). 
+By proceeding to payment, you confirm: 
+● You are at least 18 years old (or the age of majority in your jurisdiction), 
+● You understand this is an AI simulation only (not the real person), 
+● You accept all risks of emotional or other effects, 
+● You agree to these Terms (including the arbitration clause and liability limitations) on 
+behalf of yourself and any heirs or representatives. 

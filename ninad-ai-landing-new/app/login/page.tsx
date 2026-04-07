@@ -4,35 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../lib/stores';
+import { authApi } from '../lib/api';
 import { toast } from 'sonner';
 
-/* ── Hardcoded credentials (temporary) ── */
-const HARDCODED_USERS = [
-  {
-    email: 'yash@gmail.com',
-    password: 'yash@123',
-    user: {
-      id: 'user-001',
-      email: 'yash@gmail.com',
-      name: 'Yash',
-      role: 'user' as const,
-      avatar_url: '',
-      created_at: new Date().toISOString(),
-    },
-  },
-  {
-    email: 'admin@gmail.com',
-    password: 'admin@123',
-    user: {
-      id: 'admin-001',
-      email: 'admin@gmail.com',
-      name: 'Admin',
-      role: 'admin' as const,
-      avatar_url: '',
-      created_at: new Date().toISOString(),
-    },
-  },
-];
+function getAuthErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
+  return apiError.response?.data?.detail || apiError.response?.data?.message || fallback;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,22 +29,20 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // Simulate a tiny network delay
-    await new Promise((r) => setTimeout(r, 400));
+    try {
+      const response = await authApi.login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    const match = HARDCODED_USERS.find(
-      (u) => u.email === email.trim().toLowerCase() && u.password === password
-    );
-
-    if (match) {
-      login(match.user, `hardcoded-token-${match.user.role}`);
-      toast.success(`Welcome back, ${match.user.name}!`);
+      login(response.user, response.tokens.access_token);
+      toast.success(`Welcome back, ${response.user.name}!`);
       router.push('/dashboard');
-    } else {
-      toast.error('Invalid credentials. Please try again.');
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error, 'Login failed. Please try again.'));
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

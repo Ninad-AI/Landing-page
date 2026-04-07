@@ -4,7 +4,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../lib/stores';
+import { authApi } from '../lib/api';
+import TermsAgreement from '../components/auth/TermsAgreement';
 import { toast } from 'sonner';
+
+function getAuthErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
+  return apiError.response?.data?.detail || apiError.response?.data?.message || fallback;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -13,6 +20,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,24 +29,29 @@ export default function RegisterPage() {
       toast.error('Please fill in all fields');
       return;
     }
+    if (!acceptedTerms) {
+      toast.error('Please review and accept the Terms & Conditions to continue.');
+      return;
+    }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 400));
 
-    // Hardcoded mock registration — creates a user role account
-    const mockUser = {
-      id: `user-${Date.now()}`,
-      email: email.trim().toLowerCase(),
-      name: name.trim(),
-      role: 'user' as const,
-      avatar_url: '',
-      created_at: new Date().toISOString(),
-    };
+    try {
+      const response = await authApi.register({
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password,
+        role: 'user',
+      });
 
-    login(mockUser, `hardcoded-token-user`);
-    toast.success(`Welcome to Ninad AI, ${mockUser.name}!`);
-    router.push('/dashboard');
-    setLoading(false);
+      login(response.user, response.tokens.access_token);
+      toast.success(`Welcome to Ninad AI, ${response.user.name}!`);
+      router.push('/dashboard');
+    } catch (error) {
+      toast.error(getAuthErrorMessage(error, 'Could not create account. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,9 +123,15 @@ export default function RegisterPage() {
               />
             </div>
 
+            <TermsAgreement
+              checked={acceptedTerms}
+              onCheckedChange={setAcceptedTerms}
+              className="pt-1"
+            />
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedTerms}
               className="w-full py-4 rounded-xl bg-primary text-white font-sans font-bold text-base transition-all duration-300 hover:bg-primary-light hover:shadow-[0_0_30px_rgba(97,37,216,0.4)] disabled:opacity-50 disabled:cursor-not-allowed btn-primary active:scale-[0.98]"
             >
               {loading ? (
