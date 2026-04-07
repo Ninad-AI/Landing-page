@@ -16,7 +16,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpenPath, setMobileMenuOpenPath] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout, isHydrated } = useAuthStore();
 
@@ -26,10 +26,7 @@ export default function Header() {
   // Match /creators/some-slug but NOT /creators or /creators/creator-name-creator-id (the old static route)
   const isCreatorSlugPage = /^\/creators\/[^/]+$/.test(pathname) && pathname !== '/creators/creator-name-creator-id';
   const isMinimalHeader = isAdminPage || isCreatorSlugPage;
-
-  if (isVoiceChatPage) {
-    return null;
-  }
+  const isMobileMenuOpen = mobileMenuOpenPath === pathname;
 
   const handleLogoClick = () => {
     if (isCreatorSlugPage) {
@@ -45,6 +42,8 @@ export default function Header() {
   };
 
   useEffect(() => {
+    if (isVoiceChatPage) return;
+
     const handleScroll = () => {
       const currentScroll = window.scrollY || document.documentElement.scrollTop;
       setIsScrolled(currentScroll > 10);
@@ -56,13 +55,13 @@ export default function Header() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [pathname]);
+  }, [isVoiceChatPage, pathname]);
 
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+    if (isVoiceChatPage) {
+      return;
+    }
 
-  useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     const previousTouchAction = document.body.style.touchAction;
 
@@ -75,12 +74,16 @@ export default function Header() {
       document.body.style.overflow = previousOverflow;
       document.body.style.touchAction = previousTouchAction;
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isVoiceChatPage]);
+
+  if (isVoiceChatPage) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();
     router.push("/");
-    setIsMobileMenuOpen(false);
+    setMobileMenuOpenPath(null);
   };
 
   /* ═══════════════════════════════════════════════
@@ -240,7 +243,11 @@ export default function Header() {
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isMobileMenuOpen}
             className="lg:hidden relative z-50 h-11 w-11 flex flex-col items-center justify-center gap-1.5 group"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() =>
+              setMobileMenuOpenPath((currentPath) =>
+                currentPath === pathname ? null : pathname
+              )
+            }
           >
             <span
               className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
@@ -269,7 +276,7 @@ export default function Header() {
               <Link
                 key={link.label}
                 href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpenPath(null)}
                 className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
               >
                 {link.label}
@@ -281,7 +288,7 @@ export default function Header() {
             <div className="flex flex-col items-center gap-4">
               <Link
                 href="/dashboard"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpenPath(null)}
                 className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
               >
                 Dashboard
@@ -297,14 +304,14 @@ export default function Header() {
             <div className="flex flex-col items-center gap-3">
               <Link
                 href="/book-demo"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpenPath(null)}
                 className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
               >
                 Book Demo
               </Link>
               <Link
                 href="/login"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => setMobileMenuOpenPath(null)}
                 className="text-sm font-sans font-medium text-white/70 hover:text-white transition-colors"
               >
                 Sign In

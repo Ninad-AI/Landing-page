@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const safetyFeatures = [
   {
@@ -46,7 +46,7 @@ export default function Safety() {
     opacity: 0,
   });
 
-  const updateActiveTabStyle = () => {
+  const updateActiveTabStyle = useCallback(() => {
     const tabContainer = tabContainerRef.current;
     const currentTab = tabRefs.current[activeTab];
 
@@ -62,7 +62,7 @@ export default function Safety() {
       height: tabRect.height,
       opacity: 1,
     });
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     updateActiveTabStyle();
@@ -73,7 +73,7 @@ export default function Safety() {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [activeTab]);
+  }, [updateActiveTabStyle]);
 
   const handleTabChange = (index: number) => {
     if (index === activeTab || isFading) return;
@@ -119,8 +119,8 @@ export default function Safety() {
             <p className="mx-auto max-w-[68ch] text-sm font-normal text-[#949494] sm:text-base md:text-lg">
               Hey there, creator! We get it—handing over your digital twin to an AI
               sounds exciting, but the big question is: <em>What if things go sideways?</em>{" "}
-              We've been there in our own chats with fans, and trust us, safety
-              isn't just a checkbox for us—it's the foundation of everything we build.
+              We&apos;ve been there in our own chats with fans, and trust us, safety
+              isn&apos;t just a checkbox for us—it&apos;s the foundation of everything we build.
             </p>
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function Safety() {
         {/* Footer CTA */}
         <div className="mx-auto mt-14 max-w-3xl text-center sm:mt-16 md:mt-20">
           <p className="font-sans text-base font-medium text-[#949494] sm:text-lg lg:text-xl">
-            Questions? We're here—let's talk it through. Your peace of mind matters most.
+            Questions? We&apos;re here—let&apos;s talk it through. Your peace of mind matters most.
           </p>
           <span className="mt-4 block text-lg font-semibold text-white sm:text-xl lg:text-2xl">Ready to launch worry-free?</span>
         </div>

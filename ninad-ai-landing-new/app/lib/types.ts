@@ -110,6 +110,20 @@ export interface RazorpayVerifyPaymentResponse {
   booking_id?: string;
 }
 
+export type FeedbackStars = 1 | 2 | 3 | 4 | 5;
+
+export interface VoiceSessionFeedbackRequest {
+  user_id: string | number;
+  influencer_id: string;
+  rating: FeedbackStars;
+  comment?: string | null;
+}
+
+export interface VoiceSessionFeedbackResponse {
+  success?: boolean;
+  message?: string;
+}
+
 // ─── Voice ───
 export interface VoiceRegistration {
   name: string;

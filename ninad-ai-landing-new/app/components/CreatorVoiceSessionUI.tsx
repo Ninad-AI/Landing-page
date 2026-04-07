@@ -8,7 +8,6 @@ interface VoiceSessionUIProps {
   callPhase: 'connecting' | 'listening' | 'speaking';
   timeLeft: number;
   totalTime: number;
-  onEndCall: () => void;
   creatorName: string;
   creatorImage: string;
 }
@@ -18,7 +17,6 @@ export default function VoiceSessionUI({
   callPhase,
   timeLeft,
   totalTime,
-  onEndCall,
   creatorName,
   creatorImage,
 }: VoiceSessionUIProps) {

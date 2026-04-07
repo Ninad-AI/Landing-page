@@ -18,6 +18,8 @@ import type {
   RazorpayCreateOrderResponse,
   RazorpayVerifyPaymentRequest,
   RazorpayVerifyPaymentResponse,
+  VoiceSessionFeedbackRequest,
+  VoiceSessionFeedbackResponse,
 } from './types';
 import { API_BASE, PAYMENT_API_BASE, buildVoiceWsUrl } from './config';
 
@@ -208,6 +210,53 @@ export const paymentApi = {
     paymentApiClient
       .post<RazorpayVerifyPaymentResponse>('/payment/verify-payment', data)
       .then((r) => r.data),
+};
+
+export const feedbackApi = {
+  submitVoiceSessionFeedback: async (data: VoiceSessionFeedbackRequest) => {
+    const parsedUserId =
+      typeof data.user_id === 'number'
+        ? data.user_id
+        : Number.parseInt(String(data.user_id), 10);
+
+    if (!Number.isInteger(parsedUserId)) {
+      throw new Error('Feedback submission failed: user_id must be a numeric value.');
+    }
+
+    const payload = {
+      user_id: parsedUserId,
+      influencer_id: data.influencer_id,
+      rating: data.rating,
+      comment: data.comment ?? null,
+    };
+
+    const preferredPath = process.env.NEXT_PUBLIC_FEEDBACK_API_PATH?.trim();
+    const candidatePaths = [
+      preferredPath,
+      '/feedback',
+      '/feedback/',
+      '/feedback/voice-session',
+      '/feedback/voice-session/',
+      '/api/feedback',
+      '/api/feedback/',
+    ].filter((path, index, arr): path is string => !!path && arr.indexOf(path) === index);
+
+    let lastError: unknown;
+
+    for (const path of candidatePaths) {
+      try {
+        const response = await api.post<VoiceSessionFeedbackResponse>(path, payload);
+        return response.data;
+      } catch (error) {
+        if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+          throw error;
+        }
+        lastError = error;
+      }
+    }
+
+    throw lastError ?? new Error('Unable to submit feedback: endpoint not found.');
+  },
 };
 
 // ─── Voice Endpoints ───

@@ -435,7 +435,6 @@ export default function CreatorProfilePage() {
             callPhase={callPhase}
             timeLeft={timeLeft}
             totalTime={selectedMinutes ? selectedMinutes * 60 : 0}
-            onEndCall={handleEndCall}
             creatorName={creatorName}
             creatorImage={creatorImage}
           />

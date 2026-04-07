@@ -59,8 +59,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     name = 'Anna Lorenza',
     title = 'Through the lens, I create stories worth remembering.',
 
-    followers = 114,
-    following = 92,
     onContactClick,
     behindGlowEnabled = true,
     behindGlowColor = 'rgba(97, 37, 216, 0.4)',
@@ -71,7 +69,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
     // ... refs (wrapRef, shellRef, etc.)
     const wrapRef = useRef<HTMLDivElement>(null);
     const shellRef = useRef<HTMLDivElement>(null);
-    const enterTimerRef = useRef<number | null>(null);
     const leaveRafRef = useRef<number | null>(null);
 
     const handleCardKeyDown = useCallback(
@@ -214,7 +211,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
             if (!shell || !tiltEngine) return;
 
             shell.classList.add('active');
-            if (enterTimerRef.current) window.clearTimeout(enterTimerRef.current);
 
             const { x, y } = getOffsets(event, shell);
             tiltEngine.setTarget(x, y);
@@ -305,15 +301,14 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         tiltEngine.toCenter();
         tiltEngine.beginInitial(ANIMATION_CONFIG.INITIAL_DURATION);
 
+        const leaveRaf = leaveRafRef.current;
+
         return () => {
-            const enterTimer = enterTimerRef.current;
-            const leaveRaf = leaveRafRef.current;
             shell.removeEventListener('pointerenter', pointerEnterHandler);
             shell.removeEventListener('pointermove', pointerMoveHandler);
             shell.removeEventListener('pointerleave', pointerLeaveHandler);
             shell.removeEventListener('click', handleClick);
             window.removeEventListener('deviceorientation', deviceOrientationHandler);
-            if (enterTimer) window.clearTimeout(enterTimer);
             if (leaveRaf) cancelAnimationFrame(leaveRaf);
             tiltEngine.cancel();
             shell.classList.remove('active');
