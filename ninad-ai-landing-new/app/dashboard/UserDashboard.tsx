@@ -1,9 +1,66 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { paymentApi } from '../lib/api';
+import type { UserBooking } from '../lib/types';
+
+function formatDate(value?: string): string {
+  if (!value) return 'Unknown date';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function bookingStatusClass(status?: string): string {
+  const normalized = status?.toLowerCase();
+  if (normalized === 'active' || normalized === 'pending') return 'text-emerald-200 bg-emerald-500/15';
+  if (normalized === 'completed') return 'text-cyan-200 bg-cyan-500/15';
+  if (normalized === 'expired') return 'text-amber-200 bg-amber-500/15';
+  if (normalized === 'cancelled') return 'text-rose-200 bg-rose-500/15';
+  return 'text-white/70 bg-white/10';
+}
 
 export default function UserDashboard() {
+  const [bookings, setBookings] = useState<UserBooking[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
+  const [bookingsError, setBookingsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadBookings = async () => {
+      setIsLoadingBookings(true);
+      setBookingsError(null);
+
+      try {
+        const data = await paymentApi.getMyBookings();
+        if (!cancelled) {
+          setBookings(data);
+        }
+      } catch (error) {
+        if (cancelled) return;
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Unable to load bookings right now.';
+        setBookingsError(message);
+      } finally {
+        if (!cancelled) {
+          setIsLoadingBookings(false);
+        }
+      }
+    };
+
+    void loadBookings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const recentBookings = useMemo(() => bookings.slice(0, 4), [bookings]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up delay-100">
       {/* Start Voice Session */}
@@ -44,21 +101,34 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Placeholder bookings */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center text-xs font-bold text-white">P</div>
-              <div>
-                <div className="text-sm font-semibold text-white">Pawan Kumar</div>
-                <div className="text-xs text-white/30">15 min session</div>
+          {isLoadingBookings && (
+            <p className="text-xs text-white/50 text-center py-4">Loading your bookings...</p>
+          )}
+
+          {!isLoadingBookings && bookingsError && (
+            <p className="text-xs text-rose-200 text-center py-4">{bookingsError}</p>
+          )}
+
+          {!isLoadingBookings && !bookingsError && recentBookings.map((booking) => (
+            <div key={booking.id} className="p-3 rounded-lg bg-white/5 border border-white/5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-white">{booking.influencer_name || 'Creator'}</div>
+                  <div className="text-xs text-white/35 mt-1">
+                    {booking.duration_minutes} min • {formatDate(booking.created_at)}
+                  </div>
+                </div>
+                <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full ${bookingStatusClass(booking.status)}`}>
+                  {booking.status || 'unknown'}
+                </span>
               </div>
             </div>
-            <span className="text-xs font-bold text-green-400/80 px-2 py-1 rounded-full bg-green-500/10">Completed</span>
-          </div>
-          <p className="text-xs text-white/25 text-center pt-2">
-            No more sessions to display
-          </p>
+          ))}
+
+          {!isLoadingBookings && !bookingsError && recentBookings.length === 0 && (
+            <p className="text-xs text-white/25 text-center pt-2">No bookings found yet.</p>
+          )}
         </div>
       </div>
     </div>

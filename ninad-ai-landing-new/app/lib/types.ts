@@ -110,6 +110,27 @@ export interface RazorpayVerifyPaymentResponse {
   booking_id?: string;
 }
 
+export interface ActiveBooking {
+  id: string;
+  influencer_id?: string;
+  duration_minutes?: number;
+  status?: string;
+  expires_at?: string;
+}
+
+export interface UserBooking {
+  id: string;
+  user_id?: string;
+  user_name?: string;
+  influencer_id?: string;
+  influencer_name?: string;
+  duration_minutes: number;
+  amount?: number;
+  status?: string;
+  created_at?: string;
+  expires_at?: string;
+}
+
 export type FeedbackStars = 1 | 2 | 3 | 4 | 5;
 
 export interface VoiceSessionFeedbackRequest {
@@ -122,28 +143,6 @@ export interface VoiceSessionFeedbackRequest {
 export interface VoiceSessionFeedbackResponse {
   success?: boolean;
   message?: string;
-}
-
-// ─── Voice ───
-export interface VoiceRegistration {
-  name: string;
-  voice_sample_url: string;
-  provider: string;
-}
-
-// ─── Provider Config ───
-export interface ProviderConfig {
-  provider: string;
-  api_key: string;
-  config: Record<string, unknown>;
-}
-
-// ─── Knowledge Base ───
-export interface KnowledgeEntry {
-  id?: string;
-  influencer_id: string;
-  content: string;
-  category: string;
 }
 
 // ─── Analytics ───
@@ -186,6 +185,98 @@ export interface TopCreator {
   name: string;
   bookings: number;
   revenue: number;
+}
+
+export interface AnalyticsDashboardResponse {
+  total_sessions: number;
+  active_users: number;
+  revenue: number;
+  avg_duration: number;
+}
+
+export interface InfluencerUsageBreakdown {
+  influencer_id?: string;
+  influencer_name?: string;
+  calls: number;
+  minutes: number;
+}
+
+export interface AnalyticsUsageResponse {
+  total_calls: number;
+  minutes_used: number;
+  influencer_breakdown: InfluencerUsageBreakdown[];
+}
+
+export interface AnalyticsRecentBooking {
+  id: string;
+  user_name?: string;
+  influencer_name?: string;
+  duration_minutes?: number;
+  status?: string;
+  amount?: number;
+  created_at?: string;
+  expires_at?: string;
+}
+
+export interface AnalyticsBookingsResponse {
+  active_count: number;
+  expired_count: number;
+  revenue_summary: number;
+  recent_bookings: AnalyticsRecentBooking[];
+}
+
+export interface UserGrowthTrend {
+  date: string;
+  active_users?: number;
+  new_users?: number;
+  total_users?: number;
+}
+
+export interface AnalyticsUsersResponse {
+  active_users: number;
+  growth_trends: UserGrowthTrend[];
+}
+
+export interface InfluencerPerformance {
+  influencer_id?: string;
+  influencer_name?: string;
+  sessions?: number;
+  calls?: number;
+  minutes?: number;
+  ratings?: number;
+  avg_rating?: number;
+  revenue?: number;
+}
+
+export interface AnalyticsInfluencersResponse {
+  influencers: InfluencerPerformance[];
+}
+
+export interface AnalyticsRecentResponse {
+  recent_bookings: AnalyticsRecentBooking[];
+}
+
+export interface InfluencerFeedbackAggregate {
+  influencer_id?: string;
+  influencer_name?: string;
+  avg_rating?: number;
+  total_feedback?: number;
+  feedback_count?: number;
+}
+
+export interface AnalyticsFeedbackResponse {
+  overall_avg_rating?: number;
+  total_feedback?: number;
+  influencer_feedback: InfluencerFeedbackAggregate[];
+}
+
+export interface HealthResponse {
+  status?: string;
+  message?: string;
+  capacity?: number;
+  load?: number;
+  providers?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 // ─── API ───

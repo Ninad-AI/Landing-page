@@ -10,7 +10,7 @@ import TermsAgreement from "../../components/auth/TermsAgreement";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi } from "../../lib/api";
+import { authApi, paymentApi } from "../../lib/api";
 import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
 import type { AllowedDurationMinutes } from "../../lib/types";
@@ -21,8 +21,31 @@ type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
 
 // Defaults for quick testing
-const DEFAULT_INFLUENCER_ID = "influencer_8";
+const DEFAULT_INFLUENCER_ID = "influencer_13";
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
+const ALLOWED_DURATIONS: AllowedDurationMinutes[] = [3, 5, 10, 15, 20, 30];
+
+function resolveBookingDuration(durationMinutes?: number, expiresAt?: string): AllowedDurationMinutes {
+  if (Number.isFinite(durationMinutes) && (durationMinutes as number) > 0) {
+    const rounded = Math.round(durationMinutes as number);
+    if ((ALLOWED_DURATIONS as number[]).includes(rounded)) {
+      return rounded as AllowedDurationMinutes;
+    }
+  }
+
+  if (expiresAt) {
+    const expiresAtMs = Date.parse(expiresAt);
+    if (Number.isFinite(expiresAtMs)) {
+      const remainingMinutes = Math.ceil((expiresAtMs - Date.now()) / 60000);
+      if (remainingMinutes > 0) {
+        const matchingPlan = ALLOWED_DURATIONS.find((minutes) => minutes >= remainingMinutes);
+        return matchingPlan ?? ALLOWED_DURATIONS[ALLOWED_DURATIONS.length - 1];
+      }
+    }
+  }
+
+  return 3;
+}
 
 function getAuthErrorMessage(error: unknown, fallback: string): string {
   const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
@@ -69,6 +92,7 @@ export default function CreatorProfilePage() {
   const [authName, setAuthName] = useState("");
   const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const isCheckingBookingRef = useRef(false);
 
   /* ── Parallax refs ── */
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -341,12 +365,53 @@ export default function CreatorProfilePage() {
      Handlers
      ═══════════════════════════════════════ */
 
-  const handleStartSession = () => {
-    if (isHydrated && isAuthenticated) {
-      setFlowState("duration");
-    } else {
-      setFlowState("auth");
+  const openDurationOrResumeBooking = useCallback(async () => {
+    if (isCheckingBookingRef.current) {
+      return;
     }
+
+    if (!creatorInfluencerId?.trim()) {
+      toast.error("Creator details are unavailable. Please retry in a moment.");
+      return;
+    }
+
+    isCheckingBookingRef.current = true;
+
+    try {
+      const activeBooking = await paymentApi.getActiveBooking(creatorInfluencerId);
+
+      if (activeBooking?.id) {
+        const durationFromBooking = resolveBookingDuration(activeBooking.duration_minutes, activeBooking.expires_at);
+        const query = new URLSearchParams({
+          duration: String(durationFromBooking),
+          booking_id: activeBooking.id,
+        });
+
+        toast.success("You already have an active booking. Continuing without payment.");
+        router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
+        return;
+      }
+
+      setFlowState("duration");
+    } catch {
+      // If active-booking lookup fails, continue normal payment flow.
+      setFlowState("duration");
+    } finally {
+      isCheckingBookingRef.current = false;
+    }
+  }, [creatorInfluencerId, router, slug]);
+
+  const handleStartSession = async () => {
+    if (isCheckingBookingRef.current) {
+      return;
+    }
+
+    if (isHydrated && isAuthenticated) {
+      await openDurationOrResumeBooking();
+      return;
+    }
+
+    setFlowState("auth");
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -385,7 +450,7 @@ export default function CreatorProfilePage() {
         toast.success(`Welcome, ${response.user.name}!`);
       }
 
-      setFlowState("duration");
+      await openDurationOrResumeBooking();
       setAuthEmail("");
       setAuthPassword("");
       setAuthName("");

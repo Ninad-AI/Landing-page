@@ -8,16 +8,21 @@ import type {
   SessionResult,
   CheckoutRequest,
   CheckoutResponse,
-  VoiceRegistration,
-  ProviderConfig,
-  KnowledgeEntry,
-  UsageAnalytics,
-  BookingAnalytics,
+  AnalyticsDashboardResponse,
+  AnalyticsUsageResponse,
+  AnalyticsBookingsResponse,
+  AnalyticsUsersResponse,
+  AnalyticsInfluencersResponse,
+  AnalyticsRecentResponse,
+  AnalyticsFeedbackResponse,
+  HealthResponse,
   Creator,
   RazorpayCreateOrderRequest,
   RazorpayCreateOrderResponse,
   RazorpayVerifyPaymentRequest,
   RazorpayVerifyPaymentResponse,
+  ActiveBooking,
+  UserBooking,
   VoiceSessionFeedbackRequest,
   VoiceSessionFeedbackResponse,
 } from './types';
@@ -35,6 +40,127 @@ function toDisplayName(email: string): string {
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(' ');
+}
+
+function firstNonEmptyString(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length > 0) return trimmed;
+      continue;
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return String(value);
+    }
+  }
+  return undefined;
+}
+
+function toFiniteNumber(...values: unknown[]): number | undefined {
+  for (const value of values) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number.parseFloat(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+  return undefined;
+}
+
+function normalizeBookingRecord(record: Record<string, unknown>): UserBooking | null {
+  const id = firstNonEmptyString(record.id, record.booking_id, record.payment_booking_id);
+  if (!id) {
+    return null;
+  }
+
+  const duration = toFiniteNumber(
+    record.duration_minutes,
+    record.duration,
+    record.minutes,
+    record.session_duration_minutes
+  );
+  const amount = toFiniteNumber(record.amount, record.total_amount, record.price, record.cost);
+
+  return {
+    id,
+    user_id: firstNonEmptyString(record.user_id, record.userId),
+    user_name: firstNonEmptyString(record.user_name, record.userName),
+    influencer_id: firstNonEmptyString(record.influencer_id, record.influencerId, record.creator_id, record.creatorId),
+    influencer_name: firstNonEmptyString(
+      record.influencer_name,
+      record.influencerName,
+      record.creator_name,
+      record.creatorName
+    ),
+    duration_minutes: duration && duration > 0 ? Math.round(duration) : 0,
+    amount,
+    status: firstNonEmptyString(record.status, record.booking_status, record.state),
+    created_at: firstNonEmptyString(record.created_at, record.createdAt, record.booked_at, record.start_time),
+    expires_at: firstNonEmptyString(record.expires_at, record.expiry, record.expiresAt, record.ends_at),
+  };
+}
+
+function normalizeBookings(payload: unknown): UserBooking[] {
+  const queue: unknown[] = [payload];
+  const visited = new Set<unknown>();
+  const bookingsById = new Map<string, UserBooking>();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (current == null || visited.has(current)) {
+      continue;
+    }
+    visited.add(current);
+
+    if (Array.isArray(current)) {
+      queue.push(...current);
+      continue;
+    }
+
+    const record = asRecord(current);
+    if (!record) {
+      continue;
+    }
+
+    queue.push(record.booking, record.active_booking, record.current_booking, record.data, record.result);
+
+    if (Array.isArray(record.bookings)) queue.push(...record.bookings);
+    if (Array.isArray(record.items)) queue.push(...record.items);
+    if (Array.isArray(record.results)) queue.push(...record.results);
+    if (Array.isArray(record.rows)) queue.push(...record.rows);
+
+    const booking = normalizeBookingRecord(record);
+    if (booking && !bookingsById.has(booking.id)) {
+      bookingsById.set(booking.id, booking);
+    }
+  }
+
+  return Array.from(bookingsById.values());
+}
+
+function isActiveBooking(booking: UserBooking): boolean {
+  const inactiveStatuses = new Set(['cancelled', 'canceled', 'completed', 'expired', 'failed']);
+  const status = booking.status?.toLowerCase();
+  if (!status) {
+    return true;
+  }
+  return !inactiveStatuses.has(status);
+}
+
+function toActiveBooking(booking: UserBooking): ActiveBooking {
+  return {
+    id: booking.id,
+    influencer_id: booking.influencer_id,
+    duration_minutes: booking.duration_minutes > 0 ? booking.duration_minutes : undefined,
+    status: booking.status,
+    expires_at: booking.expires_at,
+  };
 }
 
 function normalizeRole(role: unknown): 'user' | 'influencer' | 'admin' {
@@ -122,6 +248,40 @@ const paymentApiClient = axios.create({
   timeout: 15000,
 });
 
+const inflightActiveBookingChecks = new Map<string, Promise<ActiveBooking | null>>();
+
+const MY_BOOKINGS_PATH = '/my-bookings';
+const FEEDBACK_PATH = '/feedback';
+
+function getRequestPathFromError(err: AxiosError): string {
+  const rawUrl = err.config?.url;
+  if (!rawUrl) {
+    return '';
+  }
+
+  try {
+    return new URL(rawUrl, API_BASE).pathname;
+  } catch {
+    return rawUrl;
+  }
+}
+
+function shouldForceLogoutOnUnauthorized(err: AxiosError): boolean {
+  if (err.response?.status !== 401) {
+    return false;
+  }
+
+  const requestPath = getRequestPathFromError(err);
+
+  // Analytics endpoints can return 401 for role/token mismatch and should not
+  // wipe the entire frontend session automatically.
+  if (requestPath.startsWith('/analytics/')) {
+    return false;
+  }
+
+  return true;
+}
+
 // ─── Request Interceptor: Attach JWT ───
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
@@ -147,7 +307,7 @@ paymentApiClient.interceptors.request.use((config: InternalAxiosRequestConfig) =
 api.interceptors.response.use(
   (res) => res,
   (err: AxiosError) => {
-    if (err.response?.status === 401 && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && shouldForceLogoutOnUnauthorized(err)) {
       localStorage.removeItem('ninad_access_token');
       localStorage.removeItem('ninad_user');
       window.dispatchEvent(new CustomEvent('ninad:auth:logout'));
@@ -182,8 +342,12 @@ export const authApi = {
   },
 
   login: async (data: LoginRequest) => {
-    const loginPayload = await api.post('/auth/login', data).then((r) => r.data);
-    return normalizeAuthResponse(loginPayload, { email: data.email });
+    const normalizedEmail = data.email.trim().toLowerCase();
+
+    const loginPayload = await api
+      .post('/auth/login', { ...data, email: normalizedEmail })
+      .then((r) => r.data);
+    return normalizeAuthResponse(loginPayload, { email: normalizedEmail });
   },
 };
 
@@ -210,6 +374,38 @@ export const paymentApi = {
     paymentApiClient
       .post<RazorpayVerifyPaymentResponse>('/payment/verify-payment', data)
       .then((r) => r.data),
+
+  getMyBookings: async (): Promise<UserBooking[]> => {
+    const response = await api.get(MY_BOOKINGS_PATH);
+    return normalizeBookings(response.data);
+  },
+
+  getActiveBooking: async (influencerId?: string): Promise<ActiveBooking | null> => {
+    const normalizedInfluencerId = influencerId?.trim();
+    const requestKey = normalizedInfluencerId || '__all__';
+
+    const existingRequest = inflightActiveBookingChecks.get(requestKey);
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    const requestPromise = (async (): Promise<ActiveBooking | null> => {
+      const bookings = await paymentApi.getMyBookings();
+      const matchingBooking = bookings
+        .filter(isActiveBooking)
+        .find((booking) => !normalizedInfluencerId || !booking.influencer_id || booking.influencer_id === normalizedInfluencerId);
+
+      return matchingBooking ? toActiveBooking(matchingBooking) : null;
+    })();
+
+    inflightActiveBookingChecks.set(requestKey, requestPromise);
+
+    try {
+      return await requestPromise;
+    } finally {
+      inflightActiveBookingChecks.delete(requestKey);
+    }
+  },
 };
 
 export const feedbackApi = {
@@ -230,60 +426,39 @@ export const feedbackApi = {
       comment: data.comment ?? null,
     };
 
-    const preferredPath = process.env.NEXT_PUBLIC_FEEDBACK_API_PATH?.trim();
-    const candidatePaths = [
-      preferredPath,
-      '/feedback',
-      '/feedback/',
-      '/feedback/voice-session',
-      '/feedback/voice-session/',
-      '/api/feedback',
-      '/api/feedback/',
-    ].filter((path, index, arr): path is string => !!path && arr.indexOf(path) === index);
-
-    let lastError: unknown;
-
-    for (const path of candidatePaths) {
-      try {
-        const response = await api.post<VoiceSessionFeedbackResponse>(path, payload);
-        return response.data;
-      } catch (error) {
-        if (!axios.isAxiosError(error) || error.response?.status !== 404) {
-          throw error;
-        }
-        lastError = error;
-      }
-    }
-
-    throw lastError ?? new Error('Unable to submit feedback: endpoint not found.');
+    const response = await api.post<VoiceSessionFeedbackResponse>(FEEDBACK_PATH, payload);
+    return response.data;
   },
-};
-
-// ─── Voice Endpoints ───
-export const voiceApi = {
-  register: (data: VoiceRegistration) =>
-    api.post('/voices', data).then((r) => r.data),
-};
-
-// ─── Provider Config Endpoints ───
-export const providerApi = {
-  save: (data: ProviderConfig) =>
-    api.post('/provider-config', data).then((r) => r.data),
-};
-
-// ─── Knowledge Base Endpoints ───
-export const knowledgeApi = {
-  save: (data: KnowledgeEntry) =>
-    api.post('/knowledge', data).then((r) => r.data),
 };
 
 // ─── Analytics Endpoints ───
 export const analyticsApi = {
+  dashboard: () =>
+    api.get<AnalyticsDashboardResponse>('/analytics/dashboard').then((r) => r.data),
+
   usage: () =>
-    api.get<UsageAnalytics>('/analytics/usage').then((r) => r.data),
+    api.get<AnalyticsUsageResponse>('/analytics/usage').then((r) => r.data),
 
   bookings: () =>
-    api.get<BookingAnalytics>('/analytics/bookings').then((r) => r.data),
+    api.get<AnalyticsBookingsResponse>('/analytics/bookings').then((r) => r.data),
+
+  users: () =>
+    api.get<AnalyticsUsersResponse>('/analytics/users').then((r) => r.data),
+
+  influencers: () =>
+    api.get<AnalyticsInfluencersResponse>('/analytics/influencers').then((r) => r.data),
+
+  recent: () =>
+    api.get<AnalyticsRecentResponse>('/analytics/recent').then((r) => r.data),
+
+  feedback: () =>
+    api.get<AnalyticsFeedbackResponse>('/analytics/feedback').then((r) => r.data),
+};
+
+// ─── System Diagnostics Endpoint ───
+export const systemApi = {
+  health: () =>
+    api.get<HealthResponse>('/health').then((r) => r.data),
 };
 
 // ─── Creators Endpoint (public) ───

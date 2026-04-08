@@ -23,16 +23,10 @@ export default function Header() {
   // Page type detection
   const isAdminPage = pathname.startsWith('/admin');
   const isVoiceChatPage = /^\/creators\/[^/]+\/voice-chat\/?$/.test(pathname);
-  // Match /creators/some-slug but NOT /creators or /creators/creator-name-creator-id (the old static route)
-  const isCreatorSlugPage = /^\/creators\/[^/]+$/.test(pathname) && pathname !== '/creators/creator-name-creator-id';
-  const isMinimalHeader = isAdminPage || isCreatorSlugPage;
+  const isMinimalHeader = isAdminPage;
   const isMobileMenuOpen = mobileMenuOpenPath === pathname;
 
   const handleLogoClick = () => {
-    if (isCreatorSlugPage) {
-      router.push("/");
-      return;
-    }
     const heroSection = document.getElementById("hero");
     if (heroSection) {
       heroSection.scrollIntoView({ behavior: "smooth" });
@@ -85,53 +79,6 @@ export default function Header() {
     router.push("/");
     setMobileMenuOpenPath(null);
   };
-
-  /* ═══════════════════════════════════════════════
-     CREATOR SLUG PAGE — Minimal header:
-     Logo (left) | Login or Logout (right) + Close button below it
-     ═══════════════════════════════════════════════ */
-  if (isCreatorSlugPage) {
-    return (
-      <header className="fixed top-0 left-0 w-full z-50 bg-transparent py-5">
-        <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-start justify-between">
-          {/* Logo */}
-          <button
-            onClick={handleLogoClick}
-            className="relative w-32 h-8 md:w-40 md:h-10 shrink-0 z-50 cursor-pointer bg-none border-none p-0"
-          >
-            <Image
-              src="/assets/ninad-ai.png"
-              alt="Ninad AI"
-              fill
-              className="object-contain object-left"
-              priority
-            />
-          </button>
-
-          {/* Right side: Close button only */}
-          <div className="flex items-center">
-            {/* Close (X) button → /creators */}
-            <Link
-              href="/creators"
-              title="Back to Creators"
-              className="group w-9 h-9 rounded-full border border-white/10 bg-black/70 backdrop-blur-md flex items-center justify-center transition-all duration-300 hover:border-red-500/60 hover:bg-red-500/30 cursor-pointer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4 text-white/60 transition-all duration-300 group-hover:text-red-400 group-hover:rotate-90"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </header>
-    );
-  }
 
   /* ═══════════════════════════════════════════════
      DEFAULT + ADMIN HEADER

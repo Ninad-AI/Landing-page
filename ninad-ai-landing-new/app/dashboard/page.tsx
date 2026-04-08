@@ -36,7 +36,7 @@ function DashboardContent() {
           </h1>
           <p className="font-sans text-base text-white/50">
             {user.role === 'admin' && 'Manage the platform from your admin dashboard.'}
-            {user.role === 'influencer' && 'Manage your voice AI presence and sessions.'}
+            {user.role === 'influencer' && 'Review your session activity and platform performance.'}
             {user.role === 'user' && 'Start voice sessions and manage your bookings.'}
           </p>
         </div>
