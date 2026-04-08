@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../lib/stores';
 import { authApi } from '../lib/api';
 import TermsAgreement from '../components/auth/TermsAgreement';
@@ -15,6 +15,8 @@ function getAuthErrorMessage(error: unknown, fallback: string): string {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const login = useAuthStore((s) => s.login);
 
   const [name, setName] = useState('');
@@ -46,7 +48,7 @@ export default function RegisterPage() {
 
       login(response.user, response.tokens.access_token);
       toast.success(`Welcome to Ninad AI, ${response.user.name}!`);
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (error) {
       toast.error(getAuthErrorMessage(error, 'Could not create account. Please try again.'));
     } finally {
@@ -156,7 +158,7 @@ export default function RegisterPage() {
           <p className="text-center text-sm text-white/50">
             Already have an account?{' '}
             <Link
-              href="/login"
+              href={redirectTo !== '/dashboard' ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'}
               className="text-primary-light font-semibold hover:text-white transition-colors duration-300"
             >
               Sign in

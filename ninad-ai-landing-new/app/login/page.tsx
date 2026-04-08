@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../lib/stores';
 import { authApi } from '../lib/api';
 import { toast } from 'sonner';
@@ -14,6 +14,8 @@ function getAuthErrorMessage(error: unknown, fallback: string): string {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
   const login = useAuthStore((s) => s.login);
 
   const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ export default function LoginPage() {
 
       login(response.user, response.tokens.access_token);
       toast.success(`Welcome back, ${response.user.name}!`);
-      router.push('/dashboard');
+      router.push(redirectTo);
     } catch (error) {
       toast.error(getAuthErrorMessage(error, 'Login failed. Please try again.'));
     } finally {
@@ -119,7 +121,7 @@ export default function LoginPage() {
             <p className="text-center text-sm text-white/50">
               Don&apos;t have an account?{' '}
               <Link
-                href="/register"
+                href={redirectTo !== '/dashboard' ? `/register?redirect=${encodeURIComponent(redirectTo)}` : '/register'}
                 className="text-primary-light font-semibold hover:text-white transition-colors duration-300"
               >
                 Create one

@@ -168,7 +168,7 @@ export default function Header() {
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href={`/login?redirect=${encodeURIComponent(pathname)}`}
                   className="px-3 py-2 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white"
                 >
                   Sign In
@@ -257,7 +257,7 @@ export default function Header() {
                 Book Demo
               </Link>
               <Link
-                href="/login"
+                href={`/login?redirect=${encodeURIComponent(pathname)}`}
                 onClick={() => setMobileMenuOpenPath(null)}
                 className="text-sm font-sans font-medium text-white/70 hover:text-white transition-colors"
               >

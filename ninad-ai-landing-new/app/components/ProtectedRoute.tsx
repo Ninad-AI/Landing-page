@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../lib/stores';
 import { canAccess } from '../lib/auth';
 import type { UserRole } from '../lib/types';
@@ -18,13 +18,15 @@ export default function ProtectedRoute({
   fallbackPath = '/login',
 }: ProtectedRouteProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, isHydrated, user } = useAuthStore();
 
   useEffect(() => {
     if (!isHydrated) return;
 
     if (!isAuthenticated) {
-      router.replace(fallbackPath);
+      const loginUrl = `${fallbackPath}?redirect=${encodeURIComponent(pathname)}`;
+      router.replace(loginUrl);
       return;
     }
 
