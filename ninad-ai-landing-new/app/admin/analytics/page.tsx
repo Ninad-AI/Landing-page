@@ -1,7 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
+import { analyticsApi } from '../../lib/api';
+import type {
+  AnalyticsBookingsResponse,
+  AnalyticsDashboardResponse,
+  AnalyticsInfluencersResponse,
+  AnalyticsRecentBooking,
+  AnalyticsUsageResponse,
+  AnalyticsUsersResponse,
+} from '../../lib/types';
 import {
   AreaChart,
   Area,
@@ -14,44 +23,70 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-// ─── Mock Data ───
-const USAGE_DAILY = [
-  { date: 'Mar 1', sessions: 42, minutes: 630 },
-  { date: 'Mar 5', sessions: 58, minutes: 870 },
-  { date: 'Mar 8', sessions: 35, minutes: 525 },
-  { date: 'Mar 12', sessions: 71, minutes: 1065 },
-  { date: 'Mar 15', sessions: 89, minutes: 1335 },
-  { date: 'Mar 18', sessions: 63, minutes: 945 },
-  { date: 'Mar 20', sessions: 95, minutes: 1425 },
-  { date: 'Mar 22', sessions: 78, minutes: 1170 },
-  { date: 'Mar 25', sessions: 112, minutes: 1680 },
-  { date: 'Mar 28', sessions: 104, minutes: 1560 },
-];
-
-
-
-const BOOKING_DAILY = [
-  { date: 'Mar 1', bookings: 12, revenue: 14800 },
-  { date: 'Mar 5', bookings: 18, revenue: 22400 },
-  { date: 'Mar 8', bookings: 9, revenue: 11200 },
-  { date: 'Mar 12', bookings: 24, revenue: 31600 },
-  { date: 'Mar 15', bookings: 31, revenue: 42800 },
-  { date: 'Mar 18', bookings: 22, revenue: 28400 },
-  { date: 'Mar 20', bookings: 38, revenue: 51200 },
-  { date: 'Mar 22', bookings: 27, revenue: 35600 },
-  { date: 'Mar 25', bookings: 45, revenue: 62400 },
-  { date: 'Mar 28', bookings: 41, revenue: 55800 },
-];
-
-const TOP_CREATORS = [
-  { name: 'Pawan Kumar', bookings: 847, revenue: 254100 },
-  { name: 'Creator B', bookings: 412, revenue: 123600 },
-  { name: 'Creator C', bookings: 298, revenue: 89400 },
-];
-
-
-
 type Tab = 'usage' | 'bookings';
+type UsageDailyPoint = { date: string; sessions: number; minutes: number };
+type BookingDailyPoint = { date: string; bookings: number; revenue: number };
+
+function toDayKey(value?: string): string {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+function toDisplayDate(value?: string): string {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function buildDailyAnalytics(recentBookings: AnalyticsRecentBooking[]): {
+  usageDaily: UsageDailyPoint[];
+  bookingDaily: BookingDailyPoint[];
+} {
+  const byDay = new Map<string, { date: string; sessions: number; minutes: number; bookings: number; revenue: number }>();
+
+  for (const booking of recentBookings) {
+    const sourceDate = booking.created_at || booking.expires_at;
+    const dayKey = toDayKey(sourceDate);
+    const date = toDisplayDate(sourceDate);
+
+    if (!dayKey || !date) continue;
+
+    const existing = byDay.get(dayKey) ?? {
+      date,
+      sessions: 0,
+      minutes: 0,
+      bookings: 0,
+      revenue: 0,
+    };
+
+    existing.sessions += 1;
+    existing.bookings += 1;
+    existing.minutes += Math.max(0, booking.duration_minutes ?? 0);
+    existing.revenue += Math.max(0, booking.amount ?? 0);
+
+    byDay.set(dayKey, existing);
+  }
+
+  const rows = [...byDay.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([, value]) => value);
+
+  return {
+    usageDaily: rows.map((row) => ({
+      date: row.date,
+      sessions: row.sessions,
+      minutes: row.minutes,
+    })),
+    bookingDaily: rows.map((row) => ({
+      date: row.date,
+      bookings: row.bookings,
+      revenue: row.revenue,
+    })),
+  };
+}
 
 // ─── Custom Tooltip ───
 function CustomTooltip({
@@ -84,6 +119,109 @@ function CustomTooltip({
 
 function AnalyticsContent() {
   const [activeTab, setActiveTab] = useState<Tab>('usage');
+  const [dashboard, setDashboard] = useState<AnalyticsDashboardResponse | null>(null);
+  const [usage, setUsage] = useState<AnalyticsUsageResponse | null>(null);
+  const [bookings, setBookings] = useState<AnalyticsBookingsResponse | null>(null);
+  const [users, setUsers] = useState<AnalyticsUsersResponse | null>(null);
+  const [influencers, setInfluencers] = useState<AnalyticsInfluencersResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const [dashResult, usageResult, bookingsResult, usersResult, influencersResult] = await Promise.allSettled([
+          analyticsApi.dashboard(),
+          analyticsApi.usage(),
+          analyticsApi.bookings(),
+          analyticsApi.users(),
+          analyticsApi.influencers(),
+        ]);
+
+        if (cancelled) return;
+
+        if (dashResult.status === 'fulfilled') setDashboard(dashResult.value);
+        if (usageResult.status === 'fulfilled') setUsage(usageResult.value);
+        if (bookingsResult.status === 'fulfilled') setBookings(bookingsResult.value);
+        if (usersResult.status === 'fulfilled') setUsers(usersResult.value);
+        if (influencersResult.status === 'fulfilled') setInfluencers(influencersResult.value);
+
+        const allFailed =
+          dashResult.status === 'rejected' &&
+          usageResult.status === 'rejected' &&
+          bookingsResult.status === 'rejected' &&
+          usersResult.status === 'rejected' &&
+          influencersResult.status === 'rejected';
+
+        if (allFailed) {
+          setError('Unable to load analytics data right now.');
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Unable to load analytics data right now.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const { usageDaily, bookingDaily } = useMemo(
+    () => buildDailyAnalytics(bookings?.recent_bookings ?? []),
+    [bookings?.recent_bookings]
+  );
+
+  const topCreators = useMemo(() => {
+    const rows = influencers?.influencers ?? [];
+
+    return rows
+      .map((creator) => ({
+        name: creator.influencer_name || 'Creator',
+        bookings: creator.calls ?? creator.sessions ?? 0,
+        revenue: creator.revenue ?? 0,
+      }))
+      .sort((a, b) => b.bookings - a.bookings)
+      .slice(0, 5);
+  }, [influencers]);
+
+  const totalSessions = dashboard?.total_sessions ?? usage?.total_calls ?? 0;
+  const totalMinutes = usage?.minutes_used ?? 0;
+  const activeUsers = dashboard?.active_users ?? users?.active_users ?? 0;
+  const avgDuration =
+    dashboard?.avg_duration != null && Number.isFinite(dashboard.avg_duration)
+      ? `${dashboard.avg_duration.toFixed(1)}m`
+      : '—';
+
+  const totalBookings = (bookings?.active_count ?? 0) + (bookings?.expired_count ?? 0);
+  const totalRevenue = bookings?.revenue_summary ?? dashboard?.revenue ?? 0;
+  const conversionRate =
+    totalBookings > 0 ? `${(((bookings?.active_count ?? 0) / totalBookings) * 100).toFixed(1)}%` : '0.0%';
+
+  const usageStats = [
+    { label: 'Total Sessions', value: totalSessions.toLocaleString() },
+    { label: 'Total Minutes', value: totalMinutes.toLocaleString() },
+    { label: 'Active Users', value: activeUsers.toLocaleString() },
+    { label: 'Avg Duration', value: avgDuration },
+  ];
+
+  const bookingStats = [
+    { label: 'Total Bookings', value: totalBookings.toLocaleString() },
+    { label: 'Revenue', value: `₹${totalRevenue.toLocaleString()}` },
+    { label: 'Conversion Rate', value: conversionRate },
+  ];
 
   return (
     <main className="relative min-h-screen overflow-x-hidden">
@@ -103,6 +241,12 @@ function AnalyticsContent() {
             Platform usage metrics and booking insights
           </p>
         </div>
+
+        {error && (
+          <div className="mb-6 rounded-xl border border-rose-500/25 bg-rose-500/10 px-5 py-3 text-sm text-rose-300">
+            {error}
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div className="flex gap-2 mb-8 sm:mb-10 animate-fade-in-up delay-100 overflow-x-auto pb-1">
@@ -133,15 +277,12 @@ function AnalyticsContent() {
           <div className="space-y-6 animate-fade-in-up delay-200">
             {/* Summary Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Sessions', value: '2,847' },
-                { label: 'Total Minutes', value: '42,705' },
-                { label: 'Active Users', value: '891' },
-                { label: 'Avg Duration', value: '18m 12s' },
-              ].map((stat) => (
+              {usageStats.map((stat) => (
                 <div key={stat.label} className="glass border border-white/10 rounded-2xl p-5">
                   <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">{stat.label}</div>
-                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">{stat.value}</div>
+                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">
+                    {isLoading ? '—' : stat.value}
+                  </div>
                 </div>
               ))}
             </div>
@@ -151,7 +292,7 @@ function AnalyticsContent() {
               <h3 className="font-sans font-bold text-lg text-white mb-6">Sessions Over Time</h3>
               <div className="w-full h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={USAGE_DAILY}>
+                  <AreaChart data={usageDaily}>
                     <defs>
                       <linearGradient id="gradientSessions" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6125d8" stopOpacity={0.4} />
@@ -189,14 +330,12 @@ function AnalyticsContent() {
           <div className="space-y-6 animate-fade-in-up delay-200">
             {/* Booking Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { label: 'Total Bookings', value: '1,557' },
-                { label: 'Revenue', value: '₹4,82,500' },
-                { label: 'Conversion Rate', value: '34.2%' },
-              ].map((stat) => (
+              {bookingStats.map((stat) => (
                 <div key={stat.label} className="glass border border-white/10 rounded-2xl p-5">
                   <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">{stat.label}</div>
-                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">{stat.value}</div>
+                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">
+                    {isLoading ? '—' : stat.value}
+                  </div>
                 </div>
               ))}
             </div>
@@ -206,7 +345,7 @@ function AnalyticsContent() {
               <h3 className="font-sans font-bold text-lg text-white mb-6">Revenue Over Time</h3>
               <div className="w-full h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={BOOKING_DAILY}>
+                  <BarChart data={bookingDaily}>
                     <defs>
                       <linearGradient id="gradientRevenue" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#9968fa" stopOpacity={0.9} />
@@ -229,7 +368,7 @@ function AnalyticsContent() {
                 <h3 className="font-sans font-bold text-lg text-white mb-6">Daily Bookings</h3>
                 <div className="w-full h-[250px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={BOOKING_DAILY}>
+                    <AreaChart data={bookingDaily}>
                       <defs>
                         <linearGradient id="gradientBookings" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#00a9ff" stopOpacity={0.4} />
@@ -256,7 +395,7 @@ function AnalyticsContent() {
               <div className="glass border border-white/10 rounded-2xl p-6">
                 <h3 className="font-sans font-bold text-lg text-white mb-6">Top Creators</h3>
                 <div className="space-y-4">
-                  {TOP_CREATORS.map((creator, i) => (
+                  {topCreators.map((creator, i) => (
                     <div key={creator.name} className="flex items-center gap-4 p-3 rounded-xl bg-white/3 border border-white/5">
                       <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary-light">
                         #{i + 1}
@@ -275,6 +414,11 @@ function AnalyticsContent() {
                       </div>
                     </div>
                   ))}
+                  {!isLoading && topCreators.length === 0 && (
+                    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/45">
+                      No creator analytics available yet.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
