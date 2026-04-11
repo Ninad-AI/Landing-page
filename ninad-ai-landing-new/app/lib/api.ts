@@ -456,9 +456,47 @@ export const analyticsApi = {
 };
 
 // ─── System Diagnostics Endpoint ───
+type HealthPath = '/helath' | '/health';
+let preferredHealthPath: HealthPath | null = null;
+
+function isMissingHealthEndpoint(error: unknown): boolean {
+  if (!(error instanceof AxiosError)) {
+    return false;
+  }
+
+  const status = error.response?.status;
+  return status === 404 || status === 405;
+}
+
+async function fetchHealthFrom(path: HealthPath): Promise<HealthResponse> {
+  return api.get<HealthResponse>(path).then((r) => r.data);
+}
+
+async function fetchSystemHealth(): Promise<HealthResponse> {
+  const pathsToTry: HealthPath[] = preferredHealthPath
+    ? [preferredHealthPath, preferredHealthPath === '/health' ? '/helath' : '/health']
+    : ['/health', '/helath'];
+
+  let lastError: unknown = null;
+
+  for (const path of pathsToTry) {
+    try {
+      const data = await fetchHealthFrom(path);
+      preferredHealthPath = path;
+      return data;
+    } catch (error) {
+      lastError = error;
+      if (!isMissingHealthEndpoint(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError ?? new Error('Unable to reach health endpoint.');
+}
+
 export const systemApi = {
-  health: () =>
-    api.get<HealthResponse>('/health').then((r) => r.data),
+  health: () => fetchSystemHealth(),
 };
 
 // ─── Creators Endpoint (public) ───
@@ -471,3 +509,4 @@ export const creatorsApi = {
 export function getVoiceWsUrl(influencerId: string): string {
   return buildVoiceWsUrl(influencerId);
 }
+

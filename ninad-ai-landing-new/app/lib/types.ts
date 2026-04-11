@@ -270,12 +270,24 @@ export interface AnalyticsFeedbackResponse {
   influencer_feedback: InfluencerFeedbackAggregate[];
 }
 
+export interface ProviderHealth {
+  active: number;
+  reserved: number;
+  limit: number;
+  available: number;
+}
+
 export interface HealthResponse {
   status?: string;
   message?: string;
-  capacity?: number;
-  load?: number;
-  providers?: Record<string, unknown>;
+  redis?: string;
+  providers?: Record<string, ProviderHealth>;
+  streaming_only?: boolean;
+  supported_providers?: string[];
+  total_capacity?: number;
+  total_active_sessions?: number;
+  total_reserved?: number;
+  warnings?: string[] | null;
   [key: string]: unknown;
 }
 
