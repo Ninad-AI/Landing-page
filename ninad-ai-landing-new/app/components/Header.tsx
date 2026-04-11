@@ -23,8 +23,9 @@ export default function Header() {
   // Page type detection
   const isAdminPage = pathname.startsWith('/admin');
   const isVoiceChatPage = /^\/creators\/[^/]+\/voice-chat\/?$/.test(pathname);
-  const isMinimalHeader = isAdminPage;
+  const isMinimalHeader = isAdminPage || isVoiceChatPage;
   const isMobileMenuOpen = mobileMenuOpenPath === pathname;
+  const voiceChatCreatorSlug = pathname.match(/^\/creators\/([^/]+)\/voice-chat\/?$/)?.[1];
 
   const handleLogoClick = () => {
     const heroSection = document.getElementById("hero");
@@ -36,8 +37,6 @@ export default function Header() {
   };
 
   useEffect(() => {
-    if (isVoiceChatPage) return;
-
     const handleScroll = () => {
       const currentScroll = window.scrollY || document.documentElement.scrollTop;
       setIsScrolled(currentScroll > 10);
@@ -49,13 +48,9 @@ export default function Header() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isVoiceChatPage, pathname]);
+  }, [pathname]);
 
   useEffect(() => {
-    if (isVoiceChatPage) {
-      return;
-    }
-
     const previousOverflow = document.body.style.overflow;
     const previousTouchAction = document.body.style.touchAction;
 
@@ -68,16 +63,25 @@ export default function Header() {
       document.body.style.overflow = previousOverflow;
       document.body.style.touchAction = previousTouchAction;
     };
-  }, [isMobileMenuOpen, isVoiceChatPage]);
-
-  if (isVoiceChatPage) {
-    return null;
-  }
+  }, [isMobileMenuOpen]);
 
   const handleLogout = () => {
     logout();
     router.push("/");
     setMobileMenuOpenPath(null);
+  };
+
+  const handleVoiceChatClose = () => {
+    const targetPath = voiceChatCreatorSlug
+      ? `http://localhost:3000/creators/${encodeURIComponent(voiceChatCreatorSlug)}`
+      : 'http://localhost:3000/creators';
+
+    if (typeof window !== 'undefined') {
+      window.location.assign(targetPath);
+      return;
+    }
+
+    router.push(voiceChatCreatorSlug ? `/creators/${voiceChatCreatorSlug}` : '/creators');
   };
 
   /* ═══════════════════════════════════════════════
@@ -125,14 +129,37 @@ export default function Header() {
         )}
 
         {/* Desktop CTA / Auth Section */}
-        {isAdminPage ? (
+        {isMinimalHeader ? (
           <div className="flex items-center absolute right-6 lg:right-12 xl:right-20">
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 rounded-full bg-transparent border border-white/15 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white hover:border-white/40 cursor-pointer"
-            >
-              Logout
-            </button>
+            {isAdminPage ? (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-full bg-transparent border border-white/15 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white hover:border-white/40 cursor-pointer"
+              >
+                Logout
+              </button>
+            ) : isVoiceChatPage ? (
+              <button
+                type="button"
+                aria-label="Close voice chat"
+                onClick={handleVoiceChatClose}
+                className="group inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-black/45 text-white/85 backdrop-blur-md transition-all duration-300 hover:border-rose-200 hover:bg-rose-400/80 hover:text-white"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="hidden lg:flex items-center gap-2 lg:absolute lg:right-12 xl:right-20">

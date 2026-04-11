@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '../lib/stores';
+import { useSystemHealthStore } from '../lib/systemHealthStore';
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -32,6 +33,9 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const startHealthPolling = useSystemHealthStore((s) => s.startPolling);
+  const stopHealthPolling = useSystemHealthStore((s) => s.stopPolling);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -44,6 +48,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+
+  useEffect(() => {
+    startHealthPolling();
+    return () => stopHealthPolling();
+  }, [startHealthPolling, stopHealthPolling]);
 
   return (
     <QueryClientProvider client={queryClient}>

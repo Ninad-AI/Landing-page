@@ -14,7 +14,6 @@ const ANIMATION_CONFIG = {
 const clamp = (v: number, min = 0, max = 100): number => Math.min(Math.max(v, min), max);
 const round = (v: number, precision = 3): number => parseFloat(v.toFixed(precision));
 
-// ... imports
 
 interface ProfileCardProps {
     avatarUrl?: string;
@@ -25,20 +24,9 @@ interface ProfileCardProps {
     name?: string;
     title?: string;
     onContactClick?: () => void;
-    contactText?: string;
-    followers?: number;
-    following?: number;
-    // Deprecated/Unused props kept for compatibility
     behindGlowEnabled?: boolean;
     behindGlowColor?: string;
     behindGlowSize?: string;
-    iconUrl?: string;
-    grainUrl?: string;
-    innerGradient?: string;
-    miniAvatarUrl?: string;
-    handle?: string;
-    status?: string;
-    showUserInfo?: boolean;
 }
 
 interface TiltEngine {
@@ -66,7 +54,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 }) => {
     const isInteractive = typeof onContactClick === 'function';
 
-    // ... refs (wrapRef, shellRef, etc.)
     const wrapRef = useRef<HTMLDivElement>(null);
     const shellRef = useRef<HTMLDivElement>(null);
     const leaveRafRef = useRef<number | null>(null);
@@ -189,7 +176,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
         };
     }, [enableTilt]);
 
-    // ... Event handlers (getOffsets, handlePointerMove, etc.)
     const getOffsets = (evt: PointerEvent, el: HTMLElement): { x: number; y: number } => {
         const rect = el.getBoundingClientRect();
         return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
@@ -288,7 +274,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                             window.addEventListener('deviceorientation', deviceOrientationHandler);
                         }
                     })
-                    .catch(console.error);
+                    .catch(() => { /* device orientation permission denied */ });
             } else {
                 window.addEventListener('deviceorientation', deviceOrientationHandler);
             }

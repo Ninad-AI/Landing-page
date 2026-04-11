@@ -153,6 +153,7 @@ function VoiceChatContent() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
+  const [isMicMuted, setIsMicMuted] = useState(false);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [feedbackSubmitError, setFeedbackSubmitError] = useState<string | null>(null);
@@ -168,6 +169,7 @@ function VoiceChatContent() {
   const ttsActiveRef = useRef(false);
   const sessionEndTimeRef = useRef<number | null>(null);
   const speechFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const micMutedRef = useRef(false);
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
@@ -251,6 +253,8 @@ function VoiceChatContent() {
     if (timerRef.current) clearInterval(timerRef.current);
     micControllerRef.current?.stop();
     micControllerRef.current = null;
+    micMutedRef.current = false;
+    setIsMicMuted(false);
     if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
       wsRef.current.close();
     }
@@ -280,9 +284,14 @@ function VoiceChatContent() {
     promptFeedbackAndExit(`/creators/${slug}`, expired);
   }, [promptFeedbackAndExit, slug]);
 
-  const handleCloseToCreators = useCallback(() => {
-    promptFeedbackAndExit("/creators");
-  }, [promptFeedbackAndExit]);
+  const handleToggleMic = useCallback(() => {
+    setIsMicMuted((prev) => {
+      const next = !prev;
+      micMutedRef.current = next;
+      micControllerRef.current?.setMuted(next);
+      return next;
+    });
+  }, []);
 
   const handleSubmitFeedback = useCallback(async ({ stars, comment }: { stars: FeedbackStars; comment?: string }) => {
     const userId = user?.id?.trim();
@@ -315,6 +324,14 @@ function VoiceChatContent() {
       setIsSubmittingFeedback(false);
     }
   }, [creatorInfluencerId, redirectPathAfterFeedback, router, slug, user?.id]);
+
+  useEffect(() => {
+    if (!isFeedbackModalOpen) return;
+
+    stopSessionResources();
+    setIsSpeaking(false);
+    setCallPhase("connecting");
+  }, [isFeedbackModalOpen, stopSessionResources]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey) return;
@@ -410,6 +427,7 @@ function VoiceChatContent() {
           return;
         }
 
+        micHandle.setMuted(micMutedRef.current);
         micControllerRef.current = micHandle;
       } catch {
         // mic failed
@@ -525,27 +543,6 @@ function VoiceChatContent() {
         <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={0.6} speed={0.5} />
       </div>
 
-      <button
-        type="button"
-        aria-label="Close voice chat"
-        onClick={handleCloseToCreators}
-        className="group fixed right-4 top-4 z-120 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-black/45 text-white/85 backdrop-blur-md pointer-events-auto transition-all duration-300 hover:border-red-400 hover:bg-red-500 hover:text-white sm:right-6 sm:top-6"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5 transition-transform duration-300 group-hover:rotate-90"
-        >
-          <path d="M18 6 6 18" />
-          <path d="m6 6 12 12" />
-        </svg>
-      </button>
-
       <div className="relative z-10 min-h-screen">
         <CreatorVoiceSessionUI
           isSpeaking={isSpeaking}
@@ -554,6 +551,8 @@ function VoiceChatContent() {
           totalTime={totalTime}
           creatorName={creatorName}
           creatorImage={creatorImage}
+          isMicMuted={isMicMuted}
+          onToggleMic={handleToggleMic}
         />
       </div>
 

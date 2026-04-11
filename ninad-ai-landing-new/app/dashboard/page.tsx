@@ -28,13 +28,13 @@ function DashboardContent() {
         <div className="absolute right-[-20vw] bottom-[6vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-24 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Header */}
-        <div className="mb-12 animate-fade-in-up">
-          <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-3">
+        <div className="mb-8 sm:mb-12 animate-fade-in-up">
+          <h1 className="font-sans font-extrabold text-2xl sm:text-3xl md:text-5xl text-white tracking-tight mb-2 sm:mb-3 break-words">
             Welcome, {user.name}
           </h1>
-          <p className="font-sans text-base text-white/50">
+          <p className="font-sans text-sm sm:text-base text-white/50">
             {user.role === 'admin' && 'Manage the platform from your admin dashboard.'}
             {user.role === 'influencer' && 'Review your session activity and platform performance.'}
             {user.role === 'user' && 'Start voice sessions and manage your bookings.'}

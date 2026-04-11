@@ -75,22 +75,3 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return userRole ? roles.includes(userRole) : false;
   },
 }));
-
-// ─── UI Store ───
-interface UIState {
-  voiceChatOpen: boolean;
-  voiceChatCreatorId: string | null;
-  openVoiceChat: (creatorId: string) => void;
-  closeVoiceChat: () => void;
-}
-
-export const useUIStore = create<UIState>((set) => ({
-  voiceChatOpen: false,
-  voiceChatCreatorId: null,
-
-  openVoiceChat: (creatorId: string) =>
-    set({ voiceChatOpen: true, voiceChatCreatorId: creatorId }),
-
-  closeVoiceChat: () =>
-    set({ voiceChatOpen: false, voiceChatCreatorId: null }),
-}));

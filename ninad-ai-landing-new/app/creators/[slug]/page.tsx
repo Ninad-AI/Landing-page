@@ -506,17 +506,15 @@ export default function CreatorProfilePage() {
         ) : (
           <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
             <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
-              <h2 className="text-[10px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-2 sm:mb-4 animate-fade-in-up">
+              <h2 className="text-[10px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-4 sm:mb-6 animate-fade-in-up">
                 • {creatorRole}
               </h2>
-              <br />
-              <h1 className="mt-2 text-[2.4rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
+              <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
                 <span className="block">{creatorName.split(" ")[0]}</span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
                   {creatorName.split(" ").slice(1).join(" ")}.
                 </span>
               </h1>
-              <br /><br />
 
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
                 <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">

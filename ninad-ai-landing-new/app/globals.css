@@ -41,6 +41,8 @@ html,
 body {
   max-width: 100%;
   overflow-x: clip;
+  /* Ensure no layout break below 320px */
+  min-width: 320px;
 }
 
 /* Smooth page transitions */
@@ -107,6 +109,48 @@ body {
     .min-h-screen {
       min-height: 100dvh;
     }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   320px Baseline Fixes
+   ═══════════════════════════════════════════════ */
+
+/* Ensure all containers respect 320px minimum */
+@media (max-width: 360px) {
+  /* Reduce padding on very small screens */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Prevent glass cards from overflowing */
+  .glass,
+  .glass-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Input fields must be full width */
+  .input-field {
+    font-size: 16px; /* Prevent iOS auto-zoom on focus */
+  }
+}
+
+/* iOS input zoom prevention at all mobile sizes */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Minimum tap target size */
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Buttons in tight rows can be smaller if needed */
+  .tap-sm {
+    min-height: 36px;
   }
 }
 

@@ -10,6 +10,8 @@ interface VoiceSessionUIProps {
   totalTime: number;
   creatorName: string;
   creatorImage: string;
+  isMicMuted?: boolean;
+  onToggleMic?: () => void;
 }
 
 export default function VoiceSessionUI({
@@ -19,6 +21,8 @@ export default function VoiceSessionUI({
   totalTime,
   creatorName,
   creatorImage,
+  isMicMuted = false,
+  onToggleMic,
 }: VoiceSessionUIProps) {
   const RING_SIZE = 280;
   const IMG_SIZE = 216;
@@ -103,7 +107,7 @@ export default function VoiceSessionUI({
           </div>
 
           {/* Controls below the circle */}
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-[155px] flex-col items-center gap-8">
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-38.75 flex-col items-center gap-8">
             {/* Timer */}
             <span className="tabular-nums text-5xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
               {formatTime(timeLeft)}
@@ -119,6 +123,39 @@ export default function VoiceSessionUI({
                 {callPhase}
               </span>
             </div>
+
+            {onToggleMic && (
+              <button
+                type="button"
+                onClick={onToggleMic}
+                aria-label={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
+                title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
+                className={`group relative inline-flex h-12 w-12 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 sm:h-14 sm:w-14 ${
+                  isMicMuted
+                    ? 'border-rose-200/55 bg-rose-400/20 text-rose-100 shadow-[0_0_24px_rgba(251,113,133,0.24)] hover:bg-rose-400/30'
+                    : 'border-white/35 bg-white/12 text-white/90 shadow-[0_0_20px_rgba(255,255,255,0.14)] hover:bg-white/18'
+                }`}
+              >
+                <span className="pointer-events-none absolute inset-1 rounded-full border border-white/20" />
+                {isMicMuted ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-5 w-5 sm:h-6 sm:w-6">
+                    <path d="M12 5a3 3 0 0 1 3 3v4a3 3 0 0 1-5.54 1.64" />
+                    <path d="M17 10v2a5 5 0 0 1-8.8 3.2" />
+                    <path d="M7 10v2" />
+                    <path d="M12 19v3" />
+                    <path d="M9 22h6" />
+                    <path d="m4 4 16 16" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-5 w-5 sm:h-6 sm:w-6">
+                    <rect x="9" y="3" width="6" height="12" rx="3" />
+                    <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                    <path d="M12 19v3" />
+                    <path d="M9 22h6" />
+                  </svg>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>

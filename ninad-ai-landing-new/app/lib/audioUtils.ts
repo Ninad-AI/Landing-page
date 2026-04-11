@@ -1,6 +1,5 @@
 /**
  * Audio utility functions for recording, VAD, and streaming.
- * Ported from E:\NINAD-AI\aanchalbadola\src\app\utils\audioUtils.ts
  */
 
 /* ────────────────────────────────────────────────────
@@ -9,6 +8,8 @@
 
 export interface StreamingMicHandle {
   stop: () => void;
+  setMuted: (muted: boolean) => void;
+  isMuted: () => boolean;
 }
 
 interface StreamingMicOptions {
@@ -75,6 +76,7 @@ export const startStreamingMic = async (
   const streamStartTime = performance.now();
   const FRAME_SIZE = 320;       // 20 ms @ 16 kHz
   let pcmRemainder = new Int16Array(0);
+  let muted = false;
 
   const safeSend = (payload: string | ArrayBuffer): boolean => {
     if (ws.readyState !== WebSocket.OPEN) return false;
@@ -88,6 +90,13 @@ export const startStreamingMic = async (
 
   const processInputChunk = (input: Float32Array) => {
     if (ws.readyState !== WebSocket.OPEN) return;
+
+    if (muted) {
+      if (typeof onAudioLevel === "function") {
+        onAudioLevel(0);
+      }
+      return;
+    }
 
     // ── Downsample to 16 kHz ──
     const targetSampleRate = 16000;
@@ -208,6 +217,21 @@ export const startStreamingMic = async (
   }
 
   return {
+    setMuted: (nextMuted: boolean) => {
+      muted = nextMuted;
+      stream.getAudioTracks().forEach((track) => {
+        track.enabled = !nextMuted;
+      });
+
+      if (nextMuted && isSpeaking && ws.readyState === WebSocket.OPEN) {
+        safeSend(JSON.stringify({ type: "speech_end" }));
+        isSpeaking = false;
+        if (typeof onSpeechEnd === "function") onSpeechEnd();
+      }
+    },
+
+    isMuted: () => muted,
+
     stop: () => {
       // If still speaking when stopped, send a final speech_end
       if (isSpeaking && ws.readyState === WebSocket.OPEN) {
