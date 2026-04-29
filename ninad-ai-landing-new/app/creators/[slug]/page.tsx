@@ -21,7 +21,7 @@ type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
 
 // Defaults for quick testing
-const DEFAULT_INFLUENCER_ID = "influencer_13";
+const DEFAULT_INFLUENCER_ID = "influencer_7";
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 const ALLOWED_DURATIONS: AllowedDurationMinutes[] = [3, 5, 10, 15, 20, 30];
 

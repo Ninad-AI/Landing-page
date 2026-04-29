@@ -15,7 +15,7 @@ import type { FeedbackStars } from "../../../lib/types";
 import { openAppWebSocket } from "../../../lib/websocket";
 
 // Defaults for quick testing
-const DEFAULT_INFLUENCER_ID = "influencer_13";
+const DEFAULT_INFLUENCER_ID = "influencer_7";
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
 type CallPhase = "connecting" | "listening" | "speaking";
