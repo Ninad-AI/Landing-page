@@ -73,8 +73,8 @@ export default function Header() {
 
   const handleVoiceChatClose = () => {
     const targetPath = voiceChatCreatorSlug
-      ? `http://localhost:3000/creators/${encodeURIComponent(voiceChatCreatorSlug)}`
-      : 'http://localhost:3000/creators';
+      ? `https://ninad.live/creators/${encodeURIComponent(voiceChatCreatorSlug)}`
+      : 'https://ninad.live/creators';
 
     if (typeof window !== 'undefined') {
       window.location.assign(targetPath);
