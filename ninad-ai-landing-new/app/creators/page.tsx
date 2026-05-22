@@ -24,6 +24,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Popular influencer and actor known for his versatile performances.",
   },
+  {
+    id: "nirupam-001",
+    name: "Nirupam",
+    role: "Actor & Producer",
+    imageUrl: "/assets/creators/nirupam.jpeg",
+    handle: "nirupam",
+    status: "Active",
+    bio: "Acclaimed actor and producer known for his powerful performances and creative vision.",
+  },
 ];
 
 export default function CreatorsPage() {

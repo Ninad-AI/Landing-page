@@ -12,6 +12,7 @@ interface VoiceSessionUIProps {
   creatorImage: string;
   isMicMuted?: boolean;
   onToggleMic?: () => void;
+  onClose?: () => void;
 }
 
 export default function VoiceSessionUI({
@@ -23,6 +24,7 @@ export default function VoiceSessionUI({
   creatorImage,
   isMicMuted = false,
   onToggleMic,
+  onClose,
 }: VoiceSessionUIProps) {
   const RING_SIZE = 280;
   const IMG_SIZE = 216;
@@ -53,6 +55,22 @@ export default function VoiceSessionUI({
     >
 
 
+
+      {/* Close button */}
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close session"
+          title="Close session"
+          className="fixed top-5 right-5 z-[60] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/70 hover:bg-white/15 hover:text-white transition-all duration-300 shadow-[0_0_16px_rgba(0,0,0,0.3)] sm:top-6 sm:right-6 sm:h-11 sm:w-11"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5 sm:h-5 sm:w-5">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      )}
 
       {/* Main layout */}
       <div className="relative flex h-full w-full items-center justify-center">

@@ -5,17 +5,11 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import ProtectedRoute from "../../../components/ProtectedRoute";
 import CreatorVoiceSessionUI from "../../../components/CreatorVoiceSessionUI";
-import VoiceFeedbackModal from "../../../components/VoiceFeedbackModal";
 import Aurora from "../../../components/ui/Aurora";
 import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUtils";
 import { buildVoiceWsUrl } from "../../../lib/config";
-import { feedbackApi } from "../../../lib/api";
-import { useAuthStore } from "../../../lib/stores";
-import type { FeedbackStars } from "../../../lib/types";
 import { openAppWebSocket } from "../../../lib/websocket";
 
-// Defaults for quick testing
-const DEFAULT_INFLUENCER_ID = "influencer_7";
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
 type CallPhase = "connecting" | "listening" | "speaking";
@@ -24,91 +18,19 @@ function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
 
-function normalizeErrorToMessage(value: unknown): string | null {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length > 0 ? trimmed : null;
-  }
-
-  if (Array.isArray(value)) {
-    const messages = value
-      .map((item) => {
-        if (typeof item === "string") {
-          return item;
-        }
-
-        if (item && typeof item === "object") {
-          const record = item as Record<string, unknown>;
-          const msg = typeof record.msg === "string" ? record.msg : null;
-          const loc = Array.isArray(record.loc)
-            ? record.loc
-              .filter((part): part is string | number => typeof part === "string" || typeof part === "number")
-              .join(".")
-            : "";
-
-          if (msg && loc) {
-            return `${loc}: ${msg}`;
-          }
-
-          if (msg) {
-            return msg;
-          }
-        }
-
-        return null;
-      })
-      .filter((message): message is string => !!message);
-
-    if (messages.length > 0) {
-      return messages.join(" | ");
-    }
-
-    return null;
-  }
-
-  if (value && typeof value === "object") {
-    const record = value as Record<string, unknown>;
-    const message =
-      normalizeErrorToMessage(record.message) ||
-      normalizeErrorToMessage(record.error) ||
-      normalizeErrorToMessage(record.detail) ||
-      normalizeErrorToMessage(record.msg);
-
-    if (message) {
-      return message;
-    }
-
-    try {
-      return JSON.stringify(record);
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
-}
-
-function getFeedbackErrorMessage(error: unknown): string {
-  const apiError = error as {
-    response?: {
-      data?: unknown;
-    };
-    message?: string;
-  };
-
-  return (
-    normalizeErrorToMessage(apiError.response?.data) ||
-    normalizeErrorToMessage(apiError.message) ||
-    (error instanceof Error ? error.message : "Unable to submit feedback right now.")
-  );
-}
-
 const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
   "pawan-kumar": {
     name: "Pawan Kumar",
     image: "/assets/creators/pavan.png",
     role: "Influencer & Actor",
-    influencerId: DEFAULT_INFLUENCER_ID,
+    influencerId: "influencer_7",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
+  "nirupam": {
+    name: "Nirupam Paritala",
+    image: "/assets/creators/nirupam.jpeg",
+    role: "Actor & Producer",
+    influencerId: "influencer_15",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
@@ -125,13 +47,12 @@ function VoiceChatContent() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const { user } = useAuthStore();
 
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
-  const creatorInfluencerId = creatorData?.influencerId ?? DEFAULT_INFLUENCER_ID;
+  const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const bookingId = searchParams.get("booking_id");
 
@@ -154,10 +75,6 @@ function VoiceChatContent() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
   const [isMicMuted, setIsMicMuted] = useState(false);
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
-  const [feedbackSubmitError, setFeedbackSubmitError] = useState<string | null>(null);
-  const [redirectPathAfterFeedback, setRedirectPathAfterFeedback] = useState<string | null>(null);
 
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
@@ -264,25 +181,23 @@ function VoiceChatContent() {
     stopPlayback();
   }, [clearSpeechFallbackTimeout, stopPlayback]);
 
-  const promptFeedbackAndExit = useCallback((redirectPath: string, expired = false) => {
+  const endSessionAndRedirect = useCallback((redirectPath: string, expired = false) => {
     stopSessionResources();
     clearPersistedSession();
     setTimeLeft(0);
     setIsSpeaking(false);
     setCallPhase("connecting");
-    setFeedbackSubmitError(null);
-    setRedirectPathAfterFeedback(redirectPath);
-    setIsFeedbackModalOpen(true);
 
     if (expired) {
       toast.info("Session duration completed.");
     }
 
-  }, [clearPersistedSession, stopSessionResources]);
+    router.replace(redirectPath);
+  }, [clearPersistedSession, router, stopSessionResources]);
 
   const handleEndCall = useCallback((expired = false) => {
-    promptFeedbackAndExit(`/creators/${slug}`, expired);
-  }, [promptFeedbackAndExit, slug]);
+    endSessionAndRedirect(`/creators/${slug}`, expired);
+  }, [endSessionAndRedirect, slug]);
 
   const handleToggleMic = useCallback(() => {
     setIsMicMuted((prev) => {
@@ -293,45 +208,21 @@ function VoiceChatContent() {
     });
   }, []);
 
-  const handleSubmitFeedback = useCallback(async ({ stars, comment }: { stars: FeedbackStars; comment?: string }) => {
-    const userId = user?.id?.trim();
-    if (!userId) {
-      const message = "Unable to submit feedback because user information is missing. Please sign in again.";
-      setFeedbackSubmitError(message);
-      toast.error(message);
-      return;
-    }
-
-    setIsSubmittingFeedback(true);
-    setFeedbackSubmitError(null);
-
-    try {
-      await feedbackApi.submitVoiceSessionFeedback({
-        user_id: userId,
-        influencer_id: creatorInfluencerId,
-        rating: stars,
-        comment: comment ?? null,
-      });
-
-      setIsFeedbackModalOpen(false);
-      toast.success("Thanks for sharing your feedback.");
-      router.push(redirectPathAfterFeedback ?? `/creators/${slug}`);
-    } catch (error) {
-      const message = getFeedbackErrorMessage(error);
-      setFeedbackSubmitError(message);
-      toast.error(message);
-    } finally {
-      setIsSubmittingFeedback(false);
-    }
-  }, [creatorInfluencerId, redirectPathAfterFeedback, router, slug, user?.id]);
-
   useEffect(() => {
-    if (!isFeedbackModalOpen) return;
+    const handleVoiceChatExit = () => {
+      stopSessionResources();
+      clearPersistedSession();
+      setTimeLeft(0);
+      setIsSpeaking(false);
+      setCallPhase("connecting");
+    };
 
-    stopSessionResources();
-    setIsSpeaking(false);
-    setCallPhase("connecting");
-  }, [isFeedbackModalOpen, stopSessionResources]);
+    window.addEventListener("ninad:voice-chat-exit", handleVoiceChatExit);
+
+    return () => {
+      window.removeEventListener("ninad:voice-chat-exit", handleVoiceChatExit);
+    };
+  }, [clearPersistedSession, stopSessionResources]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey) return;
@@ -345,12 +236,16 @@ function VoiceChatContent() {
       if (Number.isFinite(parsedEndTime)) {
         if (parsedEndTime <= now) {
           clearPersistedSession();
-          handleEndCall(true);
+          setTimeout(() => {
+            handleEndCall(true);
+          }, 0);
           return;
         }
 
         sessionEndTimeRef.current = parsedEndTime;
-        setTimeLeft(Math.max(0, Math.ceil((parsedEndTime - now) / 1000)));
+        setTimeout(() => {
+          setTimeLeft(Math.max(0, Math.ceil((parsedEndTime - now) / 1000)));
+        }, 0);
         return;
       }
     }
@@ -358,7 +253,9 @@ function VoiceChatContent() {
     const sessionDurationSeconds = getSessionDurationSeconds(durationMinutes);
     const newEndTime = now + sessionDurationSeconds * 1000;
     sessionEndTimeRef.current = newEndTime;
-    setTimeLeft(sessionDurationSeconds);
+    setTimeout(() => {
+      setTimeLeft(sessionDurationSeconds);
+    }, 0);
     if (typeof window !== "undefined") {
       sessionStorage.setItem(sessionStorageKey, String(newEndTime));
     }
@@ -368,9 +265,6 @@ function VoiceChatContent() {
     if (!durationMinutes) return;
 
     let disposed = false;
-
-    setIsSpeaking(false);
-    setCallPhase("connecting");
 
     const wsUrl = new URL(buildVoiceWsUrl(creatorInfluencerId));
     wsUrl.searchParams.set("preferred_provider", preferredProvider);
@@ -559,15 +453,6 @@ function VoiceChatContent() {
       <p className="pointer-events-none fixed bottom-12 left-1/2 z-110 -translate-x-1/2 text-[10px] font-normal tracking-wide text-white/60 sm:bottom-14 sm:text-[11px]">
         Ninad AI can make mistakes.
       </p>
-
-      {isFeedbackModalOpen && (
-        <VoiceFeedbackModal
-          creatorName={creatorName}
-          isSubmitting={isSubmittingFeedback}
-          submitError={feedbackSubmitError}
-          onSubmit={handleSubmitFeedback}
-        />
-      )}
     </main>
   );
 }

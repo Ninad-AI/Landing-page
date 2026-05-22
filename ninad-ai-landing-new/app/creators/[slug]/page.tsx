@@ -20,8 +20,6 @@ type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 type AuthTab = "login" | "signup";
 
-// Defaults for quick testing
-const DEFAULT_INFLUENCER_ID = "influencer_7";
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 const ALLOWED_DURATIONS: AllowedDurationMinutes[] = [3, 5, 10, 15, 20, 30];
 
@@ -58,7 +56,14 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     name: "Pawan Kumar",
     image: "/assets/creators/pavan.png",
     role: "Influencer & Actor",
-    influencerId: DEFAULT_INFLUENCER_ID,
+    influencerId: "influencer_7",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
+  "nirupam": {
+    name: "Nirupam Paritala",
+    image: "/assets/creators/nirupam.jpeg",
+    role: "Actor & Producer",
+    influencerId: "influencer_15",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
@@ -71,7 +76,7 @@ export default function CreatorProfilePage() {
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
   const creatorRole = creatorData?.role ?? "Creator";
-  const creatorInfluencerId = creatorData?.influencerId ?? DEFAULT_INFLUENCER_ID;
+  const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
 
   /* ── Auth store ── */

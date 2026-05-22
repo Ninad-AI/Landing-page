@@ -73,15 +73,14 @@ export default function Header() {
 
   const handleVoiceChatClose = () => {
     const targetPath = voiceChatCreatorSlug
-      ? `https://ninad.live/creators/${encodeURIComponent(voiceChatCreatorSlug)}`
-      : 'https://ninad.live/creators';
+      ? `/creators/${encodeURIComponent(voiceChatCreatorSlug)}`
+      : "/creators";
 
-    if (typeof window !== 'undefined') {
-      window.location.assign(targetPath);
-      return;
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("ninad:voice-chat-exit"));
     }
 
-    router.push(voiceChatCreatorSlug ? `/creators/${voiceChatCreatorSlug}` : '/creators');
+    router.replace(targetPath);
   };
 
   /* ═══════════════════════════════════════════════
