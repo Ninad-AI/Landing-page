@@ -15,7 +15,7 @@ interface Creator {
 }
 
 const CREATORS: Creator[] = [
-  {
+  /* {
     id: "pawan-kumar-001",
     name: "Pawan Kumar",
     role: "Influencer & Actor",
@@ -23,7 +23,7 @@ const CREATORS: Creator[] = [
     handle: "pawan-kumar",
     status: "Active",
     bio: "Popular influencer and actor known for his versatile performances.",
-  },
+  }, */
   {
     id: "nirupam-001",
     name: "Nirupam",
