@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE } from "../lib/config";
+import { getSupabaseClient } from "../lib/supabaseClient";
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
@@ -18,7 +22,7 @@ export default function Waitlist() {
     return () => window.clearTimeout(t);
   }, [status.type]);
 
-  const canSubmit = useMemo(() => email.trim().length > 3, [email]);
+  const canSubmit = useMemo(() => isValidEmail(email.trim()), [email]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,24 +31,29 @@ export default function Waitlist() {
     setStatus({ type: "loading" });
 
     try {
-      const res = await fetch(`${API_BASE}/api/waitlist`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "homepage-waitlist" }),
-      });
+      const cleanedEmail = email.trim().toLowerCase();
+      if (!isValidEmail(cleanedEmail)) {
+        throw new Error("Please enter a valid email.");
+      }
 
-      const data = (await res.json().catch(() => null)) as
-        | { ok: true; message?: string }
-        | { ok: false; error?: string }
-        | null;
+      const supabase = getSupabaseClient();
+      const { error } = await supabase
+        .from("waitlist_subscribers")
+        .insert({ email: cleanedEmail });
 
-      if (!res.ok || !data || !("ok" in data) || data.ok === false) {
-        throw new Error(data && "error" in data && data.error ? data.error : "Failed to join waitlist.");
+      if (error) {
+        const errorCode = (error as { code?: string }).code;
+        if (errorCode === "23505") {
+          setStatus({ type: "success", message: "You’re on the waitlist." });
+          setEmail("");
+          return;
+        }
+        throw new Error(error.message);
       }
 
       setStatus({
         type: "success",
-        message: data.message || "You’re on the waitlist.",
+        message: "You’re on the waitlist.",
       });
       setEmail("");
     } catch (err) {

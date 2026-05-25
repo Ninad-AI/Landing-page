@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { API_BASE } from "../lib/config";
+import { getSupabaseClient } from "../lib/supabaseClient";
+
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
 type FormState = {
   name: string;
@@ -34,7 +38,7 @@ export default function BookDemoForm() {
 
   const canSubmit = useMemo(() => {
     return (
-      form.email.trim().length > 3 &&
+      isValidEmail(form.email.trim()) &&
       form.name.trim().length > 1 &&
       form.phone.trim().length > 3
     );
@@ -51,30 +55,56 @@ export default function BookDemoForm() {
     setStatus({ type: "loading" });
 
     try {
-      const res = await fetch(`${API_BASE}/api/book-demo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          company: form.company,
-          message: form.message,
-        }),
+      const name = form.name.trim().slice(0, 120);
+      const email = form.email.trim().toLowerCase();
+      const phone = form.phone.trim().slice(0, 40);
+      const company = form.company.trim().slice(0, 160);
+      const message = form.message.trim().slice(0, 2000);
+
+      if (!name) {
+        throw new Error("Please enter your name.");
+      }
+
+      if (!email || !isValidEmail(email)) {
+        throw new Error("Please enter a valid email.");
+      }
+
+      if (!phone) {
+        throw new Error("Please enter a phone number.");
+      }
+
+      const supabase = getSupabaseClient();
+      const { error } = await supabase.from("demo_requests").insert({
+        name,
+        email,
+        phone,
+        company: company || null,
+        message: message || null,
       });
 
-      const data = (await res.json().catch(() => null)) as
-        | { ok: true; message?: string }
-        | { ok: false; error?: string }
-        | null;
-
-      if (!res.ok || !data || !("ok" in data) || data.ok === false) {
-        throw new Error(data && "error" in data && data.error ? data.error : "Failed to submit.");
+      if (error) {
+        if (typeof error.message === "string" && error.message.toLowerCase().includes("message")) {
+          const retry = await supabase.from("demo_requests").insert({
+            name,
+            email,
+            phone,
+            company: company || null,
+          });
+          if (!retry.error) {
+            setStatus({
+              type: "success",
+              message: "Thanks — we’ll email you to schedule a demo.",
+            });
+            setForm({ name: "", email: "", phone: "", company: "", message: "" });
+            return;
+          }
+        }
+        throw new Error(error.message);
       }
 
       setStatus({
         type: "success",
-        message: data.message || "Request received — we’ll reach out shortly.",
+        message: "Thanks — we’ll email you to schedule a demo.",
       });
       setForm({ name: "", email: "", phone: "", company: "", message: "" });
     } catch (err) {
