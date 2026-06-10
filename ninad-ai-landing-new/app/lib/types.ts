@@ -16,16 +16,8 @@ export interface AuthTokens {
   token_type: string;
 }
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  name: string;
-  role?: UserRole;
+export interface GoogleSignInRequest {
+  id_token: string;
 }
 
 export interface AuthResponse {

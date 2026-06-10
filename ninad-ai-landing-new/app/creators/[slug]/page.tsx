@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
-import TermsAgreement from "../../components/auth/TermsAgreement";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
@@ -18,7 +18,6 @@ import type { AllowedDurationMinutes } from "../../lib/types";
 /* ── Flow: idle → auth (if needed) → duration → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
-type AuthTab = "login" | "signup";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 const ALLOWED_DURATIONS: AllowedDurationMinutes[] = [3, 5, 10, 15, 20, 30];
@@ -45,10 +44,6 @@ function resolveBookingDuration(durationMinutes?: number, expiresAt?: string): A
   return 3;
 }
 
-function getAuthErrorMessage(error: unknown, fallback: string): string {
-  const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
-  return apiError.response?.data?.detail || apiError.response?.data?.message || fallback;
-}
 
 /* ── Creator data ── */
 const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
@@ -91,11 +86,6 @@ export default function CreatorProfilePage() {
   const [isVisible, setIsVisible] = useState(false);
 
   /* ── Auth modal state ── */
-  const [authTab, setAuthTab] = useState<AuthTab>("login");
-  const [authEmail, setAuthEmail] = useState("");
-  const [authPassword, setAuthPassword] = useState("");
-  const [authName, setAuthName] = useState("");
-  const [authAcceptedTerms, setAuthAcceptedTerms] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const isCheckingBookingRef = useRef(false);
 
@@ -419,53 +409,30 @@ export default function CreatorProfilePage() {
     setFlowState("auth");
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (authTab === "login" && (!authEmail || !authPassword)) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (authTab === "signup" && (!authEmail || !authPassword || !authName)) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (authTab === "signup" && !authAcceptedTerms) {
-      toast.error("Please review and accept the Terms & Conditions to continue.");
+  const handleGoogleAuthSuccess = async (credentialResponse: CredentialResponse) => {
+    const idToken = credentialResponse.credential;
+    if (!idToken) {
+      toast.error("Google Sign-In failed: no credential received.");
       return;
     }
 
     setAuthLoading(true);
-
     try {
-      if (authTab === "login") {
-        const response = await authApi.login({
-          email: authEmail.trim().toLowerCase(),
-          password: authPassword,
-        });
-        authLogin(response.user, response.tokens.access_token);
-        toast.success(`Welcome back, ${response.user.name}!`);
-      } else {
-        const response = await authApi.register({
-          name: authName.trim(),
-          email: authEmail.trim().toLowerCase(),
-          password: authPassword,
-          role: "user",
-        });
-        authLogin(response.user, response.tokens.access_token);
-        toast.success(`Welcome, ${response.user.name}!`);
-      }
-
+      const response = await authApi.googleSignIn({ id_token: idToken });
+      authLogin(response.user, response.tokens.access_token);
+      toast.success(`Welcome, ${response.user.name}!`);
       await openDurationOrResumeBooking();
-      setAuthEmail("");
-      setAuthPassword("");
-      setAuthName("");
-      setAuthAcceptedTerms(false);
     } catch (error) {
-      const fallback = authTab === "login" ? "Login failed. Please try again." : "Could not create account.";
-      toast.error(getAuthErrorMessage(error, fallback));
+      const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
+      const msg = apiError.response?.data?.detail || apiError.response?.data?.message || "Sign-in failed. Please try again.";
+      toast.error(msg);
     } finally {
       setAuthLoading(false);
     }
+  };
+
+  const handleGoogleAuthError = () => {
+    toast.error("Google Sign-In was cancelled or failed. Please try again.");
   };
 
   const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
@@ -480,10 +447,6 @@ export default function CreatorProfilePage() {
   const closeModal = () => {
     setFlowState("idle");
     setSelectedMinutes(null);
-    setAuthEmail("");
-    setAuthPassword("");
-    setAuthName("");
-    setAuthAcceptedTerms(false);
   };
 
   /* ═══════════════════════════════════════
@@ -567,52 +530,40 @@ export default function CreatorProfilePage() {
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="flex items-center justify-center gap-1 mb-8 p-1 rounded-full bg-white/5 border border-white/10">
-                  <button onClick={() => setAuthTab("login")} className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${authTab === "login" ? "bg-white text-black" : "text-white/50 hover:text-white"}`}>
-                    Login
-                  </button>
-                  <button onClick={() => setAuthTab("signup")} className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all duration-300 ${authTab === "signup" ? "bg-white text-black" : "text-white/50 hover:text-white"}`}>
-                    Sign Up
-                  </button>
+                {/* Header */}
+                <div className="text-center mb-7">
+                  <h2 className="text-xl font-extrabold text-white tracking-tight mb-1">Sign in to continue</h2>
+                  <p className="text-xs text-white/40 font-sans">Connect with your Google account to start a session</p>
                 </div>
 
-                <form onSubmit={handleAuthSubmit} className="space-y-4">
-                  {authTab === "signup" && (
-                    <div>
-                      <label className="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1.5">Name</label>
-                      <input type="text" value={authName} onChange={(e) => setAuthName(e.target.value)} placeholder="Your name" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium outline-none focus:border-white/30 transition-colors" required />
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1.5">Email</label>
-                    <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium outline-none focus:border-white/30 transition-colors" required />
+                {/* Google Sign-In */}
+                {authLoading ? (
+                  <div className="w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
+                    <span className="text-sm text-white/50 font-sans">Signing you in…</span>
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1.5">Password</label>
-                    <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium outline-none focus:border-white/30 transition-colors" required />
+                ) : (
+                  <div className="flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
+                    <GoogleLogin
+                      onSuccess={handleGoogleAuthSuccess}
+                      onError={handleGoogleAuthError}
+                      theme="filled_black"
+                      size="large"
+                      shape="rectangular"
+                      text="continue_with"
+                      width="340"
+                      logo_alignment="left"
+                      useOneTap={false}
+                    />
                   </div>
+                )}
 
-                  {authTab === "signup" && (
-                    <TermsAgreement checked={authAcceptedTerms} onCheckedChange={setAuthAcceptedTerms} />
-                  )}
-
-                  <button type="submit" disabled={authLoading || (authTab === "signup" && !authAcceptedTerms)} className="w-full py-3.5 rounded-xl bg-white text-black font-bold text-sm transition-all duration-300 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed mt-2">
-                    {authLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                        {authTab === "login" ? "Signing in..." : "Creating account..."}
-                      </span>
-                    ) : (
-                      authTab === "login" ? "Sign In" : "Create Account"
-                    )}
-                  </button>
-                </form>
-
-                <p className="text-center text-xs text-white/30 mt-5">
-                  {authTab === "login" ? "Don't have an account? " : "Already have an account? "}
-                  <button onClick={() => setAuthTab(authTab === "login" ? "signup" : "login")} className="text-white/60 font-semibold hover:text-white transition-colors">
-                    {authTab === "login" ? "Sign Up" : "Login"}
-                  </button>
+                <p className="text-center text-[11px] text-white/25 mt-5 font-sans leading-relaxed">
+                  By continuing, you agree to Ninad AI&apos;s{" "}
+                  <a href="/terms-and-conditions" className="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">
+                    Terms of Service
+                  </a>
+                  .
                 </p>
               </div>
             </div>

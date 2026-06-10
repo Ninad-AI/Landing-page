@@ -1,8 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   AuthResponse,
-  LoginRequest,
-  RegisterRequest,
+  GoogleSignInRequest,
   SessionCreateRequest,
   Session,
   SessionResult,
@@ -215,8 +214,11 @@ function normalizeAuthResponse(
     (typeof userObj?.created_at === 'string' ? userObj.created_at : undefined) ||
     new Date().toISOString();
 
+  // Support both avatar_url (nested user obj) and picture (flat Google response)
   const avatarUrl =
     (typeof userObj?.avatar_url === 'string' ? userObj.avatar_url : undefined) ||
+    (typeof root.picture === 'string' ? root.picture : undefined) ||
+    (typeof root.avatar_url === 'string' ? root.avatar_url : undefined) ||
     '';
 
   return {
@@ -318,36 +320,17 @@ api.interceptors.response.use(
 
 // ─── Auth Endpoints ───
 export const authApi = {
-  register: async (data: RegisterRequest) => {
-    const registerPayload = await api.post('/auth/register', data).then((r) => r.data);
-
-    // Some backends return metadata only on register and omit tokens.
-    try {
-      return normalizeAuthResponse(registerPayload, {
-        email: data.email,
-        name: data.name,
-        role: data.role,
-      });
-    } catch {
-      const loginPayload = await api
-        .post('/auth/login', { email: data.email, password: data.password })
-        .then((r) => r.data);
-
-      return normalizeAuthResponse(loginPayload, {
-        email: data.email,
-        name: data.name,
-        role: data.role,
-      });
-    }
-  },
-
-  login: async (data: LoginRequest) => {
-    const normalizedEmail = data.email.trim().toLowerCase();
-
-    const loginPayload = await api
-      .post('/auth/login', { ...data, email: normalizedEmail })
-      .then((r) => r.data);
-    return normalizeAuthResponse(loginPayload, { email: normalizedEmail });
+  /**
+   * Exchange a Google ID Token for an internal JWT.
+   * POST /auth/google { id_token }
+   * Backend verifies with Google's public keys (RS256), creates/updates User in DB,
+   * and returns an internal HS256 JWT.
+   */
+  googleSignIn: async (data: GoogleSignInRequest): Promise<AuthResponse> => {
+    const payload = await api.post('/auth/google', data).then((r) => r.data);
+    // The backend returns a flat object: { access_token, token_type, user_id, email, role, name, picture }
+    const email = typeof payload?.email === 'string' ? payload.email : 'unknown@google.com';
+    return normalizeAuthResponse(payload, { email });
   },
 };
 

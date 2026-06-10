@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '../lib/stores';
 import { useSystemHealthStore } from '../lib/systemHealthStore';
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -55,26 +58,28 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }, [startHealthPolling, stopHealthPolling]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthHydrator>
-        {children}
-      </AuthHydrator>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: 'rgba(15, 10, 30, 0.85)',
-            backdropFilter: 'blur(32px)',
-            WebkitBackdropFilter: 'blur(32px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: '#ffffff',
-            fontFamily: 'var(--font-inter)',
-            borderRadius: '16px',
-            boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.5)',
-          },
-        }}
-        richColors
-      />
-    </QueryClientProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <QueryClientProvider client={queryClient}>
+        <AuthHydrator>
+          {children}
+        </AuthHydrator>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'rgba(15, 10, 30, 0.85)',
+              backdropFilter: 'blur(32px)',
+              WebkitBackdropFilter: 'blur(32px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: '#ffffff',
+              fontFamily: 'var(--font-inter)',
+              borderRadius: '16px',
+              boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.5)',
+            },
+          }}
+          richColors
+        />
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 }
