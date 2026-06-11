@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { systemApi } from './api';
 import type { ProviderHealth } from './types';
 
-export const HEALTH_POLL_INTERVAL_SECONDS = 10;
+export const HEALTH_POLL_INTERVAL_SECONDS = 30;
 const HEALTH_POLL_INTERVAL_MS = HEALTH_POLL_INTERVAL_SECONDS * 1000;
 
 let healthPollTimer: ReturnType<typeof setInterval> | null = null;

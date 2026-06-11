@@ -15,34 +15,11 @@ import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
-/* ── Flow: idle → auth (if needed) → duration → active ── */
+/* ── Flow: idle → duration → auth (if needed) → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
-const ALLOWED_DURATIONS: AllowedDurationMinutes[] = [3, 5, 10, 15, 20, 30];
-
-function resolveBookingDuration(durationMinutes?: number, expiresAt?: string): AllowedDurationMinutes {
-  if (Number.isFinite(durationMinutes) && (durationMinutes as number) > 0) {
-    const rounded = Math.round(durationMinutes as number);
-    if ((ALLOWED_DURATIONS as number[]).includes(rounded)) {
-      return rounded as AllowedDurationMinutes;
-    }
-  }
-
-  if (expiresAt) {
-    const expiresAtMs = Date.parse(expiresAt);
-    if (Number.isFinite(expiresAtMs)) {
-      const remainingMinutes = Math.ceil((expiresAtMs - Date.now()) / 60000);
-      if (remainingMinutes > 0) {
-        const matchingPlan = ALLOWED_DURATIONS.find((minutes) => minutes >= remainingMinutes);
-        return matchingPlan ?? ALLOWED_DURATIONS[ALLOWED_DURATIONS.length - 1];
-      }
-    }
-  }
-
-  return 3;
-}
 
 
 /* ── Creator data ── */
@@ -95,15 +72,13 @@ export default function CreatorProfilePage() {
 
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
-  const isCheckingBookingRef = useRef(false);
 
   /* ── Free session & feedback state ── */
   const [showFeedback, setShowFeedback] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
-  const hasUsedFreeSession = typeof window !== "undefined"
-    ? sessionStorage.getItem(`free_session_${slug}`) === "true"
-    : false;
+  const [showPricingAfterFree, setShowPricingAfterFree] = useState(false);
+  const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
 
   /* ── Parallax refs ── */
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -124,12 +99,11 @@ export default function CreatorProfilePage() {
      Effects
      ═══════════════════════════════════════ */
 
-  // Detect free session ended → show feedback + duration modal
+  // Detect free session ended → show pricing first, feedback on decline
   useEffect(() => {
     const freeEnded = searchParams.get("freeSessionEnded");
     if (freeEnded === "true") {
-      sessionStorage.setItem(`free_session_${slug}`, "true");
-      setShowFeedback(true);
+      setShowPricingAfterFree(true);
       setFlowState("duration");
       const url = new URL(window.location.href);
       url.searchParams.delete("freeSessionEnded");
@@ -389,53 +363,17 @@ export default function CreatorProfilePage() {
      Handlers
      ═══════════════════════════════════════ */
 
-  const openDurationOrResumeBooking = useCallback(async () => {
-    if (isCheckingBookingRef.current) {
-      return;
-    }
-
-    if (!creatorInfluencerId?.trim()) {
-      toast.error("Creator details are unavailable. Please retry in a moment.");
-      return;
-    }
-
-    isCheckingBookingRef.current = true;
-
-    try {
-      const activeBooking = await paymentApi.getActiveBooking(creatorInfluencerId);
-
-      if (activeBooking?.id) {
-        const durationFromBooking = resolveBookingDuration(activeBooking.duration_minutes, activeBooking.expires_at);
-        const query = new URLSearchParams({
-          duration: String(durationFromBooking),
-          booking_id: activeBooking.id,
-        });
-
-        toast.success("You already have an active booking. Continuing without payment.");
-        router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
-        return;
-      }
-
-      setFlowState("duration");
-    } catch {
-      // If active-booking lookup fails, continue normal payment flow.
-      setFlowState("duration");
-    } finally {
-      isCheckingBookingRef.current = false;
-    }
-  }, [creatorInfluencerId, router, slug]);
+  const redirectToSession = (durationMinutes: number, bookingId?: string, free?: boolean) => {
+    const query = new URLSearchParams({ duration: String(durationMinutes) });
+    if (bookingId) query.set("booking_id", bookingId);
+    if (free) query.set("free", "true");
+    router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
+  };
 
   const handleStartSession = async () => {
-    if (isCheckingBookingRef.current) {
-      return;
-    }
-
-    if (isHydrated && isAuthenticated) {
-      await openDurationOrResumeBooking();
-      return;
-    }
-
-    setFlowState("auth");
+    setShowPricingAfterFree(false);
+    setShowFeedback(false);
+    setFlowState("duration");
   };
 
   const handleGoogleAuthSuccess = async (credentialResponse: CredentialResponse) => {
@@ -450,11 +388,20 @@ export default function CreatorProfilePage() {
       const response = await authApi.googleSignIn({ id_token: idToken });
       authLogin(response.user, response.tokens.access_token);
       toast.success(`Welcome, ${response.user.name}!`);
-      await openDurationOrResumeBooking();
+
+      const pending = pendingSessionRef.current;
+      pendingSessionRef.current = null;
+
+      if (pending) {
+        redirectToSession(pending.duration, pending.bookingId);
+      } else {
+        setFlowState("duration");
+      }
     } catch (error) {
       const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
       const msg = apiError.response?.data?.detail || apiError.response?.data?.message || "Sign-in failed. Please try again.";
       toast.error(msg);
+      setFlowState("duration");
     } finally {
       setAuthLoading(false);
     }
@@ -465,17 +412,23 @@ export default function CreatorProfilePage() {
   };
 
   const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
-    const query = new URLSearchParams({ duration: String(durationMinutes) });
-    if (bookingId) {
-      query.set("booking_id", bookingId);
+    if (isHydrated && isAuthenticated) {
+      redirectToSession(durationMinutes, bookingId);
+      return;
     }
 
-    router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
+    pendingSessionRef.current = { duration: durationMinutes, bookingId };
+    setFlowState("auth");
   };
 
   const handleFreeSession = () => {
-    setFlowState("idle");
-    router.push(`/creators/${slug}/voice-chat?duration=1&free=true`);
+    if (isHydrated && isAuthenticated) {
+      redirectToSession(1, undefined, true);
+      return;
+    }
+
+    pendingSessionRef.current = null;
+    setFlowState("auth");
   };
 
   const handleSubmitFeedback = async (stars: FeedbackStars, feedbackComment?: string) => {
@@ -498,6 +451,12 @@ export default function CreatorProfilePage() {
   };
 
   const closeModal = () => {
+    if (showPricingAfterFree) {
+      setShowPricingAfterFree(false);
+      setShowFeedback(true);
+      setFlowState("duration");
+      return;
+    }
     setFlowState("idle");
     setSelectedMinutes(null);
     setShowFeedback(false);
@@ -633,7 +592,7 @@ export default function CreatorProfilePage() {
         userEmail={user?.email}
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
-        showFreeOption={!hasUsedFreeSession}
+        showFreeOption={!showPricingAfterFree}
         onFreeSession={handleFreeSession}
         feedbackMode={showFeedback}
         onSubmitFeedback={handleSubmitFeedback}

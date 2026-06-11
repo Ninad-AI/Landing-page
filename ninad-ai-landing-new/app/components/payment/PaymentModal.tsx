@@ -82,6 +82,7 @@ interface PaymentModalProps {
   userEmail?: string;
   providerName?: string;
   onPaymentVerified: (duration: AllowedDurationMinutes, bookingId?: string) => void;
+  onSelectPaidPlan?: (duration: AllowedDurationMinutes) => void;
   showFreeOption?: boolean;
   onFreeSession?: () => void;
   feedbackMode?: boolean;
@@ -99,6 +100,7 @@ export default function PaymentModal({
   userEmail,
   providerName = DEFAULT_PROVIDER_NAME,
   onPaymentVerified,
+  onSelectPaidPlan,
   showFreeOption = true,
   onFreeSession,
   feedbackMode = false,
@@ -183,6 +185,11 @@ export default function PaymentModal({
 
     if (!influencerId?.trim()) {
       toast.error("Influencer context is missing. Please retry from creator page.");
+      return;
+    }
+
+    if (onSelectPaidPlan) {
+      onSelectPaidPlan(selectedDuration);
       return;
     }
 

@@ -10,8 +10,6 @@ interface VoiceSessionUIProps {
   totalTime: number;
   creatorName: string;
   creatorImage: string;
-  isMicMuted?: boolean;
-  onToggleMic?: () => void;
   onClose?: () => void;
 }
 
@@ -22,12 +20,10 @@ export default function VoiceSessionUI({
   totalTime,
   creatorName,
   creatorImage,
-  isMicMuted = false,
-  onToggleMic,
   onClose,
 }: VoiceSessionUIProps) {
-  const RING_SIZE = 280;
-  const IMG_SIZE = 216;
+  const RING_SIZE = 240;
+  const IMG_SIZE = 180;
   const cx = RING_SIZE / 2;
   const cy = RING_SIZE / 2;
   const radius = IMG_SIZE / 2 + 10;
@@ -54,31 +50,11 @@ export default function VoiceSessionUI({
       numCircles={8}
     >
 
-
-
-      {/* Close button */}
-      {onClose && (
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close session"
-          title="Close session"
-          className="fixed top-5 right-5 z-[60] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/70 hover:bg-white/15 hover:text-white transition-all duration-300 shadow-[0_0_16px_rgba(0,0,0,0.3)] sm:top-6 sm:right-6 sm:h-11 sm:w-11"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4.5 w-4.5 sm:h-5 sm:w-5">
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
-        </button>
-      )}
-
-      {/* Main layout */}
-      <div className="relative flex h-full w-full items-center justify-center">
+      <div className="relative flex h-full w-full items-center justify-center px-4">
         <div
           className="relative flex items-center justify-center"
           style={{ width: RING_SIZE, height: RING_SIZE }}
         >
-          {/* Progress ring SVG */}
           <svg
             className="absolute inset-0 -rotate-90 overflow-visible"
             width={RING_SIZE}
@@ -106,7 +82,6 @@ export default function VoiceSessionUI({
             />
           </svg>
 
-          {/* Creator image */}
           <div
             className="relative overflow-hidden rounded-full border-2 border-white/10 bg-slate-900 shadow-[0_0_50px_rgba(0,0,0,0.5)]"
             style={{ width: IMG_SIZE, height: IMG_SIZE }}
@@ -118,20 +93,16 @@ export default function VoiceSessionUI({
               className="object-cover"
               priority
             />
-            {/* Speaking overlay */}
             <div
               className={`absolute inset-0 bg-rose-500/20 transition-opacity duration-700 ${isSpeaking ? 'opacity-30' : 'opacity-0'}`}
             />
           </div>
 
-          {/* Controls below the circle */}
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-38.75 flex-col items-center gap-8">
-            {/* Timer */}
-            <span className="tabular-nums text-5xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-36 flex-col items-center gap-6 sm:translate-y-44">
+            <span className="tabular-nums text-4xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
               {formatTime(timeLeft)}
             </span>
 
-            {/* Status */}
             <div className="flex items-center gap-3">
               <span className="relative flex h-1.5 w-1.5">
                 <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${statusDotColor.ping}`} />
@@ -141,42 +112,24 @@ export default function VoiceSessionUI({
                 {callPhase}
               </span>
             </div>
-
-            {onToggleMic && (
-              <button
-                type="button"
-                onClick={onToggleMic}
-                aria-label={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
-                title={isMicMuted ? 'Unmute microphone' : 'Mute microphone'}
-                className={`group relative inline-flex h-12 w-12 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 sm:h-14 sm:w-14 ${
-                  isMicMuted
-                    ? 'border-rose-200/55 bg-rose-400/20 text-rose-100 shadow-[0_0_24px_rgba(251,113,133,0.24)] hover:bg-rose-400/30'
-                    : 'border-white/35 bg-white/12 text-white/90 shadow-[0_0_20px_rgba(255,255,255,0.14)] hover:bg-white/18'
-                }`}
-              >
-                <span className="pointer-events-none absolute inset-1 rounded-full border border-white/20" />
-                {isMicMuted ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-5 w-5 sm:h-6 sm:w-6">
-                    <path d="M12 5a3 3 0 0 1 3 3v4a3 3 0 0 1-5.54 1.64" />
-                    <path d="M17 10v2a5 5 0 0 1-8.8 3.2" />
-                    <path d="M7 10v2" />
-                    <path d="M12 19v3" />
-                    <path d="M9 22h6" />
-                    <path d="m4 4 16 16" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 h-5 w-5 sm:h-6 sm:w-6">
-                    <rect x="9" y="3" width="6" height="12" rx="3" />
-                    <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
-                    <path d="M12 19v3" />
-                    <path d="M9 22h6" />
-                  </svg>
-                )}
-              </button>
-            )}
           </div>
         </div>
       </div>
+
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close session"
+          title="Close session"
+          className="fixed top-4 right-4 z-[60] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/70 hover:bg-white/15 hover:text-white transition-all duration-300 shadow-[0_0_16px_rgba(0,0,0,0.3)] sm:top-6 sm:right-6"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 sm:h-5 sm:w-5">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      )}
     </Ripple>
   );
 }

@@ -83,7 +83,6 @@ function VoiceChatContent() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
-  const [isMicMuted, setIsMicMuted] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
@@ -95,7 +94,6 @@ function VoiceChatContent() {
   const ttsActiveRef = useRef(false);
   const sessionEndTimeRef = useRef<number | null>(null);
   const speechFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const micMutedRef = useRef(false);
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
@@ -179,8 +177,6 @@ function VoiceChatContent() {
     if (timerRef.current) clearInterval(timerRef.current);
     micControllerRef.current?.stop();
     micControllerRef.current = null;
-    micMutedRef.current = false;
-    setIsMicMuted(false);
     if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
       wsRef.current.close();
     }
@@ -210,15 +206,6 @@ function VoiceChatContent() {
       : `/creators/${slug}`;
     endSessionAndRedirect(redirectPath, expired);
   }, [endSessionAndRedirect, isFreeSession, slug]);
-
-  const handleToggleMic = useCallback(() => {
-    setIsMicMuted((prev) => {
-      const next = !prev;
-      micMutedRef.current = next;
-      micControllerRef.current?.setMuted(next);
-      return next;
-    });
-  }, []);
 
   useEffect(() => {
     const handleVoiceChatExit = () => {
@@ -333,7 +320,6 @@ function VoiceChatContent() {
           return;
         }
 
-        micHandle.setMuted(micMutedRef.current);
         micControllerRef.current = micHandle;
       } catch {
         // mic failed
@@ -457,8 +443,6 @@ function VoiceChatContent() {
           totalTime={totalTime}
           creatorName={creatorName}
           creatorImage={creatorImage}
-          isMicMuted={isMicMuted}
-          onToggleMic={handleToggleMic}
         />
       </div>
 
