@@ -65,6 +65,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         </AuthHydrator>
         <Toaster
           position="top-right"
+          duration={2500}
           toastOptions={{
             style: {
               background: 'rgba(15, 10, 30, 0.85)',

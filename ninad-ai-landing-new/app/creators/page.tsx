@@ -33,6 +33,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Acclaimed actor and producer known for his powerful performances and creative vision.",
   },
+  {
+    id: "sunil-chhetri-001",
+    name: "Sunil Chhetri",
+    role: "Footballer and Athlete",
+    imageUrl: "/assets/creators/sunil-chhetri-1.jpg",
+    handle: "sunil-chhetri",
+    status: "Active",
+    bio: "Legendary Indian footballer and captain, known for his leadership and goal-scoring prowess.",
+  },
 ];
 
 export default function CreatorsPage() {

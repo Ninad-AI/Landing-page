@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuthStore } from "../../lib/stores";
@@ -10,10 +10,10 @@ import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi } from "../../lib/api";
+import { authApi, paymentApi, feedbackApi } from "../../lib/api";
 import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
-import type { AllowedDurationMinutes } from "../../lib/types";
+import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
 /* ── Flow: idle → auth (if needed) → duration → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
@@ -61,11 +61,19 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "influencer_15",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "sunil-chhetri": {
+    name: "Sunil Chhetri",
+    image: "/assets/creators/sunil-chhetri-1.jpg",
+    role: "Footballer and Athlete",
+    influencerId: "influencer_sunil_001",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorProfilePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -89,6 +97,14 @@ export default function CreatorProfilePage() {
   const [authLoading, setAuthLoading] = useState(false);
   const isCheckingBookingRef = useRef(false);
 
+  /* ── Free session & feedback state ── */
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const hasUsedFreeSession = typeof window !== "undefined"
+    ? sessionStorage.getItem(`free_session_${slug}`) === "true"
+    : false;
+
   /* ── Parallax refs ── */
   const mousePosRef = useRef({ x: 0, y: 0 });
   const mouseTargetRef = useRef({ x: 0, y: 0 });
@@ -107,6 +123,19 @@ export default function CreatorProfilePage() {
   /* ═══════════════════════════════════════
      Effects
      ═══════════════════════════════════════ */
+
+  // Detect free session ended → show feedback + duration modal
+  useEffect(() => {
+    const freeEnded = searchParams.get("freeSessionEnded");
+    if (freeEnded === "true") {
+      sessionStorage.setItem(`free_session_${slug}`, "true");
+      setShowFeedback(true);
+      setFlowState("duration");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("freeSessionEnded");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, slug]);
 
   // Entrance animation + mouse parallax
   useEffect(() => {
@@ -444,9 +473,34 @@ export default function CreatorProfilePage() {
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
+  const handleFreeSession = () => {
+    setFlowState("idle");
+    router.push(`/creators/${slug}/voice-chat?duration=1&free=true`);
+  };
+
+  const handleSubmitFeedback = async (stars: FeedbackStars, feedbackComment?: string) => {
+    setIsSubmittingFeedback(true);
+    setFeedbackError(null);
+    try {
+      await feedbackApi.submitVoiceSessionFeedback({
+        user_id: user?.id ?? "",
+        influencer_id: creatorInfluencerId,
+        rating: stars,
+        comment: feedbackComment ?? null,
+      });
+      toast.success("Thank you for your feedback!");
+      setShowFeedback(false);
+    } catch {
+      setFeedbackError("Failed to submit feedback. Please try again.");
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   const closeModal = () => {
     setFlowState("idle");
     setSelectedMinutes(null);
+    setShowFeedback(false);
   };
 
   /* ═══════════════════════════════════════
@@ -579,6 +633,13 @@ export default function CreatorProfilePage() {
         userEmail={user?.email}
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
+        showFreeOption={!hasUsedFreeSession}
+        onFreeSession={handleFreeSession}
+        feedbackMode={showFeedback}
+        onSubmitFeedback={handleSubmitFeedback}
+        isSubmittingFeedback={isSubmittingFeedback}
+        feedbackError={feedbackError}
+        creatorName={creatorName}
       />
     </main>
   );

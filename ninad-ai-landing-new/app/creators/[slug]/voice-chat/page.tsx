@@ -33,6 +33,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "influencer_15",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "sunil-chhetri": {
+    name: "Sunil Chhetri",
+    image: "/assets/creators/sunil-chhetri-1.jpg",
+    role: "Footballer and Athlete",
+    influencerId: "influencer_sunil_001",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
@@ -55,6 +62,8 @@ function VoiceChatContent() {
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const bookingId = searchParams.get("booking_id");
+
+  const isFreeSession = searchParams.get("free") === "true";
 
   const durationValue = searchParams.get("duration");
   const durationMinutes = useMemo(() => {
@@ -196,8 +205,11 @@ function VoiceChatContent() {
   }, [clearPersistedSession, router, stopSessionResources]);
 
   const handleEndCall = useCallback((expired = false) => {
-    endSessionAndRedirect(`/creators/${slug}`, expired);
-  }, [endSessionAndRedirect, slug]);
+    const redirectPath = isFreeSession
+      ? `/creators/${slug}?freeSessionEnded=true`
+      : `/creators/${slug}`;
+    endSessionAndRedirect(redirectPath, expired);
+  }, [endSessionAndRedirect, isFreeSession, slug]);
 
   const handleToggleMic = useCallback(() => {
     setIsMicMuted((prev) => {
