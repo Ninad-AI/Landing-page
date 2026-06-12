@@ -214,8 +214,9 @@ export default function Header() {
         {!isMinimalHeader && (
           <button
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-controls="mobile-menu"
             aria-expanded={isMobileMenuOpen}
-            className="lg:hidden relative z-50 h-11 w-11 flex flex-col items-center justify-center gap-1.5 group"
+            className="lg:hidden relative z-50 h-11 w-11 flex flex-col items-center justify-center gap-1.5 group cursor-pointer bg-none border-none p-0"
             onClick={() =>
               setMobileMenuOpenPath((currentPath) =>
                 currentPath === pathname ? null : pathname
@@ -223,15 +224,15 @@ export default function Header() {
             }
           >
             <span
-              className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
+              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
                 }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
+              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
                 }`}
             />
             <span
-              className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
                 }`}
             />
           </button>
@@ -239,6 +240,10 @@ export default function Header() {
 
         {/* Mobile Menu Content */}
         <div
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
           className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex min-h-dvh flex-col items-center justify-start gap-6 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+5.5rem)] transition-transform duration-500 ease-in-out ${isMobileMenuOpen
             ? "translate-x-0"
             : "translate-x-full"

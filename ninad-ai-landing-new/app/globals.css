@@ -41,7 +41,6 @@ html,
 body {
   max-width: 100%;
   overflow-x: clip;
-  /* Ensure no layout break below 320px */
   min-width: 320px;
 }
 
@@ -76,7 +75,7 @@ body {
   --font-hand: var(--font-caveat);
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -98,62 +97,213 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (max-width: 768px) {
+/* ═══════════════════════════════════════════════
+   Dynamic Viewport Units
+   ═══════════════════════════════════════════════ */
+@supports (height: 100dvh) {
   .min-h-screen {
-    min-height: 100svh;
+    min-height: 100dvh;
   }
 }
 
-@supports (height: 100dvh) {
-  @media (max-width: 768px) {
-    .min-h-screen {
-      min-height: 100dvh;
-    }
+@supports not (height: 100dvh) {
+  .min-h-screen {
+    min-height: 100vh;
   }
 }
 
 /* ═══════════════════════════════════════════════
-   320px Baseline Fixes
+   Cross-Browser Scrollbar
    ═══════════════════════════════════════════════ */
 
-/* Ensure all containers respect 320px minimum */
-@media (max-width: 360px) {
-  /* Reduce padding on very small screens */
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+/* Webkit (Chrome, Safari, Edge, Brave, Opera) */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ═══════════════════════════════════════════════
+   Safari & iOS-Specific Fixes
+   ═══════════════════════════════════════════════ */
+
+/* Remove default tap highlight in Safari/iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth momentum scrolling for overflow containers on iOS */
+.scroll-container,
+.overflow-auto,
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent iOS zoom on input focus */
+input, select, textarea {
+  font-size: 16px;
+}
+
+/* Remove default iOS appearance from buttons and inputs */
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input,
+select,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* Re-enable rounded corners on search inputs for Safari */
+input[type="search"] {
+  -webkit-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ═══════════════════════════════════════════════
+   Firefox-Specific Fixes
+   ═══════════════════════════════════════════════ */
+
+/* Fix Firefox focus ring */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Remove dotted inner border in Firefox */
+button::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   Edge & Chromium-Specific Fixes
+   ═══════════════════════════════════════════════ */
+
+/* Better backdrop-filter rendering in Edge/Chromium */
+@supports (-ms-ime-align: auto) {
+  .glass,
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive Breakpoint Refinements
+   ═══════════════════════════════════════════════ */
+
+/* Small phones (320px - 374px) */
+@media (max-width: 374px) {
+  body {
+    font-size: 14px;
   }
 
-  /* Prevent glass cards from overflowing */
+  .container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  h1 { font-size: clamp(1.5rem, 10vw, 2rem) !important; }
+  h2 { font-size: clamp(1.25rem, 8vw, 1.75rem) !important; }
+
   .glass,
   .glass-card {
     min-width: 0;
     overflow: hidden;
   }
+}
 
-  /* Input fields must be full width */
-  .input-field {
-    font-size: 16px; /* Prevent iOS auto-zoom on focus */
+/* Standard phones (375px - 480px) */
+@media (min-width: 375px) and (max-width: 480px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
-/* iOS input zoom prevention at all mobile sizes */
-@media (max-width: 768px) {
+/* Phones and small tablets portrait (< 768px) */
+@media (max-width: 767px) {
   input, select, textarea {
     font-size: 16px !important;
   }
 
-  /* Minimum tap target size */
   button, a, [role="button"] {
     min-height: 44px;
   }
 
-  /* Buttons in tight rows can be smaller if needed */
   .tap-sm {
     min-height: 36px;
   }
+
+  /* Prevent horizontal overflow on very small screens */
+  section {
+    overflow-x: hidden;
+  }
 }
 
+/* Tablets (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  body {
+    font-size: 15px;
+  }
+
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* Small laptops / large tablets landscape (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Standard desktops (1280px - 1535px) */
+@media (min-width: 1280px) and (max-width: 1535px) {
+  .container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+/* Large desktops and ultrawide (1536px+) */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1600px;
+  }
+}
+
+/* Touch devices - interaction optimizations */
 @media (pointer: coarse) {
   .animate-marquee,
   .animate-marquee-reverse {
@@ -167,6 +317,39 @@ body {
   }
 }
 
+/* Print styles */
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
+
+  @page {
+    margin: 2cm;
+  }
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -176,11 +359,23 @@ body {
   }
 }
 
+/* Content visibility for performance (below-fold sections) */
+#features,
+#products,
+#use-cases,
+#safety,
+#waitlist,
+footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+
 img,
 video,
 canvas,
 svg {
   max-width: 100%;
+  height: auto;
 }
 
 p,
@@ -191,6 +386,7 @@ h4,
 h5,
 h6 {
   overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 /* ═══════════════════════════════════════════════
@@ -422,28 +618,30 @@ h6 {
 
 @keyframes marquee {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 @keyframes marquee-reverse {
   0% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
   100% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+  will-change: transform;
 }
 
 .animate-marquee-reverse {
   animation: marquee-reverse 30s linear infinite;
+  will-change: transform;
 }
 
 /* ═══════════════════════════════════════════════
@@ -475,27 +673,6 @@ h6 {
 
 .delay-300 {
   animation-delay: 300ms;
-}
-
-/* ═══════════════════════════════════════════════
-   Smooth Scrollbar (Webkit)
-   ═══════════════════════════════════════════════ */
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ═══════════════════════════════════════════════

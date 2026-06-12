@@ -11,26 +11,26 @@ export default function Hero() {
       </div>
 
       {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex w-full max-w-425 flex-col items-center justify-center space-y-6 px-4 sm:px-6 md:space-y-8 md:px-8 lg:space-y-12">
+      <div className="relative z-10 flex w-full max-w-[90vw] sm:max-w-[85vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-425 flex-col items-center justify-center space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 px-4 sm:px-6 md:px-8">
         {/* REAL-TIME */}
-        <h1 className="font-sans font-extrabold text-[clamp(32px,8vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
+        <h1 className="font-sans font-extrabold text-[clamp(28px,7vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
           REAL-TIME
         </h1>
 
         {/* AI VOICE w/ Orb */}
-        <div className="relative flex items-center justify-center leading-none">
+        <div className="relative flex items-center justify-center leading-none max-w-full">
           {/* AI V */}
           <span
             className="
               font-sans
               font-extrabold
-              text-[clamp(60px,18vw,280px)]
+              text-[clamp(32px,14vw,280px)]
               leading-[0.85]
               tracking-tighter
               bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
-              pr-1
+              pr-[0.08em]
             "
           >
             AI V
@@ -40,11 +40,11 @@ export default function Hero() {
           <div
             className="
               relative
-              w-[clamp(60px,18vw,280px)]
-              h-[clamp(60px,18vw,280px)]
+              w-[clamp(32px,14vw,280px)]
+              h-[clamp(32px,14vw,280px)]
               shrink-0
               cursor-pointer
-              mx-[0.15em]
+              mx-[0.08em]
               group
               z-20
             "
@@ -64,6 +64,7 @@ export default function Hero() {
               src="/assets/hero-orb.png"
               alt="Voice Orb"
               fill
+              sizes="(max-width: 480px) 64px, (max-width: 768px) 108px, (max-width: 1024px) 144px, 280px"
               className="object-contain scale-110 z-10 transition-all duration-700 group-hover:brightness-150"
             />
           </div>
@@ -73,13 +74,13 @@ export default function Hero() {
             className="
               font-sans
               font-extrabold
-              text-[clamp(60px,18vw,280px)]
+              text-[clamp(32px,14vw,280px)]
               leading-[0.85]
               tracking-tighter
               bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
               bg-clip-text
               text-transparent
-              pl-1
+              pl-[0.08em]
             "
           >
             ICE
@@ -87,12 +88,12 @@ export default function Hero() {
         </div>
 
         {/* TAGLINE */}
-        <h2 className="font-sans font-extrabold text-[clamp(20px,5vw,44px)] text-white/90 uppercase leading-none text-center tracking-tight">
+        <h2 className="font-sans font-extrabold text-[clamp(18px,4.5vw,44px)] text-white/90 uppercase leading-none text-center tracking-tight">
           THAT FEELS HUMAN
         </h2>
 
         {/* SUBTEXT */}
-        <p className="font-roboto font-light text-sm sm:text-base md:text-xl text-muted text-center leading-relaxed max-w-3xl lg:max-w-4xl tracking-wide px-3 sm:px-4">
+        <p className="font-roboto font-light text-xs sm:text-sm md:text-base lg:text-xl text-muted text-center leading-relaxed max-w-2xl lg:max-w-4xl tracking-wide px-2 sm:px-4">
           Low-latency, expressive speech for apps, agents, and experiences ready to
           integrate in minutes.
         </p>

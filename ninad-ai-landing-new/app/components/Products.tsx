@@ -79,6 +79,22 @@ export default function Products() {
     };
   }, [activeProduct]);
 
+  // Throttled resize to avoid layout thrashing
+  useEffect(() => {
+    let ticking = false;
+    const handleResize = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsDesktop(window.innerWidth >= 1024);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleProductHover = (index: number) => {
     if (index !== activeProduct && !isTransitioning) {
       setIsTransitioning(true);
@@ -165,46 +181,67 @@ export default function Products() {
 
           {/* Product Description - Right Side */}
           <div
-            className="relative flex-1 lg:pl-10 xl:pl-20"
+            className="relative flex-1 lg:pl-8 xl:pl-16"
             style={{
-              minHeight: isDesktop ? '400px' : 'auto',
+              minHeight: isDesktop ? '320px' : 'auto',
               height: listHeight > 0 && isDesktop ? `${listHeight}px` : 'auto'
             }}
           >
             <div
               className={`
-                    transition-all duration-300 ease-out h-full
+                    transition-all duration-300 ease-out
                     ${isTransitioning ? 'opacity-0 translate-y-2 blur-sm' : 'opacity-100 translate-y-0 blur-0'}
                 `}
             >
-              {/* Above Line Container */}
-              {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
-                <div
-                  className="lg:absolute lg:left-0 lg:right-0 lg:pb-6 mb-4 lg:mb-0"
-                  style={{
-                    bottom: `calc(100% - ${linePosition}px)`
-                  }}
-                >
-                  <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
-                    {products[activeProduct].description}
+              {/* On mobile/tablet: show description below the list */}
+              {!isDesktop && (
+                <div className="pt-6 sm:pt-8">
+                  <p className="font-anonymous text-base sm:text-lg md:text-xl lg:text-3xl leading-relaxed text-white/90">
+                    {products[activeProduct].descriptionPosition === 'split'
+                      ? products[activeProduct].description
+                      : products[activeProduct].description}
                   </p>
+                  {products[activeProduct].descriptionPosition === 'split' && products[activeProduct].descriptionPart2 && (
+                    <p className="font-anonymous text-base sm:text-lg md:text-xl lg:text-3xl leading-relaxed text-white/90 mt-4">
+                      {products[activeProduct].descriptionPart2}
+                    </p>
+                  )}
                 </div>
               )}
 
-              {/* Below Line Container */}
-              {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
-                <div
-                  className="lg:absolute lg:left-0 lg:right-0 lg:pt-6"
-                  style={{
-                    top: `${linePosition}px`
-                  }}
-                >
-                  <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
-                    {products[activeProduct].descriptionPosition === 'split'
-                      ? products[activeProduct].descriptionPart2
-                      : products[activeProduct].description}
-                  </p>
-                </div>
+              {/* On desktop: split layout with absolute positioning */}
+              {isDesktop && (
+                <>
+                  {/* Above Line Container */}
+                  {(products[activeProduct].descriptionPosition === 'above' || products[activeProduct].descriptionPosition === 'split') && (
+                    <div
+                      className="absolute left-0 right-0 pb-6"
+                      style={{
+                        bottom: `calc(100% - ${linePosition}px)`
+                      }}
+                    >
+                      <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                        {products[activeProduct].description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Below Line Container */}
+                  {(products[activeProduct].descriptionPosition === 'below' || products[activeProduct].descriptionPosition === 'split') && (
+                    <div
+                      className="absolute left-0 right-0 pt-6"
+                      style={{
+                        top: `${linePosition}px`
+                      }}
+                    >
+                      <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                        {products[activeProduct].descriptionPosition === 'split'
+                          ? products[activeProduct].descriptionPart2
+                          : products[activeProduct].description}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

@@ -17,6 +17,7 @@ export default function Footer() {
                   src="/assets/ninad-ai.png"
                   alt="Ninad AI"
                   fill
+                  sizes="144px"
                   className="object-contain object-left"
                 />
               </div>
