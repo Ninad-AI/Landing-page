@@ -371,6 +371,8 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                                 alt={name || "Profile"}
                                 fill
                                 className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                                quality={100}
+                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full bg-linear-to-br from-gray-800 to-black" />

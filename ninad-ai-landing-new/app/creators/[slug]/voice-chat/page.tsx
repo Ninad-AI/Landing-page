@@ -40,6 +40,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "influencer_sunil_001",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "aneri-thakkar": {
+    name: "Aneri Thakkar",
+    image: "/assets/creators/aneri-2.jpg",
+    role: "Coach and Influencer",
+    influencerId: "influencer_aneri_001",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

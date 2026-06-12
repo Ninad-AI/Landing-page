@@ -42,6 +42,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Legendary Indian footballer and captain, known for his leadership and goal-scoring prowess.",
   },
+  {
+    id: "aneri-001",
+    name: "Aneri Thakkar",
+    role: "Coach and Influencer",
+    imageUrl: "/assets/creators/aneri-2.jpg",
+    handle: "aneri-thakkar",
+    status: "Active",
+    bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
+  },
 ];
 
 export default function CreatorsPage() {

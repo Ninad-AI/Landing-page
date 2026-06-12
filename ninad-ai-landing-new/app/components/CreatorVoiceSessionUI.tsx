@@ -87,12 +87,14 @@ export default function VoiceSessionUI({
             style={{ width: IMG_SIZE, height: IMG_SIZE }}
           >
             <Image
-              src={creatorImage}
-              alt={creatorName}
-              fill
-              className="object-cover"
-              priority
-            />
+  src={creatorImage}
+  alt={creatorName}
+  width={1200}           // Use actual large size
+  height={800}
+  className="w-full h-auto object-cover"
+  priority
+  quality={100}
+/>
             <div
               className={`absolute inset-0 bg-rose-500/20 transition-opacity duration-700 ${isSpeaking ? 'opacity-30' : 'opacity-0'}`}
             />
