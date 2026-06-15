@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { paymentApi } from '../lib/api';
 import type { UserBooking } from '../lib/types';
@@ -12,13 +12,21 @@ function formatDate(value?: string): string {
   return date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-function bookingStatusClass(status?: string): string {
-  const normalized = status?.toLowerCase();
-  if (normalized === 'active' || normalized === 'pending') return 'text-emerald-200 bg-emerald-500/15';
-  if (normalized === 'completed') return 'text-cyan-200 bg-cyan-500/15';
-  if (normalized === 'expired') return 'text-amber-200 bg-amber-500/15';
-  if (normalized === 'cancelled') return 'text-rose-200 bg-rose-500/15';
-  return 'text-white/70 bg-white/10';
+function formatCountdown(seconds: number): string {
+  if (seconds <= 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function getDisplayAmount(booking: UserBooking): string | null {
+  if (booking.amount_paise != null) return `₹${(booking.amount_paise / 100).toFixed(0)}`;
+  if (booking.amount != null) return `₹${booking.amount}`;
+  return null;
+}
+
+function getCreatorName(booking: UserBooking): string {
+  return booking.influencer?.name || booking.influencer_name || 'Creator';
 }
 
 function StatPill({
@@ -41,6 +49,36 @@ function StatPill({
       <p className="font-extrabold text-lg sm:text-xl tracking-tight truncate">{value}</p>
       <p className="text-[10px] sm:text-xs opacity-70 mt-0.5 truncate">{label}</p>
     </div>
+  );
+}
+
+/** Live countdown that ticks from remaining_seconds down to 0 */
+function LiveCountdown({ initialSeconds }: { initialSeconds: number }) {
+  const [secs, setSecs] = useState(Math.max(0, initialSeconds));
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (secs <= 0) return;
+    intervalRef.current = setInterval(() => {
+      setSecs((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  // Only run once on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <span className="font-mono text-emerald-300 text-xs font-bold tabular-nums">
+      {formatCountdown(secs)}
+    </span>
   );
 }
 
@@ -82,18 +120,21 @@ export default function UserDashboard() {
     };
   }, []);
 
-  const recentBookings = useMemo(() => bookings.slice(0, 6), [bookings]);
+  // Only show active bookings per spec
+  const activeBookings = useMemo(
+    () => bookings.filter((b) => b.status?.toLowerCase() === 'active'),
+    [bookings]
+  );
 
-  /* ── derived stats ───────────────────────────────────────── */
+  const recentBookings = useMemo(() => activeBookings.slice(0, 6), [activeBookings]);
+
+  /* ── derived stats ─────────────────────────────────────────── */
   const totalBookings = bookings.length;
   const totalMinutes = useMemo(
     () => bookings.reduce((acc, b) => acc + (b.duration_minutes ?? 0), 0),
     [bookings]
   );
-  const completedCount = useMemo(
-    () => bookings.filter((b) => b.status?.toLowerCase() === 'completed').length,
-    [bookings]
-  );
+  const activeCount = activeBookings.length;
 
   return (
     <div className="space-y-8 animate-fade-in-up delay-100">
@@ -102,7 +143,7 @@ export default function UserDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <StatPill label="Total Sessions" value={totalBookings} accent="primary" />
           <StatPill label="Minutes Booked" value={`${totalMinutes} min`} accent="cyan" />
-          <StatPill label="Completed" value={completedCount} accent="default" />
+          <StatPill label="Active Bookings" value={activeCount} accent="amber" />
         </div>
       )}
 
@@ -131,7 +172,7 @@ export default function UserDashboard() {
           </Link>
         </div>
 
-        {/* My Bookings */}
+        {/* My Active Bookings */}
         <div className="glass border border-white/15 rounded-2xl p-8 hover:border-accent-blue/30 transition-all duration-300 group">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-xl bg-accent-blue/15 flex items-center justify-center group-hover:bg-accent-blue/25 transition-colors">
@@ -140,8 +181,8 @@ export default function UserDashboard() {
               </svg>
             </div>
             <div>
-              <h3 className="font-sans font-bold text-lg text-white">My Bookings</h3>
-              <p className="text-sm text-white/40">View your session history</p>
+              <h3 className="font-sans font-bold text-lg text-white">Active Bookings</h3>
+              <p className="text-sm text-white/40">Sessions available to use</p>
             </div>
           </div>
 
@@ -158,27 +199,41 @@ export default function UserDashboard() {
               <p className="text-xs text-rose-200 text-center py-4">{bookingsError}</p>
             )}
 
-            {!isLoadingBookings && !bookingsError && recentBookings.map((booking) => (
-              <div key={booking.id} className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-sm font-semibold text-white">{booking.influencer_name || 'Creator'}</div>
-                    <div className="text-xs text-white/35 mt-1">
-                      {booking.duration_minutes} min
-                      {booking.amount != null && ` • ₹${booking.amount}`}
-                      {' • '}
-                      {formatDate(booking.created_at)}
+            {!isLoadingBookings && !bookingsError && recentBookings.map((booking) => {
+              const displayAmount = getDisplayAmount(booking);
+              const creatorName = getCreatorName(booking);
+              return (
+                <div key={booking.id} className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-white truncate">{creatorName}</div>
+                      <div className="text-xs text-white/35 mt-1">
+                        {booking.duration_minutes} min
+                        {displayAmount && ` • ${displayAmount}`}
+                        {' • '}
+                        {formatDate(booking.created_at)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full text-emerald-200 bg-emerald-500/15">
+                        active
+                      </span>
+                      {booking.remaining_seconds != null && booking.remaining_seconds > 0 && (
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
+                          </svg>
+                          <LiveCountdown initialSeconds={booking.remaining_seconds} />
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-full shrink-0 ${bookingStatusClass(booking.status)}`}>
-                    {booking.status || 'unknown'}
-                  </span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {!isLoadingBookings && !bookingsError && recentBookings.length === 0 && (
-              <p className="text-xs text-white/25 text-center pt-2">No bookings found yet.</p>
+              <p className="text-xs text-white/25 text-center pt-2">No active bookings. Buy a session to get started.</p>
             )}
           </div>
         </div>

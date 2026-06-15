@@ -19,32 +19,18 @@ function getSessionDurationSeconds(durationMinutes: number): number {
 }
 
 const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
-  "pawan-kumar": {
-    name: "Pawan Kumar",
-    image: "/assets/creators/pavan.png",
-    role: "Influencer & Actor",
-    influencerId: "influencer_7",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
   "nirupam": {
     name: "Nirupam Paritala",
     image: "/assets/creators/nirupam.jpeg",
     role: "Actor & Producer",
-    influencerId: "influencer_15",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  "sunil-chhetri": {
-    name: "Sunil Chhetri",
-    image: "/assets/creators/sunil-chhetri-1.jpg",
-    role: "Footballer and Athlete",
-    influencerId: "influencer_sunil_001",
+    influencerId: "nirupam",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
   "aneri-thakkar": {
     name: "Aneri Thakkar",
     image: "/assets/creators/aneri-2.jpg",
     role: "Coach and Influencer",
-    influencerId: "influencer_aneri_001",
+    influencerId: "aneri",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
@@ -184,7 +170,10 @@ function VoiceChatContent() {
     if (timerRef.current) clearInterval(timerRef.current);
     micControllerRef.current?.stop();
     micControllerRef.current = null;
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      try { wsRef.current.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+      wsRef.current.close();
+    } else if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
       wsRef.current.close();
     }
     wsRef.current = null;
@@ -271,45 +260,37 @@ function VoiceChatContent() {
     if (!durationMinutes) return;
 
     let disposed = false;
+    let initAckReceived = false;
 
-    const wsUrl = new URL(buildVoiceWsUrl(creatorInfluencerId));
-    wsUrl.searchParams.set("preferred_provider", preferredProvider);
-    wsUrl.searchParams.set("provider", preferredProvider);
-    wsUrl.searchParams.set("creator_slug", slug);
-
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
-    if (typeof window !== "undefined" && authToken) {
-      wsUrl.searchParams.set("token", authToken);
-    }
 
-    const ws = openAppWebSocket(wsUrl.toString());
+    const ws = openAppWebSocket(wsUrl);
     ws.binaryType = "arraybuffer";
     wsRef.current = ws;
 
-    ws.onopen = async () => {
+    ws.onopen = () => {
       if (disposed) return;
-      setCallPhase("listening");
       clearSpeechFallbackTimeout();
       ttsActiveRef.current = false;
 
+      // Send init message — mic streaming starts only after init_ack
       if (ws.readyState === WebSocket.OPEN) {
         try {
           ws.send(
             JSON.stringify({
-              type: "session_init",
-              action: "session_init",
+              token: authToken,
               influencer_id: creatorInfluencerId,
               preferred_provider: preferredProvider,
-              provider: preferredProvider,
-              creator_slug: slug,
-              token: authToken,
             })
           );
         } catch {
-          // Ignore init-message failures; connection state handlers already cover retry UX.
+          // Ignore init-message failures
         }
       }
+    };
 
+    const startMic = async () => {
       try {
         const micHandle = await startStreamingMic(ws, () => {}, {
           energyThreshold: 0.01,
@@ -343,6 +324,60 @@ function VoiceChatContent() {
       } else {
         try {
           const msg = JSON.parse(event.data as string);
+
+          if (msg.type === "init_ack") {
+            // Server confirmed session — now begin audio streaming
+            if (msg.is_trial && msg.trial_duration_seconds) {
+              const newEndTime = Date.now() + msg.trial_duration_seconds * 1000;
+              sessionEndTimeRef.current = newEndTime;
+              setTimeLeft(msg.trial_duration_seconds);
+              if (typeof window !== "undefined" && sessionStorageKey) {
+                sessionStorage.setItem(sessionStorageKey, String(newEndTime));
+              }
+            }
+            initAckReceived = true;
+            setCallPhase("listening");
+            ttsActiveRef.current = false;
+            void startMic();
+            return;
+          }
+
+          if (msg.type === "trial_warning") {
+            toast.warning(msg.message || "Your free trial ends in 10 seconds.");
+            return;
+          }
+
+          if (msg.type === "trial_ended") {
+            toast.error(msg.message || "Free trial session ended. Purchase a session to continue.");
+            handleEndCall(true);
+            return;
+          }
+
+          if (msg.type === "timeout") {
+            toast.info("Session time is up.");
+            handleEndCall(true);
+            return;
+          }
+
+          if (msg.type === "error") {
+            const errMsg: string = msg.error || msg.message || "An error occurred.";
+            const lower = errMsg.toLowerCase();
+            if (lower.includes("no active booking")) {
+              toast.error("No active booking found. Please purchase a session.");
+              handleEndCall();
+            } else if (lower.includes("capacity") || lower.includes("full capacity")) {
+              toast.error("All sessions are at capacity. Please try again later.");
+              handleEndCall();
+            } else if (lower.includes("authentication required")) {
+              toast.error("Authentication required. Please sign in.");
+              handleEndCall();
+            } else {
+              toast.error(errMsg);
+              handleEndCall();
+            }
+            return;
+          }
+
           if (msg.type === "tts_start") {
             ttsActiveRef.current = true;
             setIsSpeaking(true);
@@ -387,7 +422,8 @@ function VoiceChatContent() {
       disposed = true;
       stopSessionResources();
     };
-  }, [clearSpeechFallbackTimeout, creatorInfluencerId, durationMinutes, preferredProvider, processBinaryChunk, scheduleSpeakingFallback, slug, stopSessionResources]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearSpeechFallbackTimeout, creatorInfluencerId, durationMinutes, preferredProvider, processBinaryChunk, scheduleSpeakingFallback, stopSessionResources]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey) return;

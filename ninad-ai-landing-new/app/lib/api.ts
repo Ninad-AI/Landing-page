@@ -15,7 +15,6 @@ import type {
   AnalyticsRecentResponse,
   AnalyticsFeedbackResponse,
   HealthResponse,
-  Creator,
   RazorpayCreateOrderRequest,
   RazorpayCreateOrderResponse,
   RazorpayVerifyPaymentRequest,
@@ -24,8 +23,9 @@ import type {
   UserBooking,
   VoiceSessionFeedbackRequest,
   VoiceSessionFeedbackResponse,
+  TrialStatusResponse,
 } from './types';
-import { API_BASE, PAYMENT_API_BASE, buildVoiceWsUrl } from './config';
+import { API_BASE, buildVoiceWsUrl } from './config';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
@@ -84,24 +84,40 @@ function normalizeBookingRecord(record: Record<string, unknown>): UserBooking | 
     record.minutes,
     record.session_duration_minutes
   );
+  const amountPaise = toFiniteNumber(record.amount_paise);
   const amount = toFiniteNumber(record.amount, record.total_amount, record.price, record.cost);
+
+  // Handle nested influencer object from /my-bookings API
+  const influencerObj = asRecord(record.influencer);
+  const influencerName = firstNonEmptyString(
+    influencerObj?.name,
+    record.influencer_name,
+    record.influencerName,
+    record.creator_name,
+    record.creatorName
+  );
 
   return {
     id,
     user_id: firstNonEmptyString(record.user_id, record.userId),
     user_name: firstNonEmptyString(record.user_name, record.userName),
     influencer_id: firstNonEmptyString(record.influencer_id, record.influencerId, record.creator_id, record.creatorId),
-    influencer_name: firstNonEmptyString(
-      record.influencer_name,
-      record.influencerName,
-      record.creator_name,
-      record.creatorName
-    ),
+    influencer_name: influencerName,
+    influencer: influencerObj ? {
+      influencer_id: typeof influencerObj.influencer_id === 'string' ? influencerObj.influencer_id : undefined,
+      name: typeof influencerObj.name === 'string' ? influencerObj.name : undefined,
+      avatar_url: typeof influencerObj.avatar_url === 'string' ? influencerObj.avatar_url : undefined,
+      short_bio: typeof influencerObj.short_bio === 'string' ? influencerObj.short_bio : undefined,
+    } : undefined,
+    provider_name: firstNonEmptyString(record.provider_name),
     duration_minutes: duration && duration > 0 ? Math.round(duration) : 0,
+    amount_paise: amountPaise,
     amount,
     status: firstNonEmptyString(record.status, record.booking_status, record.state),
     created_at: firstNonEmptyString(record.created_at, record.createdAt, record.booked_at, record.start_time),
     expires_at: firstNonEmptyString(record.expires_at, record.expiry, record.expiresAt, record.ends_at),
+    remaining_seconds: toFiniteNumber(record.remaining_seconds),
+    remaining_minutes: toFiniteNumber(record.remaining_minutes),
   };
 }
 
@@ -144,12 +160,10 @@ function normalizeBookings(payload: unknown): UserBooking[] {
 }
 
 function isActiveBooking(booking: UserBooking): boolean {
-  const inactiveStatuses = new Set(['cancelled', 'canceled', 'completed', 'expired', 'failed']);
   const status = booking.status?.toLowerCase();
-  if (!status) {
-    return true;
-  }
-  return !inactiveStatuses.has(status);
+  // Explicitly match 'active' per spec; also allow undefined/pending for backward compat
+  if (!status) return true;
+  return status === 'active' || status === 'pending';
 }
 
 function toActiveBooking(booking: UserBooking): ActiveBooking {
@@ -244,12 +258,6 @@ export const api = axios.create({
   timeout: 15000,
 });
 
-const paymentApiClient = axios.create({
-  baseURL: PAYMENT_API_BASE,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
-});
-
 const inflightActiveBookingChecks = new Map<string, Promise<ActiveBooking | null>>();
 
 const MY_BOOKINGS_PATH = '/my-bookings';
@@ -286,16 +294,6 @@ function shouldForceLogoutOnUnauthorized(err: AxiosError): boolean {
 
 // ─── Request Interceptor: Attach JWT ───
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('ninad_access_token');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-  return config;
-});
-
-paymentApiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('ninad_access_token');
     if (token && config.headers) {
@@ -349,12 +347,12 @@ export const paymentApi = {
     api.post<CheckoutResponse>('/payment/create-checkout', data).then((r) => r.data),
 
   createRazorpayOrder: (data: RazorpayCreateOrderRequest) =>
-    paymentApiClient
+    api
       .post<RazorpayCreateOrderResponse>('/payment/create-order', data)
       .then((r) => r.data),
 
   verifyRazorpayPayment: (data: RazorpayVerifyPaymentRequest) =>
-    paymentApiClient
+    api
       .post<RazorpayVerifyPaymentResponse>('/payment/verify-payment', data)
       .then((r) => r.data),
 
@@ -376,7 +374,7 @@ export const paymentApi = {
       const bookings = await paymentApi.getMyBookings();
       const matchingBooking = bookings
         .filter(isActiveBooking)
-        .find((booking) => !normalizedInfluencerId || !booking.influencer_id || booking.influencer_id === normalizedInfluencerId);
+        .find((booking) => !normalizedInfluencerId || !booking.influencer_id || booking.influencer_id.trim().toLowerCase() === normalizedInfluencerId.toLowerCase());
 
       return matchingBooking ? toActiveBooking(matchingBooking) : null;
     })();
@@ -412,6 +410,12 @@ export const feedbackApi = {
     const response = await api.post<VoiceSessionFeedbackResponse>(FEEDBACK_PATH, payload);
     return response.data;
   },
+};
+
+// ─── Trial Endpoints ───
+export const trialApi = {
+  getStatus: () =>
+    api.get<TrialStatusResponse>('/trial/status').then((r) => r.data),
 };
 
 // ─── Analytics Endpoints ───
@@ -482,14 +486,7 @@ export const systemApi = {
   health: () => fetchSystemHealth(),
 };
 
-// ─── Creators Endpoint (public) ───
-export const creatorsApi = {
-  list: () =>
-    api.get<Creator[]>('/creators').then((r) => r.data),
-};
-
 // ─── WebSocket URL builder ───
 export function getVoiceWsUrl(influencerId: string): string {
   return buildVoiceWsUrl(influencerId);
 }
-

@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi, feedbackApi } from "../../lib/api";
+import { authApi, paymentApi, feedbackApi, trialApi } from "../../lib/api";
 import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
@@ -24,13 +25,6 @@ const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
 /* ── Creator data ── */
 const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
-  "pawan-kumar": {
-    name: "Pawan Kumar",
-    image: "/assets/creators/pavan.png",
-    role: "Influencer & Actor",
-    influencerId: "influencer_7",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
   "nirupam": {
     name: "Nirupam Paritala",
     image: "/assets/creators/nirupam.jpeg",
@@ -38,18 +32,11 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "influencer_15",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "sunil-chhetri": {
-    name: "Sunil Chhetri",
-    image: "/assets/creators/sunil-chhetri-1.jpg",
-    role: "Footballer and Athlete",
-    influencerId: "influencer_sunil_001",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
   "aneri-thakkar": {
     name: "Aneri Thakkar",
     image: "/assets/creators/aneri-2.jpg",
     role: "Coach and Influencer",
-    influencerId: "influencer_aneri_001",
+    influencerId: "aneri",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
@@ -69,6 +56,15 @@ export default function CreatorProfilePage() {
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
 
+  /* ── Trial Status ── */
+  const { data: trialStatus } = useQuery({
+    queryKey: ["trialStatus", user?.id],
+    queryFn: trialApi.getStatus,
+    enabled: isHydrated && isAuthenticated,
+  });
+
+  const hasFreeTrial = trialStatus?.trials.find((t) => t.influencer_id === creatorInfluencerId)?.available ?? true;
+
   /* ── UI state ── */
   const [flowState, setFlowState] = useState<FlowState>("idle");
   const [selectedMinutes, setSelectedMinutes] = useState<AllowedDurationMinutes | null>(null);
@@ -85,7 +81,8 @@ export default function CreatorProfilePage() {
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [showPricingAfterFree, setShowPricingAfterFree] = useState(false);
-  const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
+  const [isCheckingTrial, setIsCheckingTrial] = useState(false);
+  const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string; isFree?: boolean } | null>(null);
 
   /* ── Parallax refs ── */
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -213,46 +210,38 @@ export default function CreatorProfilePage() {
   useEffect(() => {
     if (flowState !== "active") return;
     let disposed = false;
+    let initAckReceived = false;
 
     setIsSpeaking(false);
     setCallPhase("connecting");
 
-    const wsUrl = new URL(buildVoiceWsUrl(creatorInfluencerId));
-    wsUrl.searchParams.set("preferred_provider", preferredProvider);
-    wsUrl.searchParams.set("provider", preferredProvider);
-    wsUrl.searchParams.set("creator_slug", slug);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
-    if (typeof window !== "undefined" && authToken) {
-      wsUrl.searchParams.set("token", authToken);
-    }
 
-    const ws = openAppWebSocket(wsUrl.toString());
+    const ws = openAppWebSocket(wsUrl);
     ws.binaryType = "arraybuffer";
     wsRef.current = ws;
 
-    ws.onopen = async () => {
+    ws.onopen = () => {
       if (disposed) return;
-      setCallPhase("listening");
-      ttsActiveRef.current = false;
 
+      // Send init message immediately — mic streaming starts only after init_ack
       if (ws.readyState === WebSocket.OPEN) {
         try {
           ws.send(
             JSON.stringify({
-              type: "session_init",
-              action: "session_init",
+              token: authToken,
               influencer_id: creatorInfluencerId,
               preferred_provider: preferredProvider,
-              provider: preferredProvider,
-              creator_slug: slug,
-              token: authToken,
             })
           );
         } catch {
-          // Ignore init-message failures; connection state handlers already cover retry UX.
+          // Ignore init-message failures
         }
       }
+    };
 
+    const startMic = async () => {
       try {
         const micHandle = await startStreamingMic(ws, () => {}, {
           energyThreshold: 0.01,
@@ -283,6 +272,56 @@ export default function CreatorProfilePage() {
       } else {
         try {
           const msg = JSON.parse(event.data as string);
+
+          if (msg.type === "init_ack") {
+            // Server confirmed session — now begin audio streaming
+            if (msg.is_trial) {
+              setTimeLeft(msg.trial_duration_seconds || 60);
+            }
+            initAckReceived = true;
+            setCallPhase("listening");
+            ttsActiveRef.current = false;
+            void startMic();
+            return;
+          }
+
+          if (msg.type === "trial_warning") {
+            toast.warning(msg.message || "Your free trial ends in 10 seconds.");
+            return;
+          }
+
+          if (msg.type === "trial_ended") {
+            toast.error(msg.message || "Free trial session ended. Purchase a session to continue.");
+            handleEndCall();
+            // Immediately transition to payment modal
+            setShowPricingAfterFree(true);
+            setFlowState("duration");
+            return;
+          }
+
+          if (msg.type === "timeout") {
+            toast.info("Session time is up.");
+            handleEndCall();
+            return;
+          }
+
+          if (msg.type === "error") {
+            const errMsg: string = msg.error || msg.message || "An error occurred.";
+            const lower = errMsg.toLowerCase();
+            if (lower.includes("no active booking")) {
+              toast.error("No active booking found. Please purchase a session.");
+            } else if (lower.includes("capacity") || lower.includes("full capacity")) {
+              toast.error("All sessions are at capacity. Please try again later.");
+            } else if (lower.includes("authentication required")) {
+              toast.error("Authentication required. Please sign in.");
+            } else {
+              toast.error(errMsg);
+            }
+            if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
+            handleEndCall();
+            return;
+          }
+
           if (msg.type === "tts_start") {
             ttsActiveRef.current = true;
             setIsSpeaking(true);
@@ -308,7 +347,10 @@ export default function CreatorProfilePage() {
     };
 
     ws.onerror = () => {
-      if (!disposed) setCallPhase("connecting");
+      if (!disposed) {
+        setCallPhase("connecting");
+        toast.error("Unable to connect to voice server. Please try again.");
+      }
     };
 
     ws.onclose = () => {
@@ -321,18 +363,25 @@ export default function CreatorProfilePage() {
       disposed = true;
       micControllerRef.current?.stop();
       micControllerRef.current = null;
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+      }
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
       wsRef.current = null;
       ttsActiveRef.current = false;
       stopPlayback();
     };
-  }, [creatorInfluencerId, flowState, preferredProvider, processBinaryChunk, slug, stopPlayback]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creatorInfluencerId, flowState, preferredProvider, processBinaryChunk, stopPlayback]);
 
   const handleEndCall = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
     micControllerRef.current?.stop();
     micControllerRef.current = null;
-    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      try { wsRef.current.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+      wsRef.current.close();
+    } else if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
       wsRef.current.close();
     }
     wsRef.current = null;
@@ -380,6 +429,36 @@ export default function CreatorProfilePage() {
   const handleStartSession = async () => {
     setShowPricingAfterFree(false);
     setShowFeedback(false);
+
+    if (isHydrated && isAuthenticated) {
+      try {
+        const activeBooking = await paymentApi.getActiveBooking();
+        if (activeBooking) {
+          redirectToSession(
+            activeBooking.duration_minutes ?? 3,
+            activeBooking.id
+          );
+          return;
+        }
+      } catch {
+        // Continue to trial/payment flow if active booking check fails
+      }
+
+      setIsCheckingTrial(true);
+      try {
+        const status = await trialApi.getStatus();
+        const trial = status.trials.find(t => t.influencer_id === creatorInfluencerId);
+        if (trial?.available) {
+          redirectToSession(1, undefined, true);
+          return;
+        }
+      } catch (error) {
+        // Silently continue to payment modal if trial check fails
+      } finally {
+        setIsCheckingTrial(false);
+      }
+    }
+
     setFlowState("duration");
   };
 
@@ -400,7 +479,7 @@ export default function CreatorProfilePage() {
       pendingSessionRef.current = null;
 
       if (pending) {
-        redirectToSession(pending.duration, pending.bookingId);
+        redirectToSession(pending.duration, pending.bookingId, pending.isFree);
       } else {
         setFlowState("duration");
       }
@@ -434,7 +513,7 @@ export default function CreatorProfilePage() {
       return;
     }
 
-    pendingSessionRef.current = null;
+    pendingSessionRef.current = { duration: 1, isFree: true };
     setFlowState("auth");
   };
 
@@ -505,12 +584,14 @@ export default function CreatorProfilePage() {
               </h1>
 
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+                <button onClick={handleStartSession} disabled={isCheckingTrial} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300 disabled:opacity-70 disabled:cursor-wait">
                   <span className="flex items-center gap-3">
-                    Start Session
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                    </svg>
+                    {isCheckingTrial ? "Checking..." : "Start Session"}
+                    {!isCheckingTrial && (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                      </svg>
+                    )}
                   </span>
                 </button>
               </div>
@@ -530,11 +611,13 @@ export default function CreatorProfilePage() {
             </div>
 
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
-              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                Start Session
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                </svg>
+              <button onClick={handleStartSession} disabled={isCheckingTrial} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300 disabled:opacity-70 disabled:cursor-wait">
+                {isCheckingTrial ? "Checking..." : "Start Session"}
+                {!isCheckingTrial && (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
@@ -599,7 +682,7 @@ export default function CreatorProfilePage() {
         userEmail={user?.email}
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
-        showFreeOption={!showPricingAfterFree}
+        showFreeOption={!showPricingAfterFree && hasFreeTrial}
         onFreeSession={handleFreeSession}
         feedbackMode={showFeedback}
         onSubmitFeedback={handleSubmitFeedback}

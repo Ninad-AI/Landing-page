@@ -15,32 +15,14 @@ interface Creator {
 }
 
 const CREATORS: Creator[] = [
-  /* {
-    id: "pawan-kumar-001",
-    name: "Pawan Kumar",
-    role: "Influencer & Actor",
-    imageUrl: "/assets/creators/pavan.png",
-    handle: "pawan-kumar",
-    status: "Active",
-    bio: "Popular influencer and actor known for his versatile performances.",
-  }, */
   {
     id: "nirupam-001",
-    name: "Nirupam",
+    name: "Nirupam Paritala",
     role: "Actor & Producer",
     imageUrl: "/assets/creators/nirupam.jpeg",
     handle: "nirupam",
     status: "Active",
     bio: "Acclaimed actor and producer known for his powerful performances and creative vision.",
-  },
-  {
-    id: "sunil-chhetri-001",
-    name: "Sunil Chhetri",
-    role: "Footballer and Athlete",
-    imageUrl: "/assets/creators/sunil-chhetri-1.jpg",
-    handle: "sunil-chhetri",
-    status: "Active",
-    bio: "Legendary Indian footballer and captain, known for his leadership and goal-scoring prowess.",
   },
   {
     id: "aneri-001",

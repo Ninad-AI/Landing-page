@@ -11,6 +11,18 @@ export interface User {
   created_at: string;
 }
 
+export interface TrialStatus {
+  influencer_id: string;
+  display_name: string;
+  available: boolean;
+  used_at: string | null;
+}
+
+export interface TrialStatusResponse {
+  user_id: number;
+  trials: TrialStatus[];
+}
+
 export interface AuthTokens {
   access_token: string;
   token_type: string;
@@ -73,7 +85,7 @@ export interface CheckoutResponse {
   session_id: string;
 }
 
-export type AllowedDurationMinutes = 3 | 5 | 10 | 15 | 20 | 30;
+export type AllowedDurationMinutes = 3 | 5 | 10 | 15 | 30;
 
 export interface RazorpayCreateOrderRequest {
   duration_minutes: AllowedDurationMinutes;
@@ -97,9 +109,10 @@ export interface RazorpayVerifyPaymentRequest {
 }
 
 export interface RazorpayVerifyPaymentResponse {
+  status?: string;
   success?: boolean;
   message?: string;
-  booking_id?: string;
+  booking_id?: number | string;
 }
 
 export interface ActiveBooking {
@@ -110,17 +123,33 @@ export interface ActiveBooking {
   expires_at?: string;
 }
 
+export interface BookingInfluencer {
+  influencer_id?: string;
+  name?: string;
+  avatar_url?: string;
+  short_bio?: string;
+}
+
 export interface UserBooking {
   id: string;
   user_id?: string;
   user_name?: string;
   influencer_id?: string;
   influencer_name?: string;
+  /** Nested influencer object returned by the new /my-bookings API */
+  influencer?: BookingInfluencer;
+  provider_name?: string;
   duration_minutes: number;
+  /** Amount in paise (₹1 = 100 paise) */
+  amount_paise?: number;
+  /** Legacy amount field (may be in rupees depending on API version) */
   amount?: number;
   status?: string;
   created_at?: string;
   expires_at?: string;
+  /** Seconds remaining in the booking window */
+  remaining_seconds?: number;
+  remaining_minutes?: number;
 }
 
 export type FeedbackStars = 1 | 2 | 3 | 4 | 5;

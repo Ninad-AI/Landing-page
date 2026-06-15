@@ -19,6 +19,7 @@ export default function Header() {
   const [mobileMenuOpenPath, setMobileMenuOpenPath] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout, isHydrated } = useAuthStore();
+  const showAnalyticsLink = isAuthenticated && (user?.role === 'influencer' || user?.role === 'admin');
 
   // Page type detection
   const isAdminPage = pathname.startsWith('/admin');
@@ -124,6 +125,16 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            {showAnalyticsLink && (
+              <Link
+                href="/admin/analytics"
+                className={`font-sans text-sm font-medium hover:text-white transition-colors uppercase tracking-wide ${
+                  pathname.startsWith('/admin/analytics') ? "text-white" : "text-white/70"
+                }`}
+              >
+                Analytics
+              </Link>
+            )}
           </nav>
         )}
 
@@ -260,6 +271,15 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            {showAnalyticsLink && (
+              <Link
+                href="/admin/analytics"
+                onClick={() => setMobileMenuOpenPath(null)}
+                className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
+              >
+                Analytics
+              </Link>
+            )}
           </nav>
 
           {isHydrated && isAuthenticated && user ? (

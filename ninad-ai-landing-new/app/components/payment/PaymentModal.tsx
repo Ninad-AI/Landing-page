@@ -16,11 +16,10 @@ const HEALTH_RECHECK_SECONDS = HEALTH_POLL_INTERVAL_SECONDS;
 
 const DURATION_PLANS: MinutePlan[] = [
   { minutes: 3, price: 59, label: "3 minutes" },
-  { minutes: 5, price: 99, label: "5 minutes" },
-  { minutes: 10, price: 189, label: "10 minutes" },
-  { minutes: 15, price: 279, label: "15 minutes" },
-  { minutes: 20, price: 379, label: "20 minutes" },
-  { minutes: 30, price: 569, label: "30 minutes" },
+  { minutes: 5, price: 79, label: "5 minutes" },
+  { minutes: 10, price: 149, label: "10 minutes" },
+  { minutes: 15, price: 199, label: "15 minutes" },
+  { minutes: 30, price: 349, label: "30 minutes" },
 ];
 
 const STAR_COPY: Record<FeedbackStars, string> = {
@@ -231,13 +230,15 @@ export default function PaymentModal({
         razorpay_signature: checkoutResult.razorpay_signature,
       });
 
-      if (verifyResult.success === false) {
+      // Backend returns { status: "success", message, booking_id }
+      const isSuccess = verifyResult.status === 'success' || verifyResult.success !== false;
+      if (!isSuccess) {
         throw new Error(verifyResult.message || "Payment verification failed.");
       }
 
       toast.success(verifyResult.message || "Payment successful. Your booking is confirmed.");
 
-      onPaymentVerified(selectedDuration, verifyResult.booking_id);
+      onPaymentVerified(selectedDuration, verifyResult.booking_id != null ? String(verifyResult.booking_id) : undefined);
       onClose();
 
       setSelectedMinutes(null);
