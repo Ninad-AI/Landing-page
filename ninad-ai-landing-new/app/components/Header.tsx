@@ -227,7 +227,7 @@ export default function Header() {
             aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-controls="mobile-menu"
             aria-expanded={isMobileMenuOpen}
-            className="lg:hidden relative z-50 h-11 w-11 flex flex-col items-center justify-center gap-1.5 group cursor-pointer bg-none border-none p-0"
+            className="lg:hidden relative z-50 h-12 w-12 flex flex-col items-center justify-center gap-1.5 group cursor-pointer bg-none border-none p-0"
             onClick={() =>
               setMobileMenuOpenPath((currentPath) =>
                 currentPath === pathname ? null : pathname
@@ -235,15 +235,15 @@ export default function Header() {
             }
           >
             <span
-              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
+              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-[4.5px]" : ""
                 }`}
             />
             <span
-              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
+              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
                 }`}
             />
             <span
-              className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-[4.5px]" : ""
                 }`}
             />
           </button>
@@ -310,7 +310,7 @@ export default function Header() {
               <Link
                 href={`/login?redirect=${encodeURIComponent(pathname)}`}
                 onClick={() => setMobileMenuOpenPath(null)}
-                className="text-sm font-sans font-medium text-white/70 hover:text-white transition-colors"
+                className="px-8 py-3 text-sm sm:text-base font-sans font-medium text-white/70 hover:text-white transition-colors"
               >
                 Sign In
               </Link>

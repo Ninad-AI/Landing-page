@@ -156,7 +156,7 @@ export default function Safety() {
                     }}
                     onClick={() => handleTabChange(index)}
                     className={`
-                      relative z-10 rounded-xl px-4 py-2.5 text-center font-sans text-xs font-bold leading-tight transition-colors duration-300 sm:px-5 sm:py-3 sm:text-sm md:text-base lg:rounded-full
+                      relative z-10                       rounded-xl px-4 py-3 text-center font-sans text-xs font-bold leading-tight transition-colors duration-300 sm:px-5 sm:py-3 sm:text-sm md:text-base lg:rounded-full
                       ${isActive
                         ? "text-black"
                         : "text-[#949494] hover:text-white"

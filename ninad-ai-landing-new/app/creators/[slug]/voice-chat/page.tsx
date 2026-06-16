@@ -29,8 +29,15 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
   "aneri-thakkar": {
     name: "Aneri Thakkar",
     image: "/assets/creators/aneri-2.jpg",
-    role: "Coach and Influencer",
+    role: "Coach & Influencer",
     influencerId: "aneri",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
+  "anveshi-jain": {
+    name: "Anveshi Jain",
+    image: "/assets/creators/anveshi.jpg",
+    role: "Actress & Influencer",
+    influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };

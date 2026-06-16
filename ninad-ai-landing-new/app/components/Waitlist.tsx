@@ -92,13 +92,13 @@ export default function Waitlist() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full sm:flex-1 h-[46px] sm:h-full px-6 text-[15px] font-light font-ibm text-[#2a2a2a] placeholder:text-[#6b6b6b] bg-white sm:bg-transparent outline-none border border-[#6125d8]/50 sm:border-none rounded-full"
+                className="w-full sm:flex-1 h-[48px] sm:h-full px-5 sm:px-6 text-[15px] font-light font-ibm text-[#2a2a2a] placeholder:text-[#6b6b6b] bg-white sm:bg-transparent outline-none border border-[#6125d8]/50 sm:border-none rounded-full"
                 required
               />
               <button
                 type="submit"
                 disabled={!canSubmit || status.type === "loading"}
-                className="w-full sm:w-auto h-[46px] sm:h-full px-8 bg-[#6125d8] text-white font-inter font-medium text-[15px] hover:bg-[#5012b8] transition-colors duration-200 whitespace-nowrap rounded-full sm:rounded-none"
+                className="w-full sm:w-auto h-[48px] sm:h-full px-8 bg-[#6125d8] text-white font-inter font-medium text-[15px] hover:bg-[#5012b8] transition-colors duration-200 whitespace-nowrap rounded-full sm:rounded-none"
               >
                 {status.type === "loading" ? "Joining…" : "Join Waitlist"}
               </button>

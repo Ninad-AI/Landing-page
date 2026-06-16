@@ -195,8 +195,8 @@ export default function Products() {
             >
               {/* On mobile/tablet: show description below the list */}
               {!isDesktop && (
-                <div className="pt-6 sm:pt-8">
-                  <p className="font-anonymous text-base sm:text-lg md:text-xl lg:text-3xl leading-relaxed text-white/90">
+                <div className="pt-4 sm:pt-8">
+                  <p className="font-anonymous text-sm sm:text-lg md:text-xl lg:text-3xl leading-relaxed text-white/90">
                     {products[activeProduct].descriptionPosition === 'split'
                       ? products[activeProduct].description
                       : products[activeProduct].description}

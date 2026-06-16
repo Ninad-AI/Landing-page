@@ -57,7 +57,7 @@ export default function Languages() {
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`
-                flex-shrink-0 w-[150px] sm:w-[180px] md:w-[206px] h-12 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
+                flex-shrink-0 w-[130px] sm:w-[180px] md:w-[206px] h-10 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
                 transition-all duration-150 relative z-20
                 ${hoveredIndex === index
                   ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
@@ -74,7 +74,7 @@ export default function Languages() {
 
         {/* Row 2 (brick offset) */}
         <div
-          className="flex gap-4 animate-marquee min-w-full translate-x-10 sm:translate-x-16 md:translate-x-[111px] overflow-visible"
+          className="flex gap-4 animate-marquee min-w-full translate-x-6 sm:translate-x-16 md:translate-x-[111px] overflow-visible"
           style={{ animationPlayState: hoveredIndex !== null && hoveredIndex >= 100 ? 'paused' : 'running' }}
         >
           {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
@@ -83,7 +83,7 @@ export default function Languages() {
               onMouseEnter={() => setHoveredIndex(index + 100)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`
-                flex-shrink-0 w-[150px] sm:w-[180px] md:w-[206px] h-12 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
+                flex-shrink-0 w-[130px] sm:w-[180px] md:w-[206px] h-10 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
                 transition-all duration-150 relative z-20
                 ${hoveredIndex === index + 100
                   ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'

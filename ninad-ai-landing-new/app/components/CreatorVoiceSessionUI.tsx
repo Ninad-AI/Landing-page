@@ -40,6 +40,8 @@ export default function VoiceSessionUI({
 
   const statusDotColor = callPhase === 'connecting'
     ? { ping: 'bg-amber-400', dot: 'bg-amber-500' }
+    : callPhase === 'listening'
+    ? { ping: 'bg-emerald-400', dot: 'bg-emerald-500' }
     : { ping: 'bg-rose-400', dot: 'bg-rose-500' };
 
   return (
@@ -52,7 +54,7 @@ export default function VoiceSessionUI({
 
       <div className="relative flex h-full w-full items-center justify-center px-4">
         <div
-          className="relative flex items-center justify-center"
+          className="relative flex items-center justify-center scale-[0.85] sm:scale-100"
           style={{ width: RING_SIZE, height: RING_SIZE }}
         >
           <svg
@@ -100,17 +102,17 @@ export default function VoiceSessionUI({
             />
           </div>
 
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-36 flex-col items-center gap-6 sm:translate-y-44">
-            <span className="tabular-nums text-4xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 translate-y-32 flex-col items-center gap-4 sm:translate-y-44 sm:gap-6">
+            <span className="tabular-nums text-3xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
               {formatTime(timeLeft)}
             </span>
 
-            <div className="flex items-center gap-3">
-              <span className="relative flex h-1.5 w-1.5">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="relative flex h-2 w-2 sm:h-1.5 sm:w-1.5">
                 <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${statusDotColor.ping}`} />
-                <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${statusDotColor.dot}`} />
+                <span className={`relative inline-flex h-2 w-2 sm:h-1.5 sm:w-1.5 rounded-full ${statusDotColor.dot}`} />
               </span>
-              <span className="text-[11px] font-light uppercase tracking-[0.6em] text-white/40">
+              <span className="text-[10px] sm:text-[11px] font-light uppercase tracking-[0.4em] sm:tracking-[0.6em] text-white/40">
                 {callPhase}
               </span>
             </div>

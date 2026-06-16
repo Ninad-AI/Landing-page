@@ -35,8 +35,15 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
   "aneri-thakkar": {
     name: "Aneri Thakkar",
     image: "/assets/creators/aneri-2.jpg",
-    role: "Coach and Influencer",
+    role: "Coach & Influencer",
     influencerId: "aneri",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
+  "anveshi-jain": {
+    name: "Anveshi Jain",
+    image: "/assets/creators/anveshi.jpg",
+    role: "Actress & Influencer",
+    influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
 };
@@ -444,15 +451,9 @@ export default function CreatorProfilePage() {
         // Continue to trial/payment flow if active booking check fails
       }
 
-      setIsCheckingTrial(true);
       try {
-        const status = await trialApi.getStatus();
-        const trial = status.trials.find(t => t.influencer_id === creatorInfluencerId);
-        if (trial?.available) {
-          redirectToSession(1, undefined, true);
-          return;
-        }
-      } catch (error) {
+        await trialApi.getStatus();
+      } catch {
         // Silently continue to payment modal if trial check fails
       } finally {
         setIsCheckingTrial(false);
@@ -571,12 +572,12 @@ export default function CreatorProfilePage() {
             creatorImage={creatorImage}
           />
         ) : (
-          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-6 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
+          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-4 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
             <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
-              <h2 className="text-[10px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-4 sm:mb-6 animate-fade-in-up">
+              <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
                 • {creatorRole}
               </h2>
-              <h1 className="text-[2.4rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
+              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
                 <span className="block">{creatorName.split(" ")[0]}</span>
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
                   {creatorName.split(" ").slice(1).join(" ")}.
@@ -597,7 +598,7 @@ export default function CreatorProfilePage() {
               </div>
             </div>
 
-            <div className="relative w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
+            <div className="relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
               <div
                 ref={(el) => { avatarRefs.current[1] = el; }}
                 className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
@@ -606,8 +607,8 @@ export default function CreatorProfilePage() {
                 <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
               </div>
-              <div className="absolute -top-6 -right-6 sm:-top-12 sm:-right-12 w-12 h-12 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />
-              <div className="absolute bottom-16 -left-4 sm:-left-16 w-14 h-14 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
+              <div className="absolute -top-4 -right-4 sm:-top-12 sm:-right-12 w-10 h-10 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />
+              <div className="absolute bottom-12 -left-3 sm:-left-16 w-10 h-10 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
             </div>
 
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">

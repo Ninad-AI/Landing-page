@@ -140,7 +140,7 @@ export default function UseCases() {
                     className="min-h-0 cursor-pointer"
                     onClick={() => setOpenIndex(null)}
                   >
-                    <div className="px-5 sm:px-6 md:px-8 pb-6 sm:pb-8 pl-5 sm:pl-[80px] md:pl-[104px]">
+                    <div className="px-4 sm:px-6 md:px-8 pb-5 sm:pb-8 pl-4 sm:pl-[80px] md:pl-[104px]">
                       <ul className="space-y-3">
                         {item.items.map((sub, i) => (
                           <li key={i} className="flex items-center gap-3 text-sm sm:text-base text-white/80 font-roboto">

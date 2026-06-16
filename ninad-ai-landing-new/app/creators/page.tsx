@@ -27,11 +27,20 @@ const CREATORS: Creator[] = [
   {
     id: "aneri-001",
     name: "Aneri Thakkar",
-    role: "Coach and Influencer",
+    role: "Coach & Influencer",
     imageUrl: "/assets/creators/aneri-2.jpg",
     handle: "aneri-thakkar",
     status: "Active",
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
+  },
+  {
+    id: "anveshi-001",
+    name: "Anveshi Jain",
+    role: "Actress & Influencer",
+    imageUrl: "/assets/creators/anveshi.jpg",
+    handle: "anveshi-jain",
+    status: "Active",
+    bio: "Known for her bold and inspiring journey from a small town to becoming a celebrated actress and influencer.",
   },
 ];
 
