@@ -39,13 +39,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "aneri",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "anveshi-jain": {
-    name: "Anveshi Jain",
-    image: "/assets/creators/anveshi.jpg",
-    role: "Actress & Influencer",
-    influencerId: "anveshi_jain",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
+  // "anveshi-jain": {
+  //   name: "Anveshi Jain",
+  //   image: "/assets/creators/anveshi.jpg",
+  //   role: "Actress & Influencer",
+  //   influencerId: "anveshi_jain",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  // },
 };
 
 export default function CreatorProfilePage() {
