@@ -7,6 +7,7 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
+import { PlayoutBuffer } from "../../lib/playbackUtils";
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
@@ -105,6 +106,8 @@ export default function CreatorProfilePage() {
   const sourceEndPromisesRef = useRef<Promise<void>[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const ttsActiveRef = useRef(false);
+  const agentSpeakingRef = useRef(false);
+  const playoutRef = useRef<PlayoutBuffer | null>(null);
 
   /* ═══════════════════════════════════════
      Effects
@@ -158,39 +161,22 @@ export default function CreatorProfilePage() {
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new Ctor();
+      audioContextRef.current = new Ctor({ sampleRate: 16000 });
       playHeadRef.current = audioContextRef.current.currentTime;
       sourceEndPromisesRef.current = [];
+      playoutRef.current = new PlayoutBuffer(audioContextRef.current);
     }
     return audioContextRef.current;
   }, []);
 
   const scheduleBuffer = useCallback((buffer: AudioBuffer) => {
-    const ctx = getAudioContext();
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    src.connect(ctx.destination);
-    const p = new Promise<void>((resolve) => {
-      src.onended = () => {
-        sourceNodesRef.current = sourceNodesRef.current.filter((n) => n !== src);
-        resolve();
-      };
-    });
+    const p = playoutRef.current!.enqueue(buffer);
     sourceEndPromisesRef.current.push(p);
-    sourceNodesRef.current.push(src);
-    if (playHeadRef.current < ctx.currentTime) playHeadRef.current = ctx.currentTime;
-    src.start(playHeadRef.current);
-    playHeadRef.current += buffer.duration;
-  }, [getAudioContext]);
+  }, []);
 
   const stopPlayback = useCallback(() => {
-    sourceNodesRef.current.forEach((n) => {
-      try {
-        n.stop(0);
-      } catch {
-        // already stopped
-      }
-    });
+    playoutRef.current?.stop();
+    playoutRef.current = null;
     sourceNodesRef.current = [];
     sourceEndPromisesRef.current = [];
     if (audioContextRef.current && audioContextRef.current.state !== "closed") {
@@ -347,6 +333,15 @@ export default function CreatorProfilePage() {
               done();
             }
           }
+
+          if (msg.type === "AgentAudioStart") {
+            agentSpeakingRef.current = true;
+            micControllerRef.current?.setMuted(true);
+          }
+          if (msg.type === "AgentAudioDone") {
+            agentSpeakingRef.current = false;
+            micControllerRef.current?.setMuted(false);
+          }
         } catch {
           // non-JSON
         }
@@ -376,6 +371,7 @@ export default function CreatorProfilePage() {
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
       wsRef.current = null;
       ttsActiveRef.current = false;
+      agentSpeakingRef.current = false;
       stopPlayback();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -394,6 +390,7 @@ export default function CreatorProfilePage() {
     wsRef.current = null;
     stopPlayback();
     ttsActiveRef.current = false;
+    agentSpeakingRef.current = false;
     setFlowState("idle");
     setTimeLeft(0);
     setSelectedMinutes(null);
