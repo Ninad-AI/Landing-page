@@ -96,8 +96,6 @@ function VoiceChatContent() {
   const agentSpeakingRef = useRef(false);
   const playoutRef = useRef<PlayoutBuffer | null>(null);
   const sessionEndTimeRef = useRef<number | null>(null);
-  const speechFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -112,6 +110,15 @@ function VoiceChatContent() {
   const scheduleBuffer = useCallback((buffer: AudioBuffer) => {
     const p = playoutRef.current!.enqueue(buffer);
     sourceEndPromisesRef.current.push(p);
+    p.then(() => {
+      const arr = sourceEndPromisesRef.current;
+      const idx = arr.indexOf(p);
+      if (idx !== -1) arr.splice(idx, 1);
+      if (arr.length === 0) {
+        setIsSpeaking(false);
+        setCallPhase("listening");
+      }
+    });
   }, []);
 
   const stopPlayback = useCallback(() => {
@@ -136,22 +143,6 @@ function VoiceChatContent() {
     scheduleBuffer(ab);
   }, [getAudioContext, scheduleBuffer]);
 
-  const clearSpeechFallbackTimeout = useCallback(() => {
-    if (speechFallbackTimeoutRef.current) {
-      clearTimeout(speechFallbackTimeoutRef.current);
-      speechFallbackTimeoutRef.current = null;
-    }
-  }, []);
-
-  const scheduleSpeakingFallback = useCallback(() => {
-    clearSpeechFallbackTimeout();
-    speechFallbackTimeoutRef.current = setTimeout(() => {
-      ttsActiveRef.current = false;
-      setIsSpeaking(false);
-      setCallPhase("listening");
-    }, 1200);
-  }, [clearSpeechFallbackTimeout]);
-
   const clearPersistedSession = useCallback(() => {
     sessionEndTimeRef.current = null;
     if (typeof window !== "undefined" && sessionStorageKey) {
@@ -172,9 +163,8 @@ function VoiceChatContent() {
     wsRef.current = null;
     ttsActiveRef.current = false;
     agentSpeakingRef.current = false;
-    clearSpeechFallbackTimeout();
     stopPlayback();
-  }, [clearSpeechFallbackTimeout, stopPlayback]);
+  }, [stopPlayback]);
 
   const endSessionAndRedirect = useCallback((redirectPath: string, expired = false) => {
     stopSessionResources();
@@ -265,7 +255,6 @@ function VoiceChatContent() {
 
     ws.onopen = () => {
       if (disposed) return;
-      clearSpeechFallbackTimeout();
       ttsActiveRef.current = false;
 
       // Send init message — mic streaming starts only after init_ack
@@ -313,7 +302,6 @@ function VoiceChatContent() {
         ttsActiveRef.current = true;
         setIsSpeaking(true);
         setCallPhase("speaking");
-        scheduleSpeakingFallback();
         processBinaryChunk(event.data);
       } else {
         try {
@@ -376,12 +364,10 @@ function VoiceChatContent() {
             ttsActiveRef.current = true;
             setIsSpeaking(true);
             setCallPhase("speaking");
-            scheduleSpeakingFallback();
           }
           if (msg.type === "tts_end") {
             const pending = [...sourceEndPromisesRef.current];
             const done = () => {
-              clearSpeechFallbackTimeout();
               ttsActiveRef.current = false;
               setIsSpeaking(false);
               setCallPhase("listening");
@@ -409,14 +395,12 @@ function VoiceChatContent() {
 
     ws.onerror = () => {
       if (!disposed) {
-        clearSpeechFallbackTimeout();
         setCallPhase("connecting");
       }
     };
 
     ws.onclose = () => {
       if (disposed) return;
-      clearSpeechFallbackTimeout();
       setIsSpeaking(false);
       setCallPhase("connecting");
     };
@@ -426,7 +410,7 @@ function VoiceChatContent() {
       stopSessionResources();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearSpeechFallbackTimeout, creatorInfluencerId, durationMinutes, preferredProvider, processBinaryChunk, scheduleSpeakingFallback, stopSessionResources]);
+  }, [creatorInfluencerId, durationMinutes, preferredProvider, processBinaryChunk, stopSessionResources]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey) return;

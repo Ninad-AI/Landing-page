@@ -172,6 +172,15 @@ export default function CreatorProfilePage() {
   const scheduleBuffer = useCallback((buffer: AudioBuffer) => {
     const p = playoutRef.current!.enqueue(buffer);
     sourceEndPromisesRef.current.push(p);
+    p.then(() => {
+      const arr = sourceEndPromisesRef.current;
+      const idx = arr.indexOf(p);
+      if (idx !== -1) arr.splice(idx, 1);
+      if (arr.length === 0) {
+        setIsSpeaking(false);
+        setCallPhase("listening");
+      }
+    });
   }, []);
 
   const stopPlayback = useCallback(() => {
