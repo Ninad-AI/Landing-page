@@ -42,6 +42,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Known for her bold and inspiring journey from a small town to becoming a celebrated actress and influencer.",
   },
+  {
+    id: "garima-001",
+    name: "Garima Chaurasia",
+    role: "Model & Influencer",
+    imageUrl: "/assets/creators/garima-2.jpg",
+    handle: "garima",
+    status: "Active",
+    bio: "Model and influencer known for her captivating presence and style.",
+  },
 ];
 
 export default function CreatorsPage() {

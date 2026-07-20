@@ -41,6 +41,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "garima": {
+    name: "Garima Chaurasia",
+    image: "/assets/creators/garima-2.jpg",
+    role: "Model & Influencer",
+    influencerId: "garima",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
