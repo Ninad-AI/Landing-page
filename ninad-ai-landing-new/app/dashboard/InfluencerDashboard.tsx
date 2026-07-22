@@ -124,31 +124,30 @@ export default function InfluencerDashboard() {
     return () => { cancelled = true; };
   }, []);
 
-  /* Robust ID matcher: handles "influencer_13" vs "13", "13" vs "13", etc.
-     Also falls back to case-insensitive name matching. */
+  /* Match a record against the logged-in influencer.
+     Prefers user.influencer_id from the auth response.
+     Falls back to legacy matching by user.id and name for backward compat. */
   function matchesMe(
     recordId?: string,
     recordName?: string,
   ): boolean {
     if (!user) return false;
-    // Exact ID match
+    if (user.influencer_id && recordId && recordId === user.influencer_id) return true;
     if (recordId && user.id && recordId === user.id) return true;
-    // Strip non-digit prefix (e.g. "influencer_13" → "13")
     if (recordId && user.id) {
       const numericPart = recordId.replace(/^\D+/, '');
       if (numericPart && numericPart === user.id) return true;
-      // Also handle user.id having a prefix
       const userNumeric = user.id.replace(/^\D+/, '');
       if (userNumeric && numericPart && numericPart === userNumeric) return true;
     }
-    // Case-insensitive name match
     if (recordName && user.name) {
       return recordName.trim().toLowerCase() === user.name.trim().toLowerCase();
     }
     return false;
   }
 
-  /* find this influencer's own record if available */
+  /* find this influencer's own record.
+     Backend now filters data for influencers, so there will usually be just one match. */
   const myRecord: InfluencerPerformance | undefined = influencers?.influencers?.find(
     (inf) => matchesMe(inf.influencer_id, inf.influencer_name)
   );
@@ -174,7 +173,7 @@ export default function InfluencerDashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          label="Total Calls"
+          label="Your Calls"
           value={loading ? '—' : totalCalls.toLocaleString()}
           sub="Voice sessions"
           accent="primary"
@@ -186,7 +185,7 @@ export default function InfluencerDashboard() {
           }
         />
         <StatCard
-          label="Minutes Used"
+          label="Your Minutes"
           value={loading ? '—' : `${totalMinutes.toLocaleString()} min`}
           sub="Across all sessions"
           accent="cyan"
@@ -198,7 +197,7 @@ export default function InfluencerDashboard() {
           }
         />
         <StatCard
-          label="Avg Rating"
+          label="Your Rating"
           value={loading ? '—' : (avgRating != null ? avgRating.toFixed(1) + ' ★' : '—')}
           sub={totalFeedback > 0 ? `${totalFeedback} reviews` : 'No reviews yet'}
           accent="amber"
@@ -210,7 +209,7 @@ export default function InfluencerDashboard() {
           }
         />
         <StatCard
-          label="Revenue"
+          label="Your Revenue"
           value={loading ? '—' : (revenue != null ? `₹${revenue.toLocaleString()}` : '—')}
           sub="Earned from sessions"
           accent="emerald"
@@ -233,7 +232,7 @@ export default function InfluencerDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Creator Performance</h3>
+            <h3 className="font-sans font-bold text-base text-white">Your Performance</h3>
           </div>
 
           {loading ? (
@@ -285,7 +284,7 @@ export default function InfluencerDashboard() {
           )}
         </div>
 
-        {/* Feedback Summary */}
+        {/* Feedback Summary — personal view */}
         <div className="glass border border-white/15 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
@@ -293,70 +292,43 @@ export default function InfluencerDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Feedback Overview</h3>
+            <h3 className="font-sans font-bold text-base text-white">Your Feedback</h3>
           </div>
 
           {loading ? (
             <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 rounded-lg bg-white/5 animate-pulse" />
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse" />
               ))}
             </div>
+          ) : myFeedback ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/8">
+                <div className="text-center">
+                  <p className="text-3xl font-extrabold text-white">{myFeedback.avg_rating?.toFixed(1) ?? '—'}</p>
+                  <p className="text-[10px] text-white/40 mt-0.5">avg rating</p>
+                </div>
+                <div className="flex-1">
+                  <StarRating rating={myFeedback.avg_rating} />
+                  <p className="text-xs text-white/35 mt-1">
+                    {(myFeedback.total_feedback ?? myFeedback.feedback_count ?? 0)} review{(myFeedback.total_feedback ?? myFeedback.feedback_count ?? 0) !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : !feedback?.influencer_feedback?.length && feedback?.overall_avg_rating != null ? (
+            <div className="p-4 rounded-xl bg-white/5 border border-white/8 text-center">
+              <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Platform Average</p>
+              <p className="text-3xl font-extrabold text-white">{feedback.overall_avg_rating.toFixed(1)}</p>
+              <StarRating rating={feedback.overall_avg_rating} />
+            </div>
           ) : (
-            <>
-              {/* Overall */}
-              {feedback?.overall_avg_rating != null && (
-                <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/8">
-                  <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Platform Average</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-extrabold text-white">
-                      {feedback.overall_avg_rating.toFixed(1)}
-                    </span>
-                    <div>
-                      <StarRating rating={feedback.overall_avg_rating} />
-                      <p className="text-xs text-white/35 mt-0.5">
-                        {feedback.total_feedback ?? 0} total reviews
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {!feedback?.influencer_feedback?.length ? (
-                <p className="text-sm text-white/30 text-center py-4">No feedback data available.</p>
-              ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                  {feedback.influencer_feedback.map((fb, i) => {
-                    const isMe = fb.influencer_id === user?.id || fb.influencer_name === user?.name;
-                    const count = fb.total_feedback ?? fb.feedback_count ?? 0;
-                    return (
-                      <div
-                        key={fb.influencer_id ?? i}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                          isMe
-                            ? 'border-amber-500/30 bg-amber-500/8'
-                            : 'border-white/5 bg-white/3 hover:bg-white/5'
-                        }`}
-                      >
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {fb.influencer_name || 'Creator'}
-                            {isMe && <span className="ml-1.5 text-[10px] text-amber-400 font-bold">(You)</span>}
-                          </p>
-                          <p className="text-xs text-white/35">{count} review{count !== 1 ? 's' : ''}</p>
-                        </div>
-                        <StarRating rating={fb.avg_rating} />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
+            <p className="text-sm text-white/30 text-center py-6">No feedback data available yet.</p>
           )}
         </div>
       </div>
 
-      {/* Usage Breakdown from /analytics/usage */}
+      {/* Usage Breakdown from /analytics/usage — personal view */}
       {!loading && usage && (
         <div className="glass border border-white/15 rounded-2xl p-6">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5">
@@ -365,10 +337,7 @@ export default function InfluencerDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Platform Usage</h3>
-            <span className="ml-auto text-[11px] sm:text-xs text-white/30 font-mono whitespace-nowrap">
-              {usage.total_calls} calls • {usage.minutes_used} min
-            </span>
+            <h3 className="font-sans font-bold text-base text-white">Your Usage</h3>
           </div>
 
           {(() => {
@@ -380,41 +349,15 @@ export default function InfluencerDashboard() {
               return <p className="text-sm text-white/30 text-center py-4">No usage data available for your account.</p>;
             }
 
-            const pct = usage.total_calls > 0
-              ? ((myUsage.calls / usage.total_calls) * 100).toFixed(1)
-              : '0.0';
-            const barWidth = Math.max(4, Number(pct) * 2);
-
             return (
-              <div className="space-y-4">
-                {/* My usage stats */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                  <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-2.5 sm:p-4 text-center">
-                    <p className="font-extrabold text-lg sm:text-xl text-white">{myUsage.calls.toLocaleString()}</p>
-                    <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Total Calls</p>
-                  </div>
-                  <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-2.5 sm:p-4 text-center">
-                    <p className="font-extrabold text-lg sm:text-xl text-white">{myUsage.minutes.toLocaleString()}</p>
-                    <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Minutes</p>
-                  </div>
-                  <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-2.5 sm:p-4 text-center">
-                    <p className="font-extrabold text-lg sm:text-xl text-accent-cyan">{pct}%</p>
-                    <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Share</p>
-                  </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-4 text-center">
+                  <p className="font-extrabold text-xl sm:text-2xl text-white">{myUsage.calls.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-white/40 mt-1">Total Calls</p>
                 </div>
-
-                {/* Share bar */}
-                <div>
-                  <div className="flex justify-between text-xs text-white/35 mb-1.5">
-                    <span>Your usage share</span>
-                    <span className="font-mono">{pct}% of {usage.total_calls} total calls</span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-white/8 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-accent-blue to-accent-cyan transition-all duration-700"
-                      style={{ width: `${Math.min(100, Number(pct))}%` }}
-                    />
-                  </div>
+                <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-4 text-center">
+                  <p className="font-extrabold text-xl sm:text-2xl text-white">{myUsage.minutes.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-white/40 mt-1">Minutes</p>
                 </div>
               </div>
             );

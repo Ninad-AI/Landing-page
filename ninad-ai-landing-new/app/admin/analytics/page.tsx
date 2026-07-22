@@ -10,6 +10,7 @@ import type {
   AnalyticsRecentBooking,
   AnalyticsUsageResponse,
   AnalyticsUsersResponse,
+  InfluencerUsageDetail,
 } from '../../lib/types';
 import {
   AreaChart,
@@ -127,6 +128,32 @@ function AnalyticsContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedInfluencerId, setSelectedInfluencerId] = useState<string | null>(null);
+  const [influencerDetail, setInfluencerDetail] = useState<InfluencerUsageDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+
+  const handleCreatorClick = async (influencerId: string) => {
+    setSelectedInfluencerId(influencerId);
+    setDetailLoading(true);
+    setDetailError(null);
+    setInfluencerDetail(null);
+    try {
+      const detail = await analyticsApi.influencerUsage(influencerId);
+      setInfluencerDetail(detail);
+    } catch {
+      setDetailError('Failed to load influencer details.');
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleBackToAll = () => {
+    setSelectedInfluencerId(null);
+    setInfluencerDetail(null);
+    setDetailError(null);
+  };
+
   useEffect(() => {
     let cancelled = false;
 
@@ -189,6 +216,7 @@ function AnalyticsContent() {
 
     return rows
       .map((creator) => ({
+        influencer_id: creator.influencer_id || '',
         name: creator.influencer_name || 'Creator',
         bookings: creator.calls ?? creator.sessions ?? 0,
         revenue: creator.revenue ?? 0,
@@ -393,33 +421,107 @@ function AnalyticsContent() {
               </div>
 
               <div className="glass border border-white/10 rounded-2xl p-6">
-                <h3 className="font-sans font-bold text-lg text-white mb-6">Top Creators</h3>
-                <div className="space-y-4">
-                  {topCreators.map((creator, i) => (
-                    <div key={creator.name} className="flex items-center gap-4 p-3 rounded-xl bg-white/3 border border-white/5">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary-light">
-                        #{i + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-sans font-semibold text-sm text-white">{creator.name}</div>
-                        <div className="text-xs text-white/30">
-                          {creator.bookings} bookings
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-sans font-bold text-sm text-white">
-                          ₹{(creator.revenue / 1000).toFixed(1)}k
-                        </div>
-                        <div className="text-[10px] text-white/25">revenue</div>
-                      </div>
-                    </div>
-                  ))}
-                  {!isLoading && topCreators.length === 0 && (
-                    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/45">
-                      No creator analytics available yet.
-                    </div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-sans font-bold text-lg text-white">
+                    {selectedInfluencerId ? `Creator: ${influencerDetail?.influencer_name || selectedInfluencerId}` : 'Top Creators'}
+                  </h3>
+                  {selectedInfluencerId && (
+                    <button
+                      onClick={handleBackToAll}
+                      className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2"
+                    >
+                      Back to all
+                    </button>
                   )}
                 </div>
+
+                {/* Drill-down detail view */}
+                {selectedInfluencerId ? (
+                  detailLoading ? (
+                    <div className="flex items-center gap-3 py-6">
+                      <div className="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin" />
+                      <p className="text-sm text-white/50">Loading influencer details...</p>
+                    </div>
+                  ) : detailError ? (
+                    <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{detailError}</div>
+                  ) : influencerDetail ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                          <p className="text-lg font-extrabold text-white">{influencerDetail.total_sessions}</p>
+                          <p className="text-[10px] text-white/40">Sessions</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                          <p className="text-lg font-extrabold text-white">{influencerDetail.total_minutes} min</p>
+                          <p className="text-[10px] text-white/40">Minutes</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                          <p className="text-lg font-extrabold text-white">₹{(influencerDetail.total_revenue ?? 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-white/40">Revenue</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                          <p className="text-lg font-extrabold text-white">{influencerDetail.avg_rating?.toFixed(1) ?? '—'}</p>
+                          <p className="text-[10px] text-white/40">Rating</p>
+                        </div>
+                      </div>
+                      {influencerDetail.daily_usage?.length > 0 && (
+                        <div className="space-y-1">
+                          <p className="text-xs text-white/40 font-semibold">Daily Usage</p>
+                          {influencerDetail.daily_usage.slice(0, 7).map((day, i) => (
+                            <div key={i} className="flex items-center justify-between rounded-lg bg-white/3 px-3 py-1.5 text-xs">
+                              <span className="text-white/70">{day.date}</span>
+                              <span className="text-white/50">{day.sessions} sessions / {day.minutes} min</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {influencerDetail.recent_bookings?.length > 0 && (
+                        <div className="space-y-1">
+                          <p className="text-xs text-white/40 font-semibold">Recent Bookings</p>
+                          {influencerDetail.recent_bookings.slice(0, 5).map((b, i) => (
+                            <div key={i} className="flex items-center justify-between rounded-lg bg-white/3 px-3 py-1.5 text-xs">
+                              <span className="text-white/70">{b.user_name || 'User'}</span>
+                              <span className="text-white/50">{b.duration_minutes} min • {b.status}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : null
+                ) : (
+                  /* Default top creators list */
+                  <div className="space-y-4">
+                    {topCreators.map((creator, i) => (
+                      <button
+                        key={creator.influencer_id || `creator-${i}`}
+                        onClick={() => creator.influencer_id && handleCreatorClick(creator.influencer_id)}
+                        disabled={!creator.influencer_id}
+                        className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/3 border border-white/5 hover:bg-white/8 hover:border-primary/30 transition-all text-left cursor-pointer disabled:cursor-default"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary-light shrink-0">
+                          #{i + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-sans font-semibold text-sm text-white truncate">{creator.name}</div>
+                          <div className="text-xs text-white/30">
+                            {creator.bookings} bookings
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="font-sans font-bold text-sm text-white">
+                            ₹{(creator.revenue / 1000).toFixed(1)}k
+                          </div>
+                          <div className="text-[10px] text-white/25">revenue</div>
+                        </div>
+                      </button>
+                    ))}
+                    {!isLoading && topCreators.length === 0 && (
+                      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/45">
+                        No creator analytics available yet.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

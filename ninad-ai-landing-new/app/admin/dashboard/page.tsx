@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ProtectedRoute from '../../components/ProtectedRoute';
-import { analyticsApi } from '../../lib/api';
+import { analyticsApi, adminApi } from '../../lib/api';
 import type {
   AnalyticsBookingsResponse,
   AnalyticsDashboardResponse,
@@ -12,6 +12,7 @@ import type {
   AnalyticsRecentResponse,
   AnalyticsUsageResponse,
   AnalyticsUsersResponse,
+  InfluencerUsageDetail,
 } from '../../lib/types';
 
 function formatNumber(value: number): string {
@@ -83,6 +84,66 @@ function AdminDashboardContent() {
   const [influencersData, setInfluencersData] = useState<AnalyticsInfluencersResponse | null>(null);
   const [recentData, setRecentData] = useState<AnalyticsRecentResponse | null>(null);
   const [feedbackData, setFeedbackData] = useState<AnalyticsFeedbackResponse | null>(null);
+
+  // ── Promote Influencer form state ──
+  const [promoteUserId, setPromoteUserId] = useState('');
+  const [promoteInfluencerId, setPromoteInfluencerId] = useState('');
+  const [promoting, setPromoting] = useState(false);
+  const [promoteResult, setPromoteResult] = useState<string | null>(null);
+  const [promoteError, setPromoteError] = useState<string | null>(null);
+
+  // ── Influencer drill-down state ──
+  const [selectedInfId, setSelectedInfId] = useState<string | null>(null);
+  const [infDetail, setInfDetail] = useState<InfluencerUsageDetail | null>(null);
+  const [infDetailLoading, setInfDetailLoading] = useState(false);
+  const [infDetailError, setInfDetailError] = useState<string | null>(null);
+
+  const handleInfClick = async (influencerId: string) => {
+    setSelectedInfId(influencerId);
+    setInfDetailLoading(true);
+    setInfDetailError(null);
+    setInfDetail(null);
+    try {
+      const detail = await analyticsApi.influencerUsage(influencerId);
+      setInfDetail(detail);
+    } catch {
+      setInfDetailError('Failed to load influencer details.');
+    } finally {
+      setInfDetailLoading(false);
+    }
+  };
+
+  const handleInfBack = () => {
+    setSelectedInfId(null);
+    setInfDetail(null);
+    setInfDetailError(null);
+  };
+
+  const handlePromote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPromoteResult(null);
+    setPromoteError(null);
+    const userIdNum = Number.parseInt(promoteUserId, 10);
+    if (!Number.isInteger(userIdNum) || !promoteInfluencerId.trim()) {
+      setPromoteError('Please enter a valid numeric user_id and non-empty influencer_id.');
+      return;
+    }
+    setPromoting(true);
+    try {
+      const res = await adminApi.promoteToInfluencer({
+        user_id: userIdNum,
+        influencer_id: promoteInfluencerId.trim(),
+      });
+      setPromoteResult(`User #${res.user_id} (${res.email}) promoted to influencer with ID "${res.influencer_id}".`);
+      setPromoteUserId('');
+      setPromoteInfluencerId('');
+    } catch (error) {
+      const msg = getApiErrorMessage(error);
+      setPromoteError(msg);
+    } finally {
+      setPromoting(false);
+    }
+  };
 
   const loadAnalytics = useCallback(async (refresh = false) => {
     if (refresh) {
@@ -266,6 +327,50 @@ function AdminDashboardContent() {
           ))}
         </div>
 
+        {/* Promote Influencer */}
+        <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-200 mb-6">
+          <h3 className="font-sans font-bold text-lg text-white mb-5">Promote to Influencer</h3>
+          <form onSubmit={handlePromote} className="flex flex-col sm:flex-row gap-3 items-end">
+            <div className="flex-1 w-full">
+              <label className="block text-xs text-white/40 font-semibold mb-1.5">User ID</label>
+              <input
+                type="number"
+                value={promoteUserId}
+                onChange={(e) => setPromoteUserId(e.target.value)}
+                placeholder="e.g. 45"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-primary/40 focus:bg-white/10 transition-all"
+              />
+            </div>
+            <div className="flex-1 w-full">
+              <label className="block text-xs text-white/40 font-semibold mb-1.5">Influencer ID</label>
+              <input
+                type="text"
+                value={promoteInfluencerId}
+                onChange={(e) => setPromoteInfluencerId(e.target.value)}
+                placeholder="e.g. priya_m"
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-primary/40 focus:bg-white/10 transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={promoting}
+              className="px-5 py-2.5 rounded-xl bg-primary/80 text-white text-sm font-bold transition-all hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {promoting ? 'Promoting...' : 'Promote'}
+            </button>
+          </form>
+          {promoteResult && (
+            <div className="mt-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-300">
+              {promoteResult}
+            </div>
+          )}
+          {promoteError && (
+            <div className="mt-3 rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-2.5 text-sm text-rose-300">
+              {promoteError}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-200">
             <h3 className="font-sans font-bold text-lg text-white mb-5">Usage Summary</h3>
@@ -359,20 +464,76 @@ function AdminDashboardContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-300">
-            <h3 className="font-sans font-bold text-lg text-white mb-5">Influencer Performance</h3>
-            <div className="space-y-2">
-              {(influencersData?.influencers ?? []).map((item, index) => (
-                <div key={`${item.influencer_id || item.influencer_name || 'influencer'}-${index}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2">
-                  <span className="text-sm text-white/85 font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
-                  <span className="text-xs text-white/50 tabular-nums">
-                    Sessions: {formatNumber(item.sessions ?? item.calls ?? 0)} • Rating: {(item.avg_rating ?? item.ratings ?? 0).toFixed(2)} • {formatCurrency(item.revenue ?? 0)}
-                  </span>
-                </div>
-              ))}
-              {(influencersData?.influencers ?? []).length === 0 && (
-                <p className="text-sm text-white/45">No influencer performance data available.</p>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-sans font-bold text-lg text-white">
+                {selectedInfId ? `Influencer: ${infDetail?.influencer_name || selectedInfId}` : 'Influencer Performance'}
+              </h3>
+              {selectedInfId && (
+                <button onClick={handleInfBack} className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2">Back</button>
               )}
             </div>
+
+            {selectedInfId ? (
+              infDetailLoading ? (
+                <div className="flex items-center gap-3 py-6">
+                  <div className="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin" />
+                  <p className="text-sm text-white/50">Loading details...</p>
+                </div>
+              ) : infDetailError ? (
+                <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{infDetailError}</div>
+              ) : infDetail ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                      <p className="text-lg font-extrabold text-white">{infDetail.total_sessions}</p>
+                      <p className="text-[10px] text-white/40">Sessions</p>
+                    </div>
+                    <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                      <p className="text-lg font-extrabold text-white">{infDetail.total_minutes} min</p>
+                      <p className="text-[10px] text-white/40">Minutes</p>
+                    </div>
+                    <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                      <p className="text-lg font-extrabold text-white">₹{(infDetail.total_revenue ?? 0).toLocaleString()}</p>
+                      <p className="text-[10px] text-white/40">Revenue</p>
+                    </div>
+                    <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
+                      <p className="text-lg font-extrabold text-white">{infDetail.avg_rating?.toFixed(1) ?? '—'}</p>
+                      <p className="text-[10px] text-white/40">Rating</p>
+                    </div>
+                  </div>
+                  {infDetail.daily_usage?.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-white/40 font-semibold">Daily Usage</p>
+                      {infDetail.daily_usage.slice(0, 7).map((day, i) => (
+                        <div key={i} className="flex items-center justify-between rounded-lg bg-white/3 px-3 py-1.5 text-xs">
+                          <span className="text-white/70">{day.date}</span>
+                          <span className="text-white/50">{day.sessions} sessions / {day.minutes} min</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : null
+            ) : (
+              <div className="space-y-2">
+                {(influencersData?.influencers ?? []).map((item, index) => (
+                  <button
+                    key={`${item.influencer_id || item.influencer_name || 'influencer'}-${index}`}
+                    onClick={() => item.influencer_id && handleInfClick(item.influencer_id)}
+                    disabled={!item.influencer_id}
+                    className="w-full flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2 hover:bg-white/8 hover:border-primary/30 transition-all text-left cursor-pointer disabled:cursor-default"
+                  >
+                    <span className="text-sm text-white/85 font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
+                    <span className="text-xs text-white/50 tabular-nums">
+                      Sessions: {formatNumber(item.sessions ?? item.calls ?? 0)} • Rating: {(item.avg_rating ?? item.ratings ?? 0).toFixed(2)} • {formatCurrency(item.revenue ?? 0)}
+                    </span>
+                  </button>
+                ))}
+                {(influencersData?.influencers ?? []).length === 0 && (
+                  <p className="text-sm text-white/45">No influencer performance data available.</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-300">

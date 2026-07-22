@@ -128,9 +128,9 @@ export default function Header() {
             ))}
             {showAnalyticsLink && (
               <Link
-                href="/admin/analytics"
+                href={user?.role === 'admin' ? '/admin/analytics' : '/dashboard'}
                 className={`font-sans text-sm font-medium hover:text-white transition-colors uppercase tracking-wide ${
-                  pathname.startsWith('/admin/analytics') ? "text-white" : "text-white/70"
+                  pathname === '/admin/analytics' || pathname === '/dashboard' ? "text-white" : "text-white/70"
                 }`}
               >
                 Analytics
@@ -274,7 +274,7 @@ export default function Header() {
             ))}
             {showAnalyticsLink && (
               <Link
-                href="/admin/analytics"
+                href={user?.role === 'admin' ? '/admin/analytics' : '/dashboard'}
                 onClick={() => setMobileMenuOpenPath(null)}
                 className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
               >

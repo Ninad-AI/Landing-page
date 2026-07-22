@@ -14,6 +14,7 @@ import type {
   AnalyticsInfluencersResponse,
   AnalyticsRecentResponse,
   AnalyticsFeedbackResponse,
+  InfluencerUsageDetail,
   HealthResponse,
   RazorpayCreateOrderRequest,
   RazorpayCreateOrderResponse,
@@ -235,6 +236,10 @@ function normalizeAuthResponse(
     (typeof root.avatar_url === 'string' ? root.avatar_url : undefined) ||
     '';
 
+  const influencerId =
+    (typeof userObj?.influencer_id === 'string' ? userObj.influencer_id : undefined) ||
+    (typeof root.influencer_id === 'string' ? root.influencer_id : undefined);
+
   return {
     user: {
       id: String(idValue),
@@ -243,6 +248,7 @@ function normalizeAuthResponse(
       role,
       avatar_url: avatarUrl,
       created_at: createdAt,
+      influencer_id: influencerId,
     },
     tokens: {
       access_token: accessToken,
@@ -440,6 +446,28 @@ export const analyticsApi = {
 
   feedback: () =>
     api.get<AnalyticsFeedbackResponse>('/analytics/feedback').then((r) => r.data),
+
+  influencerUsage: (influencerId: string) =>
+    api.get<InfluencerUsageDetail>(`/analytics/influencers/${encodeURIComponent(influencerId)}/usage`).then((r) => r.data),
+};
+
+export interface PromoteInfluencerRequest {
+  user_id: number;
+  influencer_id: string;
+}
+
+export interface PromoteInfluencerResponse {
+  status: string;
+  user_id: number;
+  email: string;
+  role: string;
+  influencer_id: string;
+}
+
+// ─── Admin Endpoints ───
+export const adminApi = {
+  promoteToInfluencer: (data: PromoteInfluencerRequest) =>
+    api.post<PromoteInfluencerResponse>('/admin/promote-influencer', data).then((r) => r.data),
 };
 
 // ─── System Diagnostics Endpoint ───

@@ -9,6 +9,7 @@ export interface User {
   role: UserRole;
   avatar_url?: string;
   created_at: string;
+  influencer_id?: string;
 }
 
 export interface TrialStatus {
@@ -271,6 +272,18 @@ export interface InfluencerPerformance {
 
 export interface AnalyticsInfluencersResponse {
   influencers: InfluencerPerformance[];
+}
+
+export interface InfluencerUsageDetail {
+  influencer_id: string;
+  influencer_name?: string;
+  total_sessions: number;
+  total_minutes: number;
+  total_revenue: number;
+  avg_rating?: number;
+  total_feedback?: number;
+  daily_usage: DailyUsage[];
+  recent_bookings: AnalyticsRecentBooking[];
 }
 
 export interface AnalyticsRecentResponse {
