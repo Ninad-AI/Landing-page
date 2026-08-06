@@ -15,11 +15,11 @@ const HIGH_TRAFFIC_MESSAGE = "The traffic is high right now. Please come back la
 const HEALTH_RECHECK_SECONDS = HEALTH_POLL_INTERVAL_SECONDS;
 
 const DURATION_PLANS: MinutePlan[] = [
+  { minutes: 1, price: 19, label: "1 minute", featured: true },
   { minutes: 3, price: 59, label: "3 minutes" },
   { minutes: 5, price: 79, label: "5 minutes" },
   { minutes: 10, price: 149, label: "10 minutes" },
   { minutes: 15, price: 199, label: "15 minutes" },
-  { minutes: 30, price: 349, label: "30 minutes" },
 ];
 
 const STAR_COPY: Record<FeedbackStars, string> = {
@@ -82,8 +82,6 @@ interface PaymentModalProps {
   providerName?: string;
   onPaymentVerified: (duration: AllowedDurationMinutes, bookingId?: string) => void;
   onSelectPaidPlan?: (duration: AllowedDurationMinutes) => void;
-  showFreeOption?: boolean;
-  onFreeSession?: () => void;
   feedbackMode?: boolean;
   onSubmitFeedback?: (stars: FeedbackStars, comment?: string) => Promise<void>;
   isSubmittingFeedback?: boolean;
@@ -100,8 +98,6 @@ export default function PaymentModal({
   providerName = DEFAULT_PROVIDER_NAME,
   onPaymentVerified,
   onSelectPaidPlan,
-  showFreeOption = true,
-  onFreeSession,
   feedbackMode = false,
   onSubmitFeedback,
   isSubmittingFeedback = false,
@@ -403,19 +399,6 @@ export default function PaymentModal({
                       }}
                       disabled={isBusy}
                     />
-
-                    {showFreeOption && onFreeSession && (
-                      <button
-                        onClick={onFreeSession}
-                        disabled={isBusy}
-                        className="w-[86%] sm:w-[320px] h-[52px] rounded-2xl border border-dashed border-emerald-500/40 bg-emerald-500/5 text-emerald-300 font-semibold text-sm transition-all duration-300 hover:bg-emerald-500/10 hover:border-emerald-400/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                        </svg>
-                        Talk to me for a minute - free
-                      </button>
-                    )}
 
                     {slots.isLoaded && slots.isFull && (
                       <div className="w-[86%] sm:w-[320px] rounded-xl border border-amber-200/25 bg-amber-500/10 px-4 py-3.5">

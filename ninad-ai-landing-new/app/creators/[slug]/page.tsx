@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
-import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../../lib/stores";
 import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
 import { PlayoutBuffer } from "../../lib/playbackUtils";
@@ -12,8 +11,8 @@ import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi, feedbackApi, trialApi } from "../../lib/api";
-import { buildVoiceWsUrl } from "../../lib/config";
+import { authApi, paymentApi, feedbackApi } from "../../lib/api";
+import { buildCreatorVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
@@ -47,12 +46,18 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "beauty-khan": {
+    name: "Beauty Khan",
+    image: "/assets/creators/beauty-khan.jpg",
+    role: "Artist and Creator",
+    influencerId: "beauty_khan",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorProfilePage() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
@@ -63,15 +68,6 @@ export default function CreatorProfilePage() {
 
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
-
-  /* ── Trial Status ── */
-  const { data: trialStatus } = useQuery({
-    queryKey: ["trialStatus", user?.id],
-    queryFn: trialApi.getStatus,
-    enabled: isHydrated && isAuthenticated,
-  });
-
-  const hasFreeTrial = trialStatus?.trials.find((t) => t.influencer_id === creatorInfluencerId)?.available ?? true;
 
   /* ── UI state ── */
   const [flowState, setFlowState] = useState<FlowState>("idle");
@@ -84,13 +80,11 @@ export default function CreatorProfilePage() {
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
 
-  /* ── Free session & feedback state ── */
+  /* ── Feedback state ── */
   const [showFeedback, setShowFeedback] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
-  const [showPricingAfterFree, setShowPricingAfterFree] = useState(false);
-  const [isCheckingTrial, setIsCheckingTrial] = useState(false);
-  const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string; isFree?: boolean } | null>(null);
+  const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
 
   /* ── Parallax refs ── */
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -112,18 +106,6 @@ export default function CreatorProfilePage() {
   /* ═══════════════════════════════════════
      Effects
      ═══════════════════════════════════════ */
-
-  // Detect free session ended → show pricing first, feedback on decline
-  useEffect(() => {
-    const freeEnded = searchParams.get("freeSessionEnded");
-    if (freeEnded === "true") {
-      setShowPricingAfterFree(true);
-      setFlowState("duration");
-      const url = new URL(window.location.href);
-      url.searchParams.delete("freeSessionEnded");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [searchParams, slug]);
 
   // Entrance animation + mouse parallax
   useEffect(() => {
@@ -217,7 +199,7 @@ export default function CreatorProfilePage() {
     setIsSpeaking(false);
     setCallPhase("connecting");
 
-    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);
@@ -277,27 +259,10 @@ export default function CreatorProfilePage() {
 
           if (msg.type === "init_ack") {
             // Server confirmed session — now begin audio streaming
-            if (msg.is_trial) {
-              setTimeLeft(msg.trial_duration_seconds || 60);
-            }
             initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
             void startMic();
-            return;
-          }
-
-          if (msg.type === "trial_warning") {
-            toast.warning(msg.message || "Your free trial ends in 10 seconds.");
-            return;
-          }
-
-          if (msg.type === "trial_ended") {
-            toast.error(msg.message || "Free trial session ended. Purchase a session to continue.");
-            handleEndCall();
-            // Immediately transition to payment modal
-            setShowPricingAfterFree(true);
-            setFlowState("duration");
             return;
           }
 
@@ -432,15 +397,13 @@ export default function CreatorProfilePage() {
      Handlers
      ═══════════════════════════════════════ */
 
-  const redirectToSession = (durationMinutes: number, bookingId?: string, free?: boolean) => {
+  const redirectToSession = (durationMinutes: number, bookingId?: string) => {
     const query = new URLSearchParams({ duration: String(durationMinutes) });
     if (bookingId) query.set("booking_id", bookingId);
-    if (free) query.set("free", "true");
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
   const handleStartSession = async () => {
-    setShowPricingAfterFree(false);
     setShowFeedback(false);
 
     if (isHydrated && isAuthenticated) {
@@ -454,15 +417,7 @@ export default function CreatorProfilePage() {
           return;
         }
       } catch {
-        // Continue to trial/payment flow if active booking check fails
-      }
-
-      try {
-        await trialApi.getStatus();
-      } catch {
-        // Silently continue to payment modal if trial check fails
-      } finally {
-        setIsCheckingTrial(false);
+        // Continue to payment flow if active booking check fails
       }
     }
 
@@ -486,7 +441,7 @@ export default function CreatorProfilePage() {
       pendingSessionRef.current = null;
 
       if (pending) {
-        redirectToSession(pending.duration, pending.bookingId, pending.isFree);
+        redirectToSession(pending.duration, pending.bookingId);
       } else {
         setFlowState("duration");
       }
@@ -514,16 +469,6 @@ export default function CreatorProfilePage() {
     setFlowState("auth");
   };
 
-  const handleFreeSession = () => {
-    if (isHydrated && isAuthenticated) {
-      redirectToSession(1, undefined, true);
-      return;
-    }
-
-    pendingSessionRef.current = { duration: 1, isFree: true };
-    setFlowState("auth");
-  };
-
   const handleSubmitFeedback = async (stars: FeedbackStars, feedbackComment?: string) => {
     setIsSubmittingFeedback(true);
     setFeedbackError(null);
@@ -544,12 +489,6 @@ export default function CreatorProfilePage() {
   };
 
   const closeModal = () => {
-    if (showPricingAfterFree) {
-      setShowPricingAfterFree(false);
-      setShowFeedback(true);
-      setFlowState("duration");
-      return;
-    }
     setFlowState("idle");
     setSelectedMinutes(null);
     setShowFeedback(false);
@@ -591,14 +530,12 @@ export default function CreatorProfilePage() {
               </h1>
 
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                <button onClick={handleStartSession} disabled={isCheckingTrial} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300 disabled:opacity-70 disabled:cursor-wait">
+                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                   <span className="flex items-center gap-3">
-                    {isCheckingTrial ? "Checking..." : "Start Session"}
-                    {!isCheckingTrial && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                      </svg>
-                    )}
+                    Start Session
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                    </svg>
                   </span>
                 </button>
               </div>
@@ -618,13 +555,11 @@ export default function CreatorProfilePage() {
             </div>
 
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
-              <button onClick={handleStartSession} disabled={isCheckingTrial} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300 disabled:opacity-70 disabled:cursor-wait">
-                {isCheckingTrial ? "Checking..." : "Start Session"}
-                {!isCheckingTrial && (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                  </svg>
-                )}
+              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+                Start Session
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                </svg>
               </button>
             </div>
           </div>
@@ -689,8 +624,6 @@ export default function CreatorProfilePage() {
         userEmail={user?.email}
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
-        showFreeOption={!showPricingAfterFree && hasFreeTrial}
-        onFreeSession={handleFreeSession}
         feedbackMode={showFeedback}
         onSubmitFeedback={handleSubmitFeedback}
         isSubmittingFeedback={isSubmittingFeedback}

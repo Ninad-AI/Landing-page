@@ -33,15 +33,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
   },
-  // {
-  //   id: "anveshi-001",
-  //   name: "Anveshi Jain",
-  //   role: "Actress & Influencer",
-  //   imageUrl: "/assets/creators/anveshi.jpg",
-  //   handle: "anveshi-jain",
-  //   status: "Active",
-  //   bio: "Known for her bold and inspiring journey from a small town to becoming a celebrated actress and influencer.",
-  // },
+  {
+    id: "beauty-khan-001",
+    name: "Beauty Khan",
+    role: "Artist and Creator",
+    imageUrl: "/assets/creators/beauty-khan.jpg",
+    handle: "beauty-khan",
+    status: "Active",
+    bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
+  },
 ];
 
 export default function CreatorsPage() {

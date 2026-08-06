@@ -8,7 +8,7 @@ import CreatorVoiceSessionUI from "../../../components/CreatorVoiceSessionUI";
 import Aurora from "../../../components/ui/Aurora";
 import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUtils";
 import { PlayoutBuffer } from "../../../lib/playbackUtils";
-import { buildVoiceWsUrl } from "../../../lib/config";
+import { buildCreatorVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
@@ -41,6 +41,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "beauty-khan": {
+    name: "Beauty Khan",
+    image: "/assets/creators/beauty-khan.jpg",
+    role: "Artist and Creator",
+    influencerId: "beauty_khan",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
@@ -63,8 +70,6 @@ function VoiceChatContent() {
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const bookingId = searchParams.get("booking_id");
-
-  const isFreeSession = searchParams.get("free") === "true";
 
   const durationValue = searchParams.get("duration");
   const durationMinutes = useMemo(() => {
@@ -181,11 +186,8 @@ function VoiceChatContent() {
   }, [clearPersistedSession, router, stopSessionResources]);
 
   const handleEndCall = useCallback((expired = false) => {
-    const redirectPath = isFreeSession
-      ? `/creators/${slug}?freeSessionEnded=true`
-      : `/creators/${slug}`;
-    endSessionAndRedirect(redirectPath, expired);
-  }, [endSessionAndRedirect, isFreeSession, slug]);
+    endSessionAndRedirect(`/creators/${slug}`, expired);
+  }, [endSessionAndRedirect, slug]);
 
   useEffect(() => {
     const handleVoiceChatExit = () => {
@@ -246,7 +248,7 @@ function VoiceChatContent() {
     let disposed = false;
     let initAckReceived = false;
 
-    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);
@@ -309,29 +311,10 @@ function VoiceChatContent() {
 
           if (msg.type === "init_ack") {
             // Server confirmed session — now begin audio streaming
-            if (msg.is_trial && msg.trial_duration_seconds) {
-              const newEndTime = Date.now() + msg.trial_duration_seconds * 1000;
-              sessionEndTimeRef.current = newEndTime;
-              setTimeLeft(msg.trial_duration_seconds);
-              if (typeof window !== "undefined" && sessionStorageKey) {
-                sessionStorage.setItem(sessionStorageKey, String(newEndTime));
-              }
-            }
             initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
             void startMic();
-            return;
-          }
-
-          if (msg.type === "trial_warning") {
-            toast.warning(msg.message || "Your free trial ends in 10 seconds.");
-            return;
-          }
-
-          if (msg.type === "trial_ended") {
-            toast.error(msg.message || "Free trial session ended. Purchase a session to continue.");
-            handleEndCall(true);
             return;
           }
 
