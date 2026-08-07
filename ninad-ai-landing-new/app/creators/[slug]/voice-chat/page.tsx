@@ -48,6 +48,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "beauty_khan",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "sona-dey": {
+    name: "Sona Dey",
+    image: "/assets/creators/sona.png",
+    role: "Model & Influencer",
+    influencerId: "sona_dey",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

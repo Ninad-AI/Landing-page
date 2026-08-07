@@ -53,6 +53,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "beauty_khan",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "sona-dey": {
+    name: "Sona Dey",
+    image: "/assets/creators/sona.png",
+    role: "Model & Influencer",
+    influencerId: "sona_dey",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorProfilePage() {
@@ -522,9 +529,9 @@ export default function CreatorProfilePage() {
               <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
                 • {creatorRole}
               </h2>
-              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[0.9] mix-blend-exclusion">
+              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
                 <span className="block">{creatorName.split(" ")[0]}</span>
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
+                <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
                   {creatorName.split(" ").slice(1).join(" ")}.
                 </span>
               </h1>

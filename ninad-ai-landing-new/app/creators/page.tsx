@@ -42,6 +42,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
   },
+  {
+    id: "sona-dey-001",
+    name: "Sona Dey",
+    role: "Model & Influencer",
+    imageUrl: "/assets/creators/sona.png",
+    handle: "sona-dey",
+    status: "Active",
+    bio: "A model and influencer known for bold, expressive visuals and a magnetic presence.",
+  },
 ];
 
 export default function CreatorsPage() {
