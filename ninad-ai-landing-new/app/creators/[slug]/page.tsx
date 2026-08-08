@@ -426,6 +426,10 @@ export default function CreatorProfilePage() {
       } catch {
         // Continue to payment flow if active booking check fails
       }
+    } else if (isHydrated && !isAuthenticated) {
+      // Require sign-in before paying
+      setFlowState("auth");
+      return;
     }
 
     setFlowState("duration");
@@ -450,6 +454,18 @@ export default function CreatorProfilePage() {
       if (pending) {
         redirectToSession(pending.duration, pending.bookingId);
       } else {
+        try {
+          const activeBooking = await paymentApi.getActiveBooking();
+          if (activeBooking) {
+            redirectToSession(
+              activeBooking.duration_minutes ?? 3,
+              activeBooking.id
+            );
+            return;
+          }
+        } catch {
+          // Continue to payment flow if active booking check fails
+        }
         setFlowState("duration");
       }
     } catch (error) {
