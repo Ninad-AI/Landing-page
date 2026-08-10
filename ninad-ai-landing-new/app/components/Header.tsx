@@ -106,6 +106,7 @@ export default function Header() {
             src="/assets/ninad-ai.png"
             alt="Ninad AI"
             fill
+            sizes="(max-width: 768px) 128px, 160px"
             className="object-contain object-left"
             priority
           />

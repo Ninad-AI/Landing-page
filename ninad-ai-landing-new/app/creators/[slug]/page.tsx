@@ -348,8 +348,14 @@ export default function CreatorProfilePage() {
       micControllerRef.current = null;
       if (ws.readyState === WebSocket.OPEN) {
         try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+        ws.close();
+      } else if (ws.readyState === WebSocket.CONNECTING) {
+        // Defer close until the handshake finishes to avoid the
+        // "WebSocket is closed before the connection is established" console error.
+        ws.onopen = () => {
+          try { ws.close(); } catch { /* ignore */ }
+        };
       }
-      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
       wsRef.current = null;
       ttsActiveRef.current = false;
       agentSpeakingRef.current = false;
@@ -362,11 +368,16 @@ export default function CreatorProfilePage() {
     if (timerRef.current) clearInterval(timerRef.current);
     micControllerRef.current?.stop();
     micControllerRef.current = null;
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      try { wsRef.current.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
-      wsRef.current.close();
-    } else if (wsRef.current && wsRef.current.readyState === WebSocket.CONNECTING) {
-      wsRef.current.close();
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+      ws.close();
+    } else if (ws && ws.readyState === WebSocket.CONNECTING) {
+      // Defer close until the handshake finishes to avoid the
+      // "WebSocket is closed before the connection is established" console error.
+      ws.onopen = () => {
+        try { ws.close(); } catch { /* ignore */ }
+      };
     }
     wsRef.current = null;
     stopPlayback();
