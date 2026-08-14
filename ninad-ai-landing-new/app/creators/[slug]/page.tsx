@@ -46,13 +46,14 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "beauty-khan": {
-    name: "Beauty Khan",
-    image: "/assets/creators/beauty-khan.jpg",
-    role: "Artist and Creator",
-    influencerId: "beauty_khan",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
+  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
+  // "beauty-khan": {
+  //   name: "Beauty Khan",
+  //   image: "/assets/creators/beauty-khan.jpg",
+  //   role: "Artist and Creator",
+  //   influencerId: "beauty_khan",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  // },
   "sona-dey": {
     name: "Sona Dey",
     image: "/assets/creators/sona.png",
@@ -86,6 +87,7 @@ export default function CreatorProfilePage() {
 
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
+  const [autoStartDuration, setAutoStartDuration] = useState<AllowedDurationMinutes | null>(null);
 
   /* ── Feedback state ── */
   const [showFeedback, setShowFeedback] = useState(false);
@@ -437,13 +439,14 @@ export default function CreatorProfilePage() {
       } catch {
         // Continue to payment flow if active booking check fails
       }
-    } else if (isHydrated && !isAuthenticated) {
-      // Require sign-in before paying
-      setFlowState("auth");
-      return;
     }
 
     setFlowState("duration");
+  };
+
+  const handleRequireAuthForPayment = (durationMinutes: AllowedDurationMinutes) => {
+    pendingSessionRef.current = { duration: durationMinutes };
+    setFlowState("auth");
   };
 
   const handleGoogleAuthSuccess = async (credentialResponse: CredentialResponse) => {
@@ -463,22 +466,24 @@ export default function CreatorProfilePage() {
       pendingSessionRef.current = null;
 
       if (pending) {
-        redirectToSession(pending.duration, pending.bookingId);
-      } else {
-        try {
-          const activeBooking = await paymentApi.getActiveBooking();
-          if (activeBooking) {
-            redirectToSession(
-              activeBooking.duration_minutes ?? 3,
-              activeBooking.id
-            );
-            return;
-          }
-        } catch {
-          // Continue to payment flow if active booking check fails
-        }
+        setAutoStartDuration(pending.duration);
         setFlowState("duration");
+        return;
       }
+
+      try {
+        const activeBooking = await paymentApi.getActiveBooking();
+        if (activeBooking) {
+          redirectToSession(
+            activeBooking.duration_minutes ?? 3,
+            activeBooking.id
+          );
+          return;
+        }
+      } catch {
+        // Continue to payment flow if active booking check fails
+      }
+      setFlowState("duration");
     } catch (error) {
       const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
       const msg = apiError.response?.data?.detail || apiError.response?.data?.message || "Sign-in failed. Please try again.";
@@ -526,6 +531,13 @@ export default function CreatorProfilePage() {
     setFlowState("idle");
     setSelectedMinutes(null);
     setShowFeedback(false);
+    pendingSessionRef.current = null;
+    setAutoStartDuration(null);
+  };
+
+  const closeAuthModal = () => {
+    pendingSessionRef.current = null;
+    setFlowState("duration");
   };
 
   /* ═══════════════════════════════════════
@@ -602,7 +614,7 @@ export default function CreatorProfilePage() {
 
       {flowState === "auth" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeModal} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeAuthModal} />
           <div className="relative w-[92vw] max-w-[380px] sm:w-full sm:max-w-md animate-fade-in-up">
             <div className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 py-8 sm:py-10 overflow-hidden" style={{ borderRadius: "1.5rem" }}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
@@ -658,6 +670,9 @@ export default function CreatorProfilePage() {
         userEmail={user?.email}
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
+        onRequireAuth={isHydrated && !isAuthenticated ? handleRequireAuthForPayment : undefined}
+        autoStartDuration={autoStartDuration}
+        onAutoStartConsumed={() => setAutoStartDuration(null)}
         feedbackMode={showFeedback}
         onSubmitFeedback={handleSubmitFeedback}
         isSubmittingFeedback={isSubmittingFeedback}

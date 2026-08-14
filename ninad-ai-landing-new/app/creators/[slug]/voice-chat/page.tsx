@@ -41,13 +41,14 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "anveshi_jain",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "beauty-khan": {
-    name: "Beauty Khan",
-    image: "/assets/creators/beauty-khan.jpg",
-    role: "Artist and Creator",
-    influencerId: "beauty_khan",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
+  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
+  // "beauty-khan": {
+  //   name: "Beauty Khan",
+  //   image: "/assets/creators/beauty-khan.jpg",
+  //   role: "Artist and Creator",
+  //   influencerId: "beauty_khan",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  // },
   "sona-dey": {
     name: "Sona Dey",
     image: "/assets/creators/sona.png",

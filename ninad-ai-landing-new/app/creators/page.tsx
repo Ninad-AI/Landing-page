@@ -33,15 +33,16 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
   },
-  {
-    id: "beauty-khan-001",
-    name: "Beauty Khan",
-    role: "Artist and Creator",
-    imageUrl: "/assets/creators/beauty-khan.jpg",
-    handle: "beauty-khan",
-    status: "Active",
-    bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
-  },
+  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
+  // {
+  //   id: "beauty-khan-001",
+  //   name: "Beauty Khan",
+  //   role: "Artist and Creator",
+  //   imageUrl: "/assets/creators/beauty-khan.jpg",
+  //   handle: "beauty-khan",
+  //   status: "Active",
+  //   bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
+  // },
   {
     id: "sona-dey-001",
     name: "Sona Dey",

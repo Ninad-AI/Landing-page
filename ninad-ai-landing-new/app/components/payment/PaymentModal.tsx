@@ -81,6 +81,9 @@ interface PaymentModalProps {
   userEmail?: string;
   providerName?: string;
   onPaymentVerified: (duration: AllowedDurationMinutes, bookingId?: string) => void;
+  onRequireAuth?: (duration: AllowedDurationMinutes) => void;
+  autoStartDuration?: AllowedDurationMinutes | null;
+  onAutoStartConsumed?: () => void;
   onSelectPaidPlan?: (duration: AllowedDurationMinutes) => void;
   feedbackMode?: boolean;
   onSubmitFeedback?: (stars: FeedbackStars, comment?: string) => Promise<void>;
@@ -97,6 +100,9 @@ export default function PaymentModal({
   userEmail,
   providerName = DEFAULT_PROVIDER_NAME,
   onPaymentVerified,
+  onRequireAuth,
+  autoStartDuration,
+  onAutoStartConsumed,
   onSelectPaidPlan,
   feedbackMode = false,
   onSubmitFeedback,
@@ -108,6 +114,7 @@ export default function PaymentModal({
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const [bookingUnavailableMessage, setBookingUnavailableMessage] = useState<string | null>(null);
+  const autoStartKeyRef = useRef<string | null>(null);
 
   const [selectedStars, setSelectedStars] = useState<0 | FeedbackStars>(0);
   const [hoverStars, setHoverStars] = useState<0 | FeedbackStars>(0);
@@ -161,7 +168,8 @@ export default function PaymentModal({
     onClose();
   };
 
-  const handlePayNow = async () => {
+  const handlePayNow = async (durationOverride?: AllowedDurationMinutes | null) => {
+    const selectedDuration = durationOverride ?? selectedMinutes;
     if (!selectedDuration) {
       toast.error("Please select a duration.");
       return;
@@ -180,6 +188,11 @@ export default function PaymentModal({
 
     if (!influencerId?.trim()) {
       toast.error("Influencer context is missing. Please retry from creator page.");
+      return;
+    }
+
+    if (onRequireAuth) {
+      onRequireAuth(selectedDuration);
       return;
     }
 
@@ -254,6 +267,22 @@ export default function PaymentModal({
       setIsVerifyingPayment(false);
     }
   };
+
+  useEffect(() => {
+    const key = autoStartDuration ? `${isOpen}:${autoStartDuration}` : null;
+    if (!isOpen || !autoStartDuration || !key) {
+      autoStartKeyRef.current = null;
+      return;
+    }
+    if (autoStartKeyRef.current === key) return;
+    if (!slots.isLoaded || slots.isChecking) return;
+    autoStartKeyRef.current = key;
+    setSelectedMinutes(autoStartDuration);
+    setBookingUnavailableMessage(null);
+    void handlePayNow(autoStartDuration);
+    onAutoStartConsumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handlePayNow identity changes every render; autoStartKeyRef guard prevents double invocation.
+  }, [isOpen, autoStartDuration, slots.isLoaded, slots.isChecking, onAutoStartConsumed]);
 
   const handleFeedbackSubmit = async () => {
     setAttemptedSubmit(true);
@@ -428,7 +457,7 @@ export default function PaymentModal({
 
                     <div className="w-full flex justify-center pt-1 sm:pt-2">
                       <button
-                        onClick={handlePayNow}
+                        onClick={() => void handlePayNow()}
                         disabled={!selectedDuration || isBusy || slots.isFull || isAwaitingInitialSlotCheck}
                         className={`w-[86%] sm:w-[320px] h-[64px] rounded-2xl font-semibold text-lg transition-all duration-500 ${
                           slots.isFull
