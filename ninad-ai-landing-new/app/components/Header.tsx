@@ -76,21 +76,23 @@ export default function Header() {
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding,box-shadow] duration-300 ease-out ${isMobileMenuOpen
         ? "bg-transparent py-6 border-b border-transparent"
-        : "bg-nd-bg/90 backdrop-blur-xl py-5 border-b border-transparent shadow-[0_1px_0_rgba(28,26,31,0.04)]"
+        : isVoiceChatPage
+          ? "bg-nd-darker/90 backdrop-blur-xl py-5 border-b border-white/10 shadow-[0_1px_0_rgba(0,0,0,0.2)]"
+          : "bg-nd-bg/90 backdrop-blur-xl py-5 border-b border-transparent shadow-[0_1px_0_rgba(28,26,31,0.04)]"
         }`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-center justify-between lg:justify-center relative">
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="relative w-32 h-8 md:w-40 md:h-10 shrink-0 z-50 cursor-pointer bg-none border-none p-0 lg:absolute lg:left-12 xl:left-20"
+          className="relative w-32 h-8 md:w-40 md:h-10 shrink-0 z-50 cursor-pointer bg-none border-none p-0 lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:left-12 xl:left-20"
         >
           <Image
             src="/assets/ninad-ai.png"
             alt="Ninad AI"
             fill
             sizes="(max-width: 768px) 128px, 160px"
-            className="object-contain object-left"
+            className={`object-contain object-left transition-[filter] duration-300 ${isVoiceChatPage ? "brightness-0 invert" : ""}`}
             priority
           />
         </button>
@@ -124,7 +126,7 @@ export default function Header() {
 
         {/* Desktop CTA / Auth Section */}
         {isMinimalHeader ? (
-          <div className="flex items-center absolute right-6 lg:right-12 xl:right-20">
+          <div className="flex items-center absolute top-1/2 -translate-y-1/2 right-6 lg:right-12 xl:right-20">
             {isAdminPage ? (
               <button
                 onClick={handleLogout}
@@ -137,7 +139,7 @@ export default function Header() {
                 type="button"
                 aria-label="Close voice chat"
                 onClick={handleVoiceChatClose}
-                className="group inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-nd-line bg-nd-bg text-nd-ink transition-all duration-300 hover:border-nd-ink hover:bg-nd-ink hover:text-nd-bg"
+                className="group inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/8 backdrop-blur-md text-white/70 transition-all duration-300 hover:bg-white/15 hover:text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -156,7 +158,7 @@ export default function Header() {
             ) : null}
           </div>
         ) : (
-          <div className="hidden lg:flex items-center gap-2 lg:absolute lg:right-12 xl:right-20">
+          <div className="hidden lg:flex items-center gap-2 lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:right-12 xl:right-20">
             {isHydrated && isAuthenticated && user ? (
               <>
                 {/* Dashboard Link */}

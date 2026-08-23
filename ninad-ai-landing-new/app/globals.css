@@ -212,7 +212,6 @@ select,
 textarea {
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 0;
 }
 
 /* Re-enable rounded corners on search inputs for Safari */
@@ -826,12 +825,12 @@ a, button, [role="button"] {
    media-query overrides on the same selector — a CSS custom property here
    gets statically folded to its fallback by the build's CSS optimizer,
    discarding the responsive cascade, so this avoids var() entirely. */
-.animate-nd-marquee { animation: nd-marquee 34s linear infinite; }
+.animate-nd-marquee { animation: nd-marquee 50s linear infinite; }
 @media (min-width: 640px) {
-  .animate-nd-marquee { animation-duration: 28s; }
+  .animate-nd-marquee { animation-duration: 40s; }
 }
 @media (min-width: 1024px) {
-  .animate-nd-marquee { animation-duration: 22s; }
+  .animate-nd-marquee { animation-duration: 32s; }
 }
 .animate-nd-pop { animation: nd-pop .28s cubic-bezier(.22,.9,.3,1) forwards; }
 .animate-nd-fade { animation: nd-fade .3s ease forwards; }

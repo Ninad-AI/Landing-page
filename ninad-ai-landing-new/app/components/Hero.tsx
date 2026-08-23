@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CREATORS } from "../lib/creators-data";
 
 export default function Hero() {
   const router = useRouter();
@@ -15,12 +14,6 @@ export default function Hero() {
         />
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 rounded-full bg-nd-tint px-3.5 py-2 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-nd-accent animate-nd-blink" />
-            <span className="text-[11px] sm:text-xs font-bold tracking-wide text-nd-accent-dark uppercase">
-              Voice-to-voice · {CREATORS.length} creators live
-            </span>
-          </div>
           <h1 className="font-display text-[40px] sm:text-[56px] md:text-[68px] lg:text-[74px] leading-[0.99] tracking-tight text-nd-ink mb-5">
             Talk to the people who <em className="not-italic italic text-nd-accent">shaped you</em>.
           </h1>
@@ -44,7 +37,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="relative z-10 flex justify-center">
+        <div className="relative z-10 hidden md:flex justify-center">
           <div className="w-full max-w-[340px] rounded-[28px] bg-nd-darker p-6 pb-6 shadow-[0_40px_90px_-30px_rgba(28,26,31,.5)]">
             <div className="flex items-center justify-between mb-5">
               <div>

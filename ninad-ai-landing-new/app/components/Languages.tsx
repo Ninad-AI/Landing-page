@@ -8,7 +8,7 @@ function LanguageRow({ hidden }: { hidden?: boolean }) {
     <div className="flex items-center gap-8 pr-8 flex-none" aria-hidden={hidden}>
       {REPEATED.map((lang, i) => (
         <Fragment key={i}>
-          {i > 0 && <span className="font-devanagari text-base leading-none text-nd-dim">·</span>}
+          <span className="h-[3px] w-[3px] flex-none rounded-full bg-nd-dim" aria-hidden="true" />
           <span className="font-devanagari text-base leading-none text-nd-muted whitespace-nowrap">{lang}</span>
         </Fragment>
       ))}

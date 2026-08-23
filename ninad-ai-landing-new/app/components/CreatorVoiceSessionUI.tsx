@@ -1,5 +1,8 @@
 'use client';
 
+import Image from 'next/image';
+import Ripple from './ui/Ripple';
+
 interface VoiceSessionUIProps {
   isSpeaking: boolean;
   callPhase: 'connecting' | 'listening' | 'speaking';
@@ -20,6 +23,7 @@ export default function VoiceSessionUI({
   callPhase,
   timeLeft,
   creatorName,
+  creatorImage,
   onClose,
 }: VoiceSessionUIProps) {
   const formatTime = (s: number) => {
@@ -31,47 +35,28 @@ export default function VoiceSessionUI({
 
   const status = STATUS_BY_PHASE[callPhase];
   const statusLabel = status.label ?? `${creatorName.split(' ')[0]} is speaking`;
-  const orbDuration = callPhase === 'speaking' ? '1.5s' : '3.6s';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-nd-darker">
-      <div className="relative flex h-full w-full flex-col items-center justify-center px-4">
-        <div className="relative flex items-center justify-center scale-[0.72] sm:scale-90 md:scale-100" style={{ width: 300, height: 300 }}>
-          <span
-            className="absolute rounded-full animate-nd-ripple"
-            style={{ width: 250, height: 250, border: '1px solid rgba(142,118,190,.5)' }}
-          />
-          <span
-            className="absolute rounded-full animate-nd-ripple"
-            style={{ width: 250, height: 250, border: '1px solid rgba(142,118,190,.4)', animationDelay: '1.7s' }}
-          />
-          <span
-            className="absolute rounded-full animate-nd-spin"
-            style={{
-              width: 270,
-              height: 270,
-              background:
-                'conic-gradient(from 0deg, rgba(142,118,190,.42), rgba(107,75,168,.05), rgba(192,96,60,.3), rgba(142,118,190,.42))',
-              filter: 'blur(32px)',
-            }}
-          />
-          <span
-            className="relative rounded-full"
-            style={{
-              width: 200,
-              height: 200,
-              background: 'radial-gradient(120% 120% at 32% 26%, #C9B6EC 0%, #8E76BE 42%, #5A3E96 78%, #3E2A6B 100%)',
-              boxShadow: 'inset 0 -18px 44px rgba(28,18,54,.6), 0 22px 60px -14px rgba(107,75,168,.65)',
-              animation: `nd-breathe ${orbDuration} ease-in-out infinite`,
-            }}
-          />
-          <span
-            className="absolute rounded-full pointer-events-none"
-            style={{ width: 58, height: 38, background: 'rgba(255,255,255,.34)', filter: 'blur(14px)', transform: 'translate(-34px, -52px)' }}
-          />
+    <Ripple className="z-50 bg-nd-darker">
+      <div className="relative h-full w-full px-4">
+        {/* Anchored to the exact same center point Ripple uses for its rings (50%/50%),
+            rather than being centered as part of a taller stack with the timer/status
+            below it — otherwise the group's midpoint, not the photo's, lands on-center. */}
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden scale-[0.85] sm:scale-95 md:scale-100"
+          style={{
+            width: 200,
+            height: 200,
+            boxShadow: 'inset 0 -18px 44px rgba(28,18,54,.35), 0 22px 60px -14px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08)',
+          }}
+        >
+          <Image src={creatorImage} alt={creatorName} fill className="object-cover" sizes="200px" priority />
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-5 sm:mt-12">
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-5"
+          style={{ top: 'calc(50% + 140px)' }}
+        >
           <span className="tabular-nums text-4xl font-light tracking-tight text-[#FAF8F4] sm:text-5xl">
             {formatTime(timeLeft)}
           </span>
@@ -99,6 +84,6 @@ export default function VoiceSessionUI({
           </svg>
         </button>
       )}
-    </div>
+    </Ripple>
   );
 }
