@@ -1,24 +1,20 @@
 import Hero from "./components/Hero";
-import Features from "./components/Features";
-import Products from "./components/Products";
-import UseCases from "./components/UseCases";
 import Languages from "./components/Languages";
-import Waitlist from "./components/Waitlist";
+import Products from "./components/Products";
+import Features from "./components/Features";
 import Safety from "./components/Safety";
-
+import UseCases from "./components/UseCases";
 import Footer from "./components/Footer";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
+    <main className="relative min-h-screen overflow-x-hidden bg-nd-bg">
       <Hero />
-      <Features />
-      <Products />
       <Languages />
-      <UseCases />
+      <Products />
+      <Features />
       <Safety />
-      <Waitlist />
-
+      <UseCases />
       <Footer />
     </main>
   );

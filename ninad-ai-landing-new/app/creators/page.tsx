@@ -1,119 +1,86 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import ProfileCard from "../components/ProfileCard";
-
-interface Creator {
-  id: string;
-  name: string;
-  role: string;
-  imageUrl: string;
-  handle: string;
-  status: string;
-  bio?: string;
-}
-
-const CREATORS: Creator[] = [
-  {
-    id: "nirupam-001",
-    name: "Nirupam Paritala",
-    role: "Actor & Producer",
-    imageUrl: "/assets/creators/nirupam.jpeg",
-    handle: "nirupam",
-    status: "Active",
-    bio: "Acclaimed actor and producer known for his powerful performances and creative vision.",
-  },
-  {
-    id: "aneri-001",
-    name: "Aneri Thakkar",
-    role: "Coach & Influencer",
-    imageUrl: "/assets/creators/aneri-2.jpg",
-    handle: "aneri-thakkar",
-    status: "Active",
-    bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
-  },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // {
-  //   id: "beauty-khan-001",
-  //   name: "Beauty Khan",
-  //   role: "Artist and Creator",
-  //   imageUrl: "/assets/creators/beauty-khan.jpg",
-  //   handle: "beauty-khan",
-  //   status: "Active",
-  //   bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
-  // },
-  {
-    id: "sona-dey-001",
-    name: "Sona Dey",
-    role: "Model & Influencer",
-    imageUrl: "/assets/creators/sona.png",
-    handle: "sona-dey",
-    status: "Active",
-    bio: "A model and influencer known for bold, expressive visuals and a magnetic presence.",
-  },
-];
+import CreatorCard from "../components/CreatorCard";
+import { CREATORS, CREATOR_CATEGORIES } from "../lib/creators-data";
 
 export default function CreatorsPage() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
+    const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleTalk = (creator: Creator) => {
-    router.push(`/creators/${creator.handle}`);
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return CREATORS.filter((c) => {
+      const matchesCategory = category === "All" || c.category === category;
+      const matchesQuery =
+        !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.role.toLowerCase().includes(q) ||
+        c.category.toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
+    });
+  }, [query, category]);
+
+  const handleTalk = (slug: string) => {
+    router.push(`/creators/${slug}`);
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black selection:bg-primary/30">
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-        <div
-          className="absolute left-[-26vw] top-[-12vw] h-[clamp(260px,56vw,700px)] w-[clamp(260px,56vw,700px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.6)_0%,transparent_70%)] animate-glow-drift"
-        />
-        <div
-          className="absolute right-[-20vw] top-[16vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.45)_0%,transparent_70%)] animate-glow-drift-reverse"
-        />
-        <div className="absolute left-[20%] bottom-[-18vw] h-[clamp(260px,46vw,600px)] w-[clamp(360px,62vw,800px)] rounded-full blur-[160px] bg-[radial-gradient(circle,rgba(147,51,234,0.4)_0%,transparent_70%)]" />
-      </div>
-
-      <div className="relative z-10 container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16 pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
-        <div className={`text-center mb-8 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
-          <h1 className="font-sans font-black text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 pb-3 sm:pb-4">
-            CREATORS
+    <main className="relative min-h-screen bg-nd-bg selection:bg-nd-accent/20">
+      <div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 pt-28 sm:pt-32 md:pt-36 pb-16 sm:pb-20 md:pb-24">
+        <div className={isVisible ? "animate-nd-up" : "opacity-0"}>
+          <h1 className="font-display text-[42px] sm:text-[52px] md:text-[58px] leading-none tracking-tight text-nd-ink mb-2">
+            Creators
           </h1>
+          <p className="text-[15px] text-nd-dim mb-8">
+            {visible.length} {visible.length === 1 ? "creator" : "creators"}
+          </p>
         </div>
 
-        <div
-          className={`font-sans font-medium text-base sm:text-lg md:text-xl text-center text-muted tracking-tight mb-12 sm:mb-16 md:mb-24 max-w-3xl mx-auto px-1 ${
-            isVisible ? "animate-fade-in-up delay-100" : "opacity-0"
-          }`}
-        >
-          <p className="mb-1">The icons redefining entertainment and influence.</p>
-          <p>From the silver screen to your feed, meet the stars shaping culture.</p>
+        <div className={`flex flex-wrap items-center gap-3.5 mb-9 ${isVisible ? "animate-nd-up" : "opacity-0"}`}>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search a name or a craft"
+            className="w-full sm:w-80 px-4 py-3 rounded-[13px] border border-nd-line bg-nd-panel text-[14.5px] text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent transition-colors"
+          />
+          <div className="flex gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
+            {["All", ...CREATOR_CATEGORIES].map((label) => {
+              const active = category === label;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setCategory(label)}
+                  className={`flex-none px-4 py-2.5 rounded-full text-[13.5px] font-semibold border transition-colors cursor-pointer ${
+                    active
+                      ? "bg-nd-ink text-nd-bg border-nd-ink"
+                      : "bg-white text-nd-muted border-nd-line hover:border-nd-ink"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div
-          className={`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 md:gap-10 justify-items-center ${
-            isVisible ? "animate-fade-in-up delay-200" : "opacity-0"
-          }`}
-        >
-          {CREATORS.map((creator) => (
-            <div key={creator.id} className="w-full max-w-[400px] flex justify-center">
-              <ProfileCard
-                name={creator.name}
-                title={creator.role}
-                avatarUrl={creator.imageUrl}
-                behindGlowColor="rgba(97, 37, 216, 0.5)"
-                onContactClick={() => handleTalk(creator)}
-              />
-            </div>
+        <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6 ${isVisible ? "animate-nd-up" : "opacity-0"}`}>
+          {visible.map((creator) => (
+            <CreatorCard key={creator.slug} creator={creator} onClick={() => handleTalk(creator.slug)} />
           ))}
         </div>
+
+        {visible.length === 0 && (
+          <p className="text-center text-nd-dim text-sm py-16">No creators match that search.</p>
+        )}
       </div>
     </main>
   );

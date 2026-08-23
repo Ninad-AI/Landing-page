@@ -39,10 +39,10 @@ function StatPill({
   accent?: 'primary' | 'cyan' | 'amber' | 'default';
 }) {
   const colors: Record<string, string> = {
-    primary: 'bg-primary/15 border-primary/25 text-primary-light',
-    cyan: 'bg-accent-blue/12 border-accent-blue/25 text-accent-cyan',
-    amber: 'bg-amber-500/12 border-amber-400/25 text-amber-300',
-    default: 'bg-white/5 border-white/10 text-white/70',
+    primary: 'bg-nd-tint border-nd-accent/25 text-nd-accent-dark',
+    cyan: 'bg-blue-50 border-blue-200 text-blue-700',
+    amber: 'bg-amber-50 border-amber-200 text-amber-700',
+    default: 'bg-nd-panel border-nd-line text-nd-muted',
   };
   return (
     <div className={`rounded-xl border px-3 py-2.5 sm:px-4 sm:py-3 ${colors[accent]}`}>
@@ -76,7 +76,7 @@ function LiveCountdown({ initialSeconds }: { initialSeconds: number }) {
   }, []);
 
   return (
-    <span className="font-mono text-emerald-300 text-xs font-bold tabular-nums">
+    <span className="font-mono text-emerald-600 text-xs font-bold tabular-nums">
       {formatCountdown(secs)}
     </span>
   );
@@ -137,7 +137,7 @@ export default function UserDashboard() {
   const activeCount = activeBookings.length;
 
   return (
-    <div className="space-y-8 animate-fade-in-up delay-100">
+    <div className="space-y-8 animate-nd-up">
       {/* Quick-stats row (shown once bookings load) */}
       {!isLoadingBookings && !bookingsError && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -149,21 +149,21 @@ export default function UserDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Start Voice Session */}
-        <div className="glass border border-white/15 rounded-2xl p-8 hover:border-primary/30 transition-all duration-300 group">
+        <div className="bg-white border border-nd-line rounded-2xl p-8 hover:border-nd-accent/30 transition-all duration-300 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
-              <svg className="w-6 h-6 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-12 h-12 rounded-xl bg-nd-tint flex items-center justify-center group-hover:bg-nd-tint/80 transition-colors">
+              <svg className="w-6 h-6 text-nd-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
               </svg>
             </div>
             <div>
-              <h3 className="font-sans font-bold text-lg text-white">Start Voice Session</h3>
-              <p className="text-sm text-white/40">Talk to your favourite creators</p>
+              <h3 className="font-nd-sans font-bold text-lg text-nd-ink">Start Voice Session</h3>
+              <p className="text-sm text-nd-dim">Talk to your favourite creators</p>
             </div>
           </div>
           <Link
             href="/creators"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-sans font-bold text-sm transition-all duration-300 hover:bg-primary-light hover:shadow-[0_0_20px_rgba(97,37,216,0.4)] btn-primary"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-nd-ink text-nd-bg font-nd-sans font-bold text-sm transition-all duration-300 hover:bg-[#302C36]"
           >
             Browse Creators
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -173,16 +173,16 @@ export default function UserDashboard() {
         </div>
 
         {/* My Active Bookings */}
-        <div className="glass border border-white/15 rounded-2xl p-8 hover:border-accent-blue/30 transition-all duration-300 group">
+        <div className="bg-white border border-nd-line rounded-2xl p-8 hover:border-blue-200 transition-all duration-300 group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-accent-blue/15 flex items-center justify-center group-hover:bg-accent-blue/25 transition-colors">
-              <svg className="w-6 h-6 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
             <div>
-              <h3 className="font-sans font-bold text-lg text-white">Active Bookings</h3>
-              <p className="text-sm text-white/40">Sessions available to use</p>
+              <h3 className="font-nd-sans font-bold text-lg text-nd-ink">Active Bookings</h3>
+              <p className="text-sm text-nd-dim">Sessions available to use</p>
             </div>
           </div>
 
@@ -190,24 +190,24 @@ export default function UserDashboard() {
             {isLoadingBookings && (
               <>
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-14 rounded-lg bg-white/5 animate-pulse" />
+                  <div key={i} className="h-14 rounded-lg bg-nd-panel animate-pulse" />
                 ))}
               </>
             )}
 
             {!isLoadingBookings && bookingsError && (
-              <p className="text-xs text-rose-200 text-center py-4">{bookingsError}</p>
+              <p className="text-xs text-red-600 text-center py-4">{bookingsError}</p>
             )}
 
             {!isLoadingBookings && !bookingsError && recentBookings.map((booking) => {
               const displayAmount = getDisplayAmount(booking);
               const creatorName = getCreatorName(booking);
               return (
-                <div key={booking.id} className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                <div key={booking.id} className="p-3 rounded-lg bg-nd-panel border border-nd-line-soft hover:border-nd-line transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold text-white truncate">{creatorName}</div>
-                      <div className="text-xs text-white/35 mt-1">
+                      <div className="text-sm font-semibold text-nd-ink truncate">{creatorName}</div>
+                      <div className="text-xs text-nd-dim mt-1">
                         {booking.duration_minutes} min
                         {displayAmount && ` • ${displayAmount}`}
                         {' • '}
@@ -215,12 +215,12 @@ export default function UserDashboard() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full text-emerald-200 bg-emerald-500/15">
+                      <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-full text-emerald-700 bg-emerald-50">
                         active
                       </span>
                       {booking.remaining_seconds != null && booking.remaining_seconds > 0 && (
                         <div className="flex items-center gap-1">
-                          <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />
                           </svg>
                           <LiveCountdown initialSeconds={booking.remaining_seconds} />
@@ -233,7 +233,7 @@ export default function UserDashboard() {
             })}
 
             {!isLoadingBookings && !bookingsError && recentBookings.length === 0 && (
-              <p className="text-xs text-white/25 text-center pt-2">No active bookings. Buy a session to get started.</p>
+              <p className="text-xs text-nd-dim text-center pt-2">No active bookings. Buy a session to get started.</p>
             )}
           </div>
         </div>

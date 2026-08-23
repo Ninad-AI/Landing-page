@@ -102,13 +102,13 @@ function CustomTooltip({
   if (!active || !payload) return null;
   return (
     <div
-      className="rounded-xl px-4 py-3 shadow-xl border border-white/10"
+      className="rounded-xl px-4 py-3 shadow-xl border border-nd-line"
       style={{
-        background: 'rgba(15, 10, 30, 0.9)',
+        background: 'rgba(255, 255, 255, 0.98)',
         backdropFilter: 'blur(20px)',
       }}
     >
-      <p className="text-xs text-white/50 mb-1 font-semibold">{label}</p>
+      <p className="text-xs text-nd-dim mb-1 font-semibold">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} className="text-sm font-bold" style={{ color: entry.color }}>
           {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
@@ -252,48 +252,42 @@ function AnalyticsContent() {
   ];
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-25">
-        <div className="absolute left-[-24vw] top-[4vw] h-[clamp(260px,52vw,700px)] w-[clamp(260px,52vw,700px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
-        <div className="absolute right-[-20vw] bottom-[6vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
-      </div>
-
+    <main className="relative min-h-screen overflow-x-hidden bg-nd-bg">
       <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Page Header */}
-        <div className="mb-8 animate-fade-in-up">
-          <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-2">
+        <div className="mb-8 animate-nd-up">
+          <h1 className="font-display text-3xl md:text-5xl text-nd-ink tracking-tight mb-2">
             Analytics
           </h1>
-          <p className="font-sans text-base text-white/40">
+          <p className="font-nd-sans text-base text-nd-dim">
             Platform usage metrics and booking insights
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-rose-500/25 bg-rose-500/10 px-5 py-3 text-sm text-rose-300">
+          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700">
             {error}
           </div>
         )}
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 mb-8 sm:mb-10 animate-fade-in-up delay-100 overflow-x-auto pb-1">
+        <div className="flex gap-2 mb-8 sm:mb-10 animate-nd-up overflow-x-auto pb-1">
           <button
             onClick={() => setActiveTab('usage')}
-            className={`px-6 py-2.5 rounded-xl font-sans font-bold text-sm transition-all duration-300 cursor-pointer ${
+            className={`px-6 py-2.5 rounded-xl font-nd-sans font-bold text-sm transition-all duration-300 cursor-pointer ${
               activeTab === 'usage'
-                ? 'bg-primary/20 text-primary-light border border-primary/30'
-                : 'bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20'
+                ? 'bg-nd-tint text-nd-accent-dark border border-nd-accent/30'
+                : 'bg-white text-nd-dim border border-nd-line hover:text-nd-ink hover:border-nd-accent/30'
             }`}
           >
             Usage
           </button>
           <button
             onClick={() => setActiveTab('bookings')}
-            className={`px-6 py-2.5 rounded-xl font-sans font-bold text-sm transition-all duration-300 cursor-pointer ${
+            className={`px-6 py-2.5 rounded-xl font-nd-sans font-bold text-sm transition-all duration-300 cursor-pointer ${
               activeTab === 'bookings'
-                ? 'bg-primary/20 text-primary-light border border-primary/30'
-                : 'bg-white/5 text-white/50 border border-white/10 hover:text-white hover:border-white/20'
+                ? 'bg-nd-tint text-nd-accent-dark border border-nd-accent/30'
+                : 'bg-white text-nd-dim border border-nd-line hover:text-nd-ink hover:border-nd-accent/30'
             }`}
           >
             Bookings
@@ -302,13 +296,13 @@ function AnalyticsContent() {
 
         {/* Usage Tab */}
         {activeTab === 'usage' && (
-          <div className="space-y-6 animate-fade-in-up delay-200">
+          <div className="space-y-6 animate-nd-up">
             {/* Summary Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {usageStats.map((stat) => (
-                <div key={stat.label} className="glass border border-white/10 rounded-2xl p-5">
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">{stat.label}</div>
-                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">
+                <div key={stat.label} className="bg-white border border-nd-line rounded-2xl p-5">
+                  <div className="text-[10px] text-nd-dim uppercase tracking-wider font-bold mb-1">{stat.label}</div>
+                  <div className="font-nd-sans font-extrabold text-2xl text-nd-ink tabular-nums">
                     {isLoading ? '—' : stat.value}
                   </div>
                 </div>
@@ -316,33 +310,33 @@ function AnalyticsContent() {
             </div>
 
             {/* Sessions Over Time */}
-            <div className="glass border border-white/10 rounded-2xl p-6">
-              <h3 className="font-sans font-bold text-lg text-white mb-6">Sessions Over Time</h3>
+            <div className="bg-white border border-nd-line rounded-2xl p-6">
+              <h3 className="font-nd-sans font-bold text-lg text-nd-ink mb-6">Sessions Over Time</h3>
               <div className="w-full h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={usageDaily}>
                     <defs>
                       <linearGradient id="gradientSessions" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6125d8" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#6125d8" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#6B4BA8" stopOpacity={0.35} />
+                        <stop offset="95%" stopColor="#6B4BA8" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="gradientMinutes" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00a9ff" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#00a9ff" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E9E3DA" />
+                    <XAxis dataKey="date" tick={{ fill: '#918B99', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#918B99', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
                     <Area
                       type="monotone"
                       dataKey="sessions"
-                      stroke="#6125d8"
+                      stroke="#6B4BA8"
                       strokeWidth={2}
                       fill="url(#gradientSessions)"
-                      dot={{ fill: '#6125d8', strokeWidth: 0, r: 3 }}
-                      activeDot={{ r: 5, stroke: '#6125d8', strokeWidth: 2, fill: '#fff' }}
+                      dot={{ fill: '#6B4BA8', strokeWidth: 0, r: 3 }}
+                      activeDot={{ r: 5, stroke: '#6B4BA8', strokeWidth: 2, fill: '#fff' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -355,13 +349,13 @@ function AnalyticsContent() {
 
         {/* Bookings Tab */}
         {activeTab === 'bookings' && (
-          <div className="space-y-6 animate-fade-in-up delay-200">
+          <div className="space-y-6 animate-nd-up">
             {/* Booking Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {bookingStats.map((stat) => (
-                <div key={stat.label} className="glass border border-white/10 rounded-2xl p-5">
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider font-bold mb-1">{stat.label}</div>
-                  <div className="font-sans font-extrabold text-2xl text-white tabular-nums">
+                <div key={stat.label} className="bg-white border border-nd-line rounded-2xl p-5">
+                  <div className="text-[10px] text-nd-dim uppercase tracking-wider font-bold mb-1">{stat.label}</div>
+                  <div className="font-nd-sans font-extrabold text-2xl text-nd-ink tabular-nums">
                     {isLoading ? '—' : stat.value}
                   </div>
                 </div>
@@ -369,20 +363,20 @@ function AnalyticsContent() {
             </div>
 
             {/* Revenue Chart */}
-            <div className="glass border border-white/10 rounded-2xl p-6">
-              <h3 className="font-sans font-bold text-lg text-white mb-6">Revenue Over Time</h3>
+            <div className="bg-white border border-nd-line rounded-2xl p-6">
+              <h3 className="font-nd-sans font-bold text-lg text-nd-ink mb-6">Revenue Over Time</h3>
               <div className="w-full h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={bookingDaily}>
                     <defs>
                       <linearGradient id="gradientRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#9968fa" stopOpacity={0.9} />
-                        <stop offset="95%" stopColor="#6125d8" stopOpacity={0.6} />
+                        <stop offset="5%" stopColor="#8E76BE" stopOpacity={0.9} />
+                        <stop offset="95%" stopColor="#6B4BA8" stopOpacity={0.6} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E9E3DA" />
+                    <XAxis dataKey="date" tick={{ fill: '#918B99', fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#918B99', fontSize: 11 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="revenue" fill="url(#gradientRevenue)" radius={[6, 6, 0, 0]} />
                   </BarChart>
@@ -392,43 +386,43 @@ function AnalyticsContent() {
 
             {/* Bookings Chart + Top Creators  */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="glass border border-white/10 rounded-2xl p-6">
-                <h3 className="font-sans font-bold text-lg text-white mb-6">Daily Bookings</h3>
+              <div className="bg-white border border-nd-line rounded-2xl p-6">
+                <h3 className="font-nd-sans font-bold text-lg text-nd-ink mb-6">Daily Bookings</h3>
                 <div className="w-full h-[250px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={bookingDaily}>
                       <defs>
                         <linearGradient id="gradientBookings" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#00a9ff" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#00a9ff" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E9E3DA" />
+                      <XAxis dataKey="date" tick={{ fill: '#918B99', fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: '#918B99', fontSize: 10 }} axisLine={false} tickLine={false} />
                       <Tooltip content={<CustomTooltip />} />
                       <Area
                         type="monotone"
                         dataKey="bookings"
-                        stroke="#00a9ff"
+                        stroke="#3B82F6"
                         strokeWidth={2}
                         fill="url(#gradientBookings)"
-                        dot={{ fill: '#00a9ff', strokeWidth: 0, r: 3 }}
+                        dot={{ fill: '#3B82F6', strokeWidth: 0, r: 3 }}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="glass border border-white/10 rounded-2xl p-6">
+              <div className="bg-white border border-nd-line rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-sans font-bold text-lg text-white">
+                  <h3 className="font-nd-sans font-bold text-lg text-nd-ink">
                     {selectedInfluencerId ? `Creator: ${influencerDetail?.influencer_name || selectedInfluencerId}` : 'Top Creators'}
                   </h3>
                   {selectedInfluencerId && (
                     <button
                       onClick={handleBackToAll}
-                      className="text-xs text-white/50 hover:text-white transition-colors underline underline-offset-2"
+                      className="text-xs text-nd-dim hover:text-nd-ink transition-colors underline underline-offset-2 cursor-pointer"
                     >
                       Back to all
                     </button>
@@ -439,49 +433,49 @@ function AnalyticsContent() {
                 {selectedInfluencerId ? (
                   detailLoading ? (
                     <div className="flex items-center gap-3 py-6">
-                      <div className="w-4 h-4 border-2 border-white/25 border-t-white rounded-full animate-spin" />
-                      <p className="text-sm text-white/50">Loading influencer details...</p>
+                      <div className="w-4 h-4 border-2 border-nd-line border-t-nd-accent rounded-full animate-spin" />
+                      <p className="text-sm text-nd-dim">Loading influencer details...</p>
                     </div>
                   ) : detailError ? (
-                    <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{detailError}</div>
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{detailError}</div>
                   ) : influencerDetail ? (
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                          <p className="text-lg font-extrabold text-white">{influencerDetail.total_sessions}</p>
-                          <p className="text-[10px] text-white/40">Sessions</p>
+                        <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-3 text-center">
+                          <p className="text-lg font-extrabold text-nd-ink">{influencerDetail.total_sessions}</p>
+                          <p className="text-[10px] text-nd-dim">Sessions</p>
                         </div>
-                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                          <p className="text-lg font-extrabold text-white">{influencerDetail.total_minutes} min</p>
-                          <p className="text-[10px] text-white/40">Minutes</p>
+                        <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-3 text-center">
+                          <p className="text-lg font-extrabold text-nd-ink">{influencerDetail.total_minutes} min</p>
+                          <p className="text-[10px] text-nd-dim">Minutes</p>
                         </div>
-                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                          <p className="text-lg font-extrabold text-white">₹{(influencerDetail.total_revenue ?? 0).toLocaleString()}</p>
-                          <p className="text-[10px] text-white/40">Revenue</p>
+                        <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-3 text-center">
+                          <p className="text-lg font-extrabold text-nd-ink">₹{(influencerDetail.total_revenue ?? 0).toLocaleString()}</p>
+                          <p className="text-[10px] text-nd-dim">Revenue</p>
                         </div>
-                        <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-center">
-                          <p className="text-lg font-extrabold text-white">{influencerDetail.avg_rating?.toFixed(1) ?? '—'}</p>
-                          <p className="text-[10px] text-white/40">Rating</p>
+                        <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-3 text-center">
+                          <p className="text-lg font-extrabold text-nd-ink">{influencerDetail.avg_rating?.toFixed(1) ?? '—'}</p>
+                          <p className="text-[10px] text-nd-dim">Rating</p>
                         </div>
                       </div>
                       {influencerDetail.daily_usage?.length > 0 && (
                         <div className="space-y-1">
-                          <p className="text-xs text-white/40 font-semibold">Daily Usage</p>
+                          <p className="text-xs text-nd-dim font-semibold">Daily Usage</p>
                           {influencerDetail.daily_usage.slice(0, 7).map((day, i) => (
-                            <div key={i} className="flex items-center justify-between rounded-lg bg-white/3 px-3 py-1.5 text-xs">
-                              <span className="text-white/70">{day.date}</span>
-                              <span className="text-white/50">{day.sessions} sessions / {day.minutes} min</span>
+                            <div key={i} className="flex items-center justify-between rounded-lg bg-nd-panel px-3 py-1.5 text-xs">
+                              <span className="text-nd-muted">{day.date}</span>
+                              <span className="text-nd-dim">{day.sessions} sessions / {day.minutes} min</span>
                             </div>
                           ))}
                         </div>
                       )}
                       {influencerDetail.recent_bookings?.length > 0 && (
                         <div className="space-y-1">
-                          <p className="text-xs text-white/40 font-semibold">Recent Bookings</p>
+                          <p className="text-xs text-nd-dim font-semibold">Recent Bookings</p>
                           {influencerDetail.recent_bookings.slice(0, 5).map((b, i) => (
-                            <div key={i} className="flex items-center justify-between rounded-lg bg-white/3 px-3 py-1.5 text-xs">
-                              <span className="text-white/70">{b.user_name || 'User'}</span>
-                              <span className="text-white/50">{b.duration_minutes} min • {b.status}</span>
+                            <div key={i} className="flex items-center justify-between rounded-lg bg-nd-panel px-3 py-1.5 text-xs">
+                              <span className="text-nd-muted">{b.user_name || 'User'}</span>
+                              <span className="text-nd-dim">{b.duration_minutes} min • {b.status}</span>
                             </div>
                           ))}
                         </div>
@@ -496,27 +490,27 @@ function AnalyticsContent() {
                         key={creator.influencer_id || `creator-${i}`}
                         onClick={() => creator.influencer_id && handleCreatorClick(creator.influencer_id)}
                         disabled={!creator.influencer_id}
-                        className="w-full flex items-center gap-4 p-3 rounded-xl bg-white/3 border border-white/5 hover:bg-white/8 hover:border-primary/30 transition-all text-left cursor-pointer disabled:cursor-default"
+                        className="w-full flex items-center gap-4 p-3 rounded-xl bg-white border border-nd-line-soft hover:bg-nd-panel hover:border-nd-accent/30 transition-all text-left cursor-pointer disabled:cursor-default"
                       >
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold text-primary-light shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-nd-tint flex items-center justify-center text-sm font-bold text-nd-accent shrink-0">
                           #{i + 1}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-sans font-semibold text-sm text-white truncate">{creator.name}</div>
-                          <div className="text-xs text-white/30">
+                          <div className="font-nd-sans font-semibold text-sm text-nd-ink truncate">{creator.name}</div>
+                          <div className="text-xs text-nd-dim">
                             {creator.bookings} bookings
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className="font-sans font-bold text-sm text-white">
+                          <div className="font-nd-sans font-bold text-sm text-nd-ink">
                             ₹{(creator.revenue / 1000).toFixed(1)}k
                           </div>
-                          <div className="text-[10px] text-white/25">revenue</div>
+                          <div className="text-[10px] text-nd-dim">revenue</div>
                         </div>
                       </button>
                     ))}
                     {!isLoading && topCreators.length === 0 && (
-                      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/45">
+                      <div className="rounded-xl border border-nd-line bg-nd-panel px-4 py-3 text-sm text-nd-dim">
                         No creator analytics available yet.
                       </div>
                     )}

@@ -26,8 +26,8 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
 
   if (!isHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-primary animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-nd-bg">
+        <div className="w-10 h-10 rounded-full border-2 border-nd-line border-t-nd-accent animate-spin" />
       </div>
     );
   }
@@ -68,14 +68,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           duration={2500}
           toastOptions={{
             style: {
-              background: 'rgba(15, 10, 30, 0.85)',
-              backdropFilter: 'blur(32px)',
-              WebkitBackdropFilter: 'blur(32px)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              color: '#ffffff',
-              fontFamily: 'var(--font-inter)',
+              background: 'rgba(250, 248, 244, 0.96)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid #E4DED4',
+              color: '#1C1A1F',
+              fontFamily: 'var(--font-manrope)',
               borderRadius: '16px',
-              boxShadow: '0 20px 60px -12px rgba(0, 0, 0, 0.5)',
+              boxShadow: '0 20px 60px -20px rgba(28,26,31,0.25)',
             },
           }}
           richColors

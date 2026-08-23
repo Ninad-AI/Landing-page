@@ -21,20 +21,14 @@ function DashboardContent() {
   if (!user) return null;
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none opacity-30">
-        <div className="absolute left-[-24vw] top-[8vw] h-[clamp(240px,48vw,600px)] w-[clamp(240px,48vw,600px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.5)_0%,transparent_70%)]" />
-        <div className="absolute right-[-20vw] bottom-[6vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
-      </div>
-
+    <main className="relative min-h-screen overflow-x-hidden bg-nd-bg">
       <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-24 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Header */}
-        <div className="mb-8 sm:mb-12 animate-fade-in-up">
-          <h1 className="font-sans font-extrabold text-2xl sm:text-3xl md:text-5xl text-white tracking-tight mb-2 sm:mb-3 break-words">
+        <div className="mb-8 sm:mb-12 animate-nd-up">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-5xl text-nd-ink tracking-tight mb-2 sm:mb-3 break-words">
             Welcome, {user.name}
           </h1>
-          <p className="font-sans text-sm sm:text-base text-white/50">
+          <p className="font-nd-sans text-sm sm:text-base text-nd-muted">
             {user.role === 'admin' && 'Manage the platform from your admin dashboard.'}
             {user.role === 'influencer' && 'Review your session activity and platform performance.'}
             {user.role === 'user' && 'Start voice sessions and manage your bookings.'}

@@ -1,102 +1,101 @@
-import Image from "next/image";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { CREATORS } from "../lib/creators-data";
 
 export default function Hero() {
+  const router = useRouter();
+
   return (
-    <section id="hero" className="relative flex w-full min-h-svh md:min-h-screen flex-col items-center justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-16 md:pb-20">
-      {/* ===== Background glows ===== */}
-      <div className="absolute inset-0 pointer-events-none opacity-50">
-        <div className="absolute left-[-30vw] top-[-18vw] h-[clamp(280px,62vw,780px)] w-[clamp(280px,60vw,760px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
-        <div className="absolute right-[-28vw] top-[4vw] h-[clamp(250px,52vw,650px)] w-[clamp(260px,54vw,670px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(59,130,246,0.55)_0%,transparent_70%)]" />
-        <div className="absolute bottom-[-14vw] left-[-42vw] h-[clamp(220px,38vw,460px)] w-[clamp(380px,78vw,900px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(147,51,234,0.55)_0%,transparent_70%)]" />
-      </div>
+    <section id="hero" className="relative overflow-hidden bg-nd-bg pt-28 sm:pt-32 md:pt-36 pb-16 sm:pb-20 md:pb-24">
+      <div className="relative mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 grid grid-cols-1 md:grid-cols-[1.05fr_.95fr] gap-10 md:gap-16 items-center overflow-hidden">
+        <div
+          className="absolute -top-28 -right-24 h-[350px] w-[350px] sm:h-[460px] sm:w-[460px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(142,118,190,.2), rgba(142,118,190,0) 68%)" }}
+        />
 
-      {/* ===== Hero content ===== */}
-      <div className="relative z-10 flex w-full max-w-[90vw] sm:max-w-[85vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-425 flex-col items-center justify-center space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 px-4 sm:px-6 md:px-8">
-        {/* REAL-TIME */}
-        <h1 className="font-sans font-extrabold text-[clamp(28px,7vw,88px)] text-white/90 uppercase leading-none text-center tracking-tight">
-          REAL-TIME
-        </h1>
-
-        {/* AI VOICE w/ Orb */}
-        <div className="relative flex items-center justify-center leading-none max-w-full">
-          {/* AI V */}
-          <span
-            className="
-              font-sans
-              font-extrabold
-              text-[clamp(32px,14vw,280px)]
-              leading-[0.85]
-              tracking-tighter
-              bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
-              bg-clip-text
-              text-transparent
-              pr-[0.08em]
-            "
-          >
-            AI V
-          </span>
-
-          {/* Orb */}
-          <div
-            className="
-              relative
-              w-[clamp(32px,14vw,280px)]
-              h-[clamp(32px,14vw,280px)]
-              shrink-0
-              cursor-pointer
-              mx-[0.08em]
-              group
-              z-20
-            "
-          >
-            {/* Ambient glow behind orb */}
-            <div
-              className="
-                absolute inset-0 
-                bg-primary/30 blur-[60px] rounded-full 
-                scale-75 animate-pulse
-                transition-all duration-700
-                group-hover:bg-primary/60 group-hover:blur-[100px] group-hover:scale-100
-              "
-            />
-
-            <Image
-              src="/assets/hero-orb.png"
-              alt="Voice Orb"
-              fill
-              sizes="(max-width: 480px) 64px, (max-width: 768px) 108px, (max-width: 1024px) 144px, 280px"
-              className="object-contain scale-110 z-10 transition-all duration-700 group-hover:brightness-150"
-            />
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-nd-tint px-3.5 py-2 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-nd-accent animate-nd-blink" />
+            <span className="text-[11px] sm:text-xs font-bold tracking-wide text-nd-accent-dark uppercase">
+              Voice-to-voice · {CREATORS.length} creators live
+            </span>
           </div>
-
-          {/* ICE */}
-          <span
-            className="
-              font-sans
-              font-extrabold
-              text-[clamp(32px,14vw,280px)]
-              leading-[0.85]
-              tracking-tighter
-              bg-linear-to-b from-[#e7fdff] via-[#b0b0b0] to-[#878787]
-              bg-clip-text
-              text-transparent
-              pl-[0.08em]
-            "
-          >
-            ICE
-          </span>
+          <h1 className="font-display text-[40px] sm:text-[56px] md:text-[68px] lg:text-[74px] leading-[0.99] tracking-tight text-nd-ink mb-5">
+            Talk to the people who <em className="not-italic italic text-nd-accent">shaped you</em>.
+          </h1>
+          <p className="text-base sm:text-lg leading-relaxed text-nd-muted max-w-[460px] mb-8">
+            Not a chatbot pretending. A licensed voice, grounded in everything they&apos;ve actually said — answering you out loud, in your language.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => router.push("/creators")}
+              className="px-7 py-4 rounded-2xl bg-nd-ink text-nd-bg font-bold text-[15px] flex items-center gap-2.5 hover:bg-[#302C36] transition-colors cursor-pointer"
+            >
+              Browse creators
+              <span className="text-lg leading-none">→</span>
+            </button>
+            <button
+              onClick={() => router.push("/for-creators")}
+              className="px-7 py-4 rounded-2xl border border-nd-line bg-white text-nd-ink font-bold text-[15px] hover:border-nd-ink transition-colors cursor-pointer"
+            >
+              I&apos;m a creator
+            </button>
+          </div>
         </div>
 
-        {/* TAGLINE */}
-        <h2 className="font-sans font-extrabold text-[clamp(18px,4.5vw,44px)] text-white/90 uppercase leading-none text-center tracking-tight">
-          THAT FEELS HUMAN
-        </h2>
+        <div className="relative z-10 flex justify-center">
+          <div className="w-full max-w-[340px] rounded-[28px] bg-nd-darker p-6 pb-6 shadow-[0_40px_90px_-30px_rgba(28,26,31,.5)]">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <div className="text-sm font-bold text-nd-bg">Live call</div>
+                <div className="text-[11px] font-semibold text-[#8E76BE] mt-0.5">AI persona · voice licensed</div>
+              </div>
+              <span className="px-2.5 py-1.5 rounded-full bg-[#221E2C] text-xs font-bold text-nd-bg tabular-nums">02:14</span>
+            </div>
 
-        {/* SUBTEXT */}
-        <p className="font-roboto font-light text-xs sm:text-sm md:text-base lg:text-xl text-muted text-center leading-relaxed max-w-2xl lg:max-w-4xl tracking-wide px-2 sm:px-4">
-          Low-latency, expressive speech for apps, agents, and experiences ready to
-          integrate in minutes.
-        </p>
+            <div className="flex justify-center py-4 pb-6">
+              <div className="relative w-[168px] h-[168px] flex items-center justify-center">
+                <span className="absolute rounded-full animate-nd-ripple" style={{ width: 140, height: 140, border: "1px solid rgba(142,118,190,.5)" }} />
+                <span className="absolute rounded-full animate-nd-ripple" style={{ width: 140, height: 140, border: "1px solid rgba(142,118,190,.4)", animationDelay: "1.7s" }} />
+                <span
+                  className="absolute rounded-full animate-nd-spin"
+                  style={{
+                    width: 152,
+                    height: 152,
+                    background: "conic-gradient(from 0deg, rgba(142,118,190,.42), rgba(107,75,168,.05), rgba(192,96,60,.3), rgba(142,118,190,.42))",
+                    filter: "blur(22px)",
+                  }}
+                />
+                <span
+                  className="relative rounded-full animate-nd-breathe"
+                  style={{
+                    width: 112,
+                    height: 112,
+                    background: "radial-gradient(120% 120% at 32% 26%, #C9B6EC 0%, #8E76BE 42%, #5A3E96 78%, #3E2A6B 100%)",
+                    boxShadow: "inset 0 -12px 28px rgba(28,18,54,.6), 0 16px 40px -12px rgba(107,75,168,.65)",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 min-h-[92px]">
+              <div className="flex flex-col gap-1 items-end">
+                <span className="text-[9px] font-extrabold tracking-wide text-[#6F6878]">YOU</span>
+                <span className="text-[13px] leading-relaxed text-[#8B8496] text-right">I&apos;ve been stuck on this for weeks.</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-extrabold tracking-wide text-[#6F6878]">CREATOR</span>
+                <span className="text-[13px] leading-relaxed text-[#F2EFF6]">Let&apos;s talk through it — from the start.</span>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2 rounded-full bg-[#221E2C] w-fit mx-auto px-3.5 py-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#8E76BE] animate-nd-blink" />
+              <span className="text-[11.5px] font-bold text-[#C9C3D1]">Creator is speaking</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

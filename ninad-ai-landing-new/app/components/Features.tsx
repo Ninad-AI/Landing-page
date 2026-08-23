@@ -1,154 +1,42 @@
-"use client";
-
-import { useRef, useState, useCallback } from "react";
-
-const features = [
-  {
-    title: "Acoustic-Aware Architecture",
-    description:
-      "Our models listen like humans do analyzing tone, pitch, rhythm, and emotion to create speech that feels natural, not robotic.",
-  },
-  {
-    title: "Emotion-Driven Output",
-    description:
-      "Every response adapts dynamically - excitement, calm, empathy so the voice matches the moment.",
-  },
-  {
-    title: "Multilingual Core",
-    description:
-      "Built for a global audience, Ninad AI supports cross-language understanding and expressive speech in dozens of languages.",
-  },
-  {
-    title: "Seamless Integration",
-    description:
-      "API-first and developer-friendly easily plug Ninad AI into apps, bots, assistants, and creative tools.",
-  },
+const STEPS = [
+  { n: "01", title: "You speak", ms: "live", body: "Hold the button and talk the way you would to a person. Hindi, Tamil, or all three in one sentence." },
+  { n: "02", title: "We transcribe", ms: "~120ms", body: "Speech-to-text tuned for Indian accents and code-switching, not a US-English model with a shrug." },
+  { n: "03", title: "The persona thinks", ms: "~330ms", body: "A model grounded in that figure's own corpus, behind a versioned system prompt and live guardrails." },
+  { n: "04", title: "They answer", ms: "~250ms", body: "Their licensed voice, streaming back word by word. You hear the reply while it forms." },
 ];
 
 export default function Features() {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [glowPos, setGlowPos] = useState<{ x: number; y: number; visible: boolean }>({
-    x: 0,
-    y: 0,
-    visible: false,
-  });
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!gridRef.current) return;
-
-      const rect = gridRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      setGlowPos({ x, y, visible: true });
-    },
-    []
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    setGlowPos((prev) => ({ ...prev, visible: false }));
-  }, []);
-
   return (
-    <section
-      id="features"
-      className="relative overflow-hidden bg-black py-16 sm:py-20 md:py-24 lg:py-32"
-    >
-      <div className="relative container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16">
-        {/* Header - Spans both columns */}
-        <div className="text-center mb-12 sm:mb-14 md:mb-16">
-          <div className="flex justify-center mb-6 sm:mb-8">
-            <h2
-              className="
-                font-sans font-bold
-                text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px]
-                leading-none tracking-tighter
-                bg-clip-text text-transparent
-                bg-gradient-to-b from-white via-gray-300 to-gray-500
-                pb-4
-              "
-            >
-              Why choose Ninad AI?
+    <section id="features" className="bg-nd-dark text-nd-bg">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 py-16 sm:py-20 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-[.9fr_1.1fr] gap-10 md:gap-16 items-start">
+          <div className="md:sticky md:top-28">
+            <div className="text-xs font-bold tracking-[0.14em] text-[#8E76BE] mb-3.5 uppercase">How it works</div>
+            <h2 className="font-display text-[36px] sm:text-[44px] leading-[1.05] tracking-tight mb-3.5">
+              Four steps, under a second.
             </h2>
-          </div>
-
-          <div className="font-sans font-medium text-base sm:text-lg md:text-2xl text-muted max-w-4xl mx-auto px-1">
-            <p className="mb-1">Experience the next evolution in voice AI.</p>
-            <p>
-              Ninad AI understands tone, emotion, and context to create voices
-              that feel truly human.
+            <p className="text-[15px] leading-relaxed text-[#A8A2AE] max-w-[380px] mb-7">
+              Speech in, speech out. No typing, no waiting for a paragraph to render.
             </p>
+            <div className="inline-flex items-center gap-3 rounded-2xl bg-[#262230] px-5 py-4">
+              <span className="font-display text-3xl leading-none">~700ms</span>
+              <span className="text-[13px] leading-tight text-[#A8A2AE] max-w-[200px]">round trip — about the length of a held breath.</span>
+            </div>
           </div>
-        </div>
-
-        {/* Features Grid Wrapper */}
-        <div
-          ref={gridRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="relative grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 rounded-[24px] overflow-hidden"
-        >
-          {/* Cursor-following glow (Limited to the grid's area) */}
-          <>
-            {/* Core glow */}
-            <div
-              className="pointer-events-none absolute w-[90px] h-[90px] rounded-full blur-[25px] z-0 hidden md:block"
-              style={{
-                left: glowPos.x - 45,
-                top: glowPos.y - 45,
-                backgroundColor: "#B400FF",
-                opacity: glowPos.visible ? 1 : 0,
-              }}
-            />
-
-            {/* Outer glow */}
-            <div
-              className="pointer-events-none absolute w-[200px] h-[200px] rounded-full blur-[90px] z-0 hidden md:block"
-              style={{
-                left: glowPos.x - 100,
-                top: glowPos.y - 100,
-                backgroundColor: "#8A00C4",
-                opacity: glowPos.visible ? 0.85 : 0,
-              }}
-            />
-          </>
-
-
-          {features.map((feature, index) => {
-            // Gradient peaking at the center intersection relative to their position
-            const borderGradient =
-              index === 0 ? "bg-gradient-to-br from-transparent via-primary/10 to-primary-light" :
-                index === 1 ? "bg-gradient-to-bl from-transparent via-primary/10 to-primary-light" :
-                  index === 2 ? "bg-gradient-to-tr from-transparent via-primary/10 to-primary-light" :
-                    "bg-gradient-to-tl from-transparent via-primary/10 to-primary-light";
-
-            return (
-              <div
-                key={index}
-                className={`relative p-[1px] rounded-[24px] z-10 ${borderGradient} flex`}
-              >
-                <div className="w-full h-full px-5 py-7 sm:px-6 sm:py-8 md:px-10 md:py-12 lg:px-14 lg:py-16 flex items-center justify-center bg-black rounded-[23px]">
-                  <div className="w-full space-y-4 sm:space-y-5 md:space-y-6 text-center flex flex-col items-center max-w-md">
-                    <h3
-                      className="
-                        font-sans font-extrabold
-                        text-2xl sm:text-[28px] md:text-[30px] leading-[0.98] tracking-[-0.6px]
-                        bg-clip-text text-transparent
-                        bg-gradient-to-b from-[#FFFFFF] to-[#B18BFF]
-                        mb-4
-                      "
-                    >
-                      {feature.title}
-                    </h3>
-                    <p className="font-sans font-normal text-sm md:text-base leading-relaxed text-[#949494] max-w-full sm:max-w-[85%]">
-                      {feature.description}
-                    </p>
+          <div className="flex flex-col">
+            {STEPS.map((s) => (
+              <div key={s.n} className="flex gap-6 py-6 border-b border-[#302C36]">
+                <div className="flex-none w-11 font-display text-3xl leading-none text-[#8E76BE]">{s.n}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-3.5">
+                    <span className="text-lg font-bold tracking-tight">{s.title}</span>
+                    <span className="flex-none text-xs font-bold text-[#6F6878] tabular-nums">{s.ms}</span>
                   </div>
+                  <div className="text-[14.5px] leading-relaxed text-[#A8A2AE] mt-1.5 max-w-[480px]">{s.body}</div>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
     </section>

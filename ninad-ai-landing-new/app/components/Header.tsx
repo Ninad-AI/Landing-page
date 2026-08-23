@@ -8,14 +8,13 @@ import { useAuthStore } from "../lib/stores";
 
 const NAV_LINKS = [
   { href: "/#features", label: "Features" },
-  { href: "/#products", label: "Products" },
   { href: "/creators", label: "Creators" },
+  { href: "/for-creators", label: "For creators" },
 ];
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpenPath, setMobileMenuOpenPath] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout, isHydrated } = useAuthStore();
@@ -36,20 +35,6 @@ export default function Header() {
       router.push("/#hero");
     }
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScroll = window.scrollY || document.documentElement.scrollTop;
-      setIsScrolled(currentScroll > 10);
-    };
-
-    handleScroll();
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [pathname]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -89,11 +74,9 @@ export default function Header() {
      ═══════════════════════════════════════════════ */
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isMobileMenuOpen
+      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding,box-shadow] duration-300 ease-out ${isMobileMenuOpen
         ? "bg-transparent py-6 border-b border-transparent"
-        : isScrolled
-          ? "bg-black/55 backdrop-blur-xl py-6 border-b border-white/10"
-          : "bg-transparent py-8 border-b border-transparent"
+        : "bg-nd-bg/90 backdrop-blur-xl py-5 border-b border-transparent shadow-[0_1px_0_rgba(28,26,31,0.04)]"
         }`}
     >
       <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-center justify-between lg:justify-center relative">
@@ -114,13 +97,13 @@ export default function Header() {
 
         {/* Desktop Nav */}
         {!isMinimalHeader && (
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-6">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className={`font-sans text-sm font-medium hover:text-white transition-colors uppercase tracking-wide ${
-                  pathname === link.href ? "text-white" : "text-white/70"
+                className={`font-nd-sans text-[13.5px] font-bold rounded-full px-4 py-2 transition-colors hover:bg-nd-tint ${
+                  pathname === link.href ? "bg-nd-tint text-nd-ink" : "text-nd-muted"
                 }`}
               >
                 {link.label}
@@ -129,8 +112,8 @@ export default function Header() {
             {showAnalyticsLink && (
               <Link
                 href={user?.role === 'admin' ? '/admin/analytics' : '/dashboard'}
-                className={`font-sans text-sm font-medium hover:text-white transition-colors uppercase tracking-wide ${
-                  pathname === '/admin/analytics' || pathname === '/dashboard' ? "text-white" : "text-white/70"
+                className={`font-nd-sans text-[13.5px] font-bold rounded-full px-4 py-2 transition-colors hover:bg-nd-tint ${
+                  pathname === '/admin/analytics' || pathname === '/dashboard' ? "bg-nd-tint text-nd-ink" : "text-nd-muted"
                 }`}
               >
                 Analytics
@@ -145,7 +128,7 @@ export default function Header() {
             {isAdminPage ? (
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 rounded-full bg-transparent border border-white/15 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white hover:border-white/40 cursor-pointer"
+                className="px-4 py-2 rounded-full bg-transparent border border-nd-line text-nd-muted font-nd-sans font-medium text-sm transition-all duration-300 hover:text-nd-ink hover:border-nd-ink cursor-pointer"
               >
                 Logout
               </button>
@@ -154,7 +137,7 @@ export default function Header() {
                 type="button"
                 aria-label="Close voice chat"
                 onClick={handleVoiceChatClose}
-                className="group inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-black/45 text-white/85 backdrop-blur-md transition-all duration-300 hover:border-rose-200 hover:bg-rose-400/80 hover:text-white"
+                className="group inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-nd-line bg-nd-bg text-nd-ink transition-all duration-300 hover:border-nd-ink hover:bg-nd-ink hover:text-nd-bg"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -179,7 +162,7 @@ export default function Header() {
                 {/* Dashboard Link */}
                 <Link
                   href="/dashboard"
-                  className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-sans font-semibold text-sm transition-all duration-300 hover:bg-white/20 hover:border-white/40"
+                  className="px-4 py-2 rounded-full bg-nd-tint border border-nd-line text-nd-ink font-nd-sans font-semibold text-sm transition-all duration-300 hover:bg-nd-panel"
                 >
                   Dashboard
                 </Link>
@@ -188,7 +171,7 @@ export default function Header() {
                 <button
                   onClick={handleLogout}
                   aria-label="Logout"
-                  className="w-9 h-9 rounded-full bg-transparent border border-white/15 text-white/70 transition-all duration-300 hover:text-white hover:border-white/40 flex items-center justify-center cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-transparent border border-nd-line text-nd-muted transition-all duration-300 hover:text-nd-ink hover:border-nd-ink flex items-center justify-center cursor-pointer"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -207,15 +190,15 @@ export default function Header() {
               <>
                 <Link
                   href={`/login?redirect=${encodeURIComponent(pathname)}`}
-                  className="px-3 py-2 text-white/70 font-sans font-medium text-sm transition-all duration-300 hover:text-white"
+                  className="px-3 py-2 text-nd-muted font-nd-sans font-medium text-sm transition-all duration-300 hover:text-nd-ink"
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/book-demo"
-                  className="px-5 py-2.5 rounded-full bg-white text-black font-sans font-bold text-sm transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]"
+                  href="/creators"
+                  className="px-5 py-2.5 rounded-full bg-nd-ink text-nd-bg font-nd-sans font-bold text-sm transition-all duration-300 hover:bg-[#302C36]"
                 >
-                  Book Demo
+                  Browse creators
                 </Link>
               </>
             )}
@@ -236,88 +219,93 @@ export default function Header() {
             }
           >
             <span
-              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-[4.5px]" : ""
+              className={`block w-6 h-[2.5px] bg-nd-ink rounded-full transition-all duration-300 ${isMobileMenuOpen ? "rotate-45 translate-y-[4.5px]" : ""
                 }`}
             />
             <span
-              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
+              className={`block w-6 h-[2.5px] bg-nd-ink rounded-full transition-all duration-300 ${isMobileMenuOpen ? "opacity-0" : ""
                 }`}
             />
             <span
-              className={`block w-6 h-[2.5px] bg-white rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-[4.5px]" : ""
+              className={`block w-6 h-[2.5px] bg-nd-ink rounded-full transition-all duration-300 ${isMobileMenuOpen ? "-rotate-45 -translate-y-[4.5px]" : ""
                 }`}
             />
           </button>
         )}
 
-        {/* Mobile Menu Content */}
-        <div
-          id="mobile-menu"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Navigation menu"
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex min-h-dvh flex-col items-center justify-start gap-6 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+5.5rem)] transition-transform duration-500 ease-in-out ${isMobileMenuOpen
-            ? "translate-x-0"
-            : "translate-x-full"
-            }`}
-        >
-          <nav className="flex flex-col items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setMobileMenuOpenPath(null)}
-                className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-            {showAnalyticsLink && (
-              <Link
-                href={user?.role === 'admin' ? '/admin/analytics' : '/dashboard'}
-                onClick={() => setMobileMenuOpenPath(null)}
-                className="font-sans text-xl sm:text-2xl font-bold text-white hover:text-primary transition-colors"
-              >
-                Analytics
-              </Link>
-            )}
-          </nav>
-
-          {isHydrated && isAuthenticated && user ? (
-            <div className="flex flex-col items-center gap-4">
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileMenuOpenPath(null)}
-                className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
-              >
-                Dashboard
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="px-8 py-3 rounded-full bg-transparent border border-white/20 text-white/70 font-sans font-medium text-base hover:text-white hover:border-white/40 transition-colors cursor-pointer"
-              >
-                Logout
-              </button>
+        {/* Mobile Menu Content — top dropdown sheet, sits below the fixed header (lower z-index) */}
+        {!isMinimalHeader && isMobileMenuOpen && (
+          <div
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            className="lg:hidden fixed inset-0 z-40 bg-[rgba(28,26,31,.5)] animate-nd-fade"
+            onClick={() => setMobileMenuOpenPath(null)}
+          >
+            <div
+              className="absolute left-0 right-0 top-0 bg-nd-bg rounded-b-3xl px-5 pb-5 animate-nd-up"
+              style={{ paddingTop: "calc(env(safe-area-inset-top) + 90px)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <nav className="flex flex-col">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpenPath(null)}
+                    className="text-left py-4 border-b border-nd-line-soft font-display text-2xl text-nd-ink"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                {showAnalyticsLink && (
+                  <Link
+                    href={user?.role === 'admin' ? '/admin/analytics' : '/dashboard'}
+                    onClick={() => setMobileMenuOpenPath(null)}
+                    className="text-left py-4 border-b border-nd-line-soft font-display text-2xl text-nd-ink"
+                  >
+                    Analytics
+                  </Link>
+                )}
+                {isHydrated && isAuthenticated && user ? (
+                  <>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpenPath(null)}
+                      className="text-left py-4 border-b border-nd-line-soft font-display text-2xl text-nd-ink"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="text-left py-4 font-display text-2xl text-nd-accent cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/creators"
+                      onClick={() => setMobileMenuOpenPath(null)}
+                      className="text-left py-4 border-b border-nd-line-soft font-display text-2xl text-nd-ink"
+                    >
+                      Browse creators
+                    </Link>
+                    <Link
+                      href={`/login?redirect=${encodeURIComponent(pathname)}`}
+                      onClick={() => setMobileMenuOpenPath(null)}
+                      className="text-left py-4 font-display text-2xl text-nd-accent"
+                    >
+                      Sign in
+                    </Link>
+                  </>
+                )}
+              </nav>
             </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3">
-              <Link
-                href="/book-demo"
-                onClick={() => setMobileMenuOpenPath(null)}
-                className="px-8 py-4 rounded-full bg-primary text-white font-sans font-bold text-lg shadow-lg hover:bg-primary-light transition-colors"
-              >
-                Book Demo
-              </Link>
-              <Link
-                href={`/login?redirect=${encodeURIComponent(pathname)}`}
-                onClick={() => setMobileMenuOpenPath(null)}
-                className="px-8 py-3 text-sm sm:text-base font-sans font-medium text-white/70 hover:text-white transition-colors"
-              >
-                Sign In
-              </Link>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );

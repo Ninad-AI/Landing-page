@@ -8,6 +8,7 @@ import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 import { useRazorpay } from "../../hooks/useRazorpay";
 import { useSlotAvailability } from "../../hooks/useSlotAvailability";
 import { HEALTH_POLL_INTERVAL_SECONDS } from "../../lib/systemHealthStore";
+import NdModal from "../ui/NdModal";
 import MinutesSelector, { type MinutePlan } from "./MinutesSelector";
 
 const DEFAULT_PROVIDER_NAME = "deepgram";
@@ -17,9 +18,9 @@ const HEALTH_RECHECK_SECONDS = HEALTH_POLL_INTERVAL_SECONDS;
 const DURATION_PLANS: MinutePlan[] = [
   { minutes: 1, price: 19, label: "1 minute", featured: true },
   { minutes: 3, price: 59, label: "3 minutes" },
-  { minutes: 5, price: 79, label: "5 minutes" },
-  { minutes: 10, price: 149, label: "10 minutes" },
-  { minutes: 15, price: 199, label: "15 minutes" },
+  { minutes: 5, price: 99, label: "5 minutes" },
+  { minutes: 10, price: 189, label: "10 minutes" },
+  { minutes: 15, price: 279, label: "15 minutes" },
 ];
 
 const STAR_COPY: Record<FeedbackStars, string> = {
@@ -296,195 +297,182 @@ export default function PaymentModal({
   const activeStars = hoverStars || selectedStars;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={handleClose} />
-      <div className="relative w-[92vw] max-w-[360px] sm:w-full sm:max-w-md animate-fade-in-up">
-        <div
-          className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[400px] sm:min-h-[440px] flex flex-col justify-center overflow-hidden"
-          style={{ borderRadius: "1.5rem" }}
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
+    <NdModal onClose={handleClose} maxWidth={400}>
+      <div className="min-h-[380px] sm:min-h-[420px] flex flex-col justify-center">
+        <div className="w-full max-w-[340px] mx-auto flex flex-col justify-center">
+          {feedbackMode ? (
+            <div className="w-full">
+              <h3 className="font-display text-[32px] sm:text-[34px] mb-1.5 text-nd-ink tracking-tight leading-tight">
+                Session feedback.
+              </h3>
+              <p className="text-[14px] sm:text-[15px] text-nd-dim mb-7 font-medium leading-snug">
+                Rate your experience with {creatorName}.
+              </p>
 
-          <div className="relative z-10 flex flex-col h-full justify-center items-center">
-            <div className="w-full max-w-[340px] flex flex-col justify-center">
-              {feedbackMode ? (
+              <div className="w-full flex flex-col items-center gap-4 sm:gap-5">
                 <div className="w-full">
-                  <h3 className="text-[30px] sm:text-[32px] md:text-[34px] font-black mb-1.5 sm:mb-2 text-white tracking-tight leading-tight px-4 sm:px-6">
-                    Session feedback.
-                  </h3>
-                  <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#A1A1A1] mb-6 sm:mb-7 font-medium leading-snug px-4 sm:px-6">
-                    Rate your experience with {creatorName}.
-                  </p>
+                  <label className="block text-[11px] font-bold text-nd-dim uppercase tracking-wider mb-2">Rating</label>
+                  <div role="radiogroup" aria-label="Rate your session" className="flex items-center gap-2.5">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const value = star as FeedbackStars;
+                      const isActive = value <= activeStars;
+                      const isSelected = value === selectedStars;
 
-                  <div className="w-full animate-fade-in-up flex flex-col items-center gap-4 sm:gap-5 mt-1 sm:mt-2">
-                    <div className="w-[86%] sm:w-[320px]">
-                      <label className="block text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2">Rating</label>
-                      <div role="radiogroup" aria-label="Rate your session" className="flex items-center gap-2.5">
-                        {[1, 2, 3, 4, 5].map((star) => {
-                          const value = star as FeedbackStars;
-                          const isActive = value <= activeStars;
-                          const isSelected = value === selectedStars;
-
-                          return (
-                            <button
-                              key={value}
-                              type="button"
-                              role="radio"
-                              aria-checked={isSelected}
-                              aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
-                              onClick={() => {
-                                setSelectedStars(value);
-                                setAttemptedSubmit(false);
-                              }}
-                              onMouseEnter={() => setHoverStars(value)}
-                              onMouseLeave={() => setHoverStars(0)}
-                              className="transition-transform duration-200 hover:scale-110"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                className={`h-8 w-8 ${
-                                  isActive
-                                    ? "fill-amber-300 text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.45)]"
-                                    : "fill-transparent text-white/25"
-                                }`}
-                              >
-                                <path
-                                  stroke="currentColor"
-                                  strokeWidth="1.5"
-                                  d="m12 2.5 2.94 5.95 6.56.95-4.75 4.63 1.12 6.54L12 17.47 6.13 20.57l1.12-6.54L2.5 9.4l6.56-.95L12 2.5Z"
-                                />
-                              </svg>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <p className="mt-2 text-xs text-white/50">
-                        {selectedStars === 0 ? "Select a star rating to continue." : STAR_COPY[selectedStars]}
-                      </p>
-                      {attemptedSubmit && selectedStars === 0 && (
-                        <p className="mt-2 text-xs font-medium text-rose-300">Please select a star rating to continue.</p>
-                      )}
-                    </div>
-
-                    <div className="w-[86%] sm:w-[320px]">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-[11px] font-bold text-white/40 uppercase tracking-wider">Comments</label>
-                        <span className="text-[11px] text-white/30">{comment.length}/1000</span>
-                      </div>
-                      <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Tell us what worked well or what should improve."
-                        rows={4}
-                        maxLength={1000}
-                        className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm font-medium outline-none focus:border-white/30 transition-colors resize-none"
-                      />
-                    </div>
-
-                    {feedbackError && (
-                      <div className="w-[86%] sm:w-[320px] rounded-xl border border-rose-300/30 bg-rose-500/10 px-3 py-2">
-                        <p className="text-xs font-medium text-rose-100">{feedbackError}</p>
-                      </div>
-                    )}
-
-                    <div className="w-full flex justify-center pt-1 sm:pt-2">
-                      <button
-                        onClick={handleFeedbackSubmit}
-                        disabled={isSubmittingFeedback}
-                        className="w-[86%] sm:w-[320px] h-[64px] rounded-2xl font-semibold text-lg bg-white text-black transition-all duration-500 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isSubmittingFeedback ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                            Submitting Feedback...
-                          </span>
-                        ) : (
-                          "Submit Feedback"
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="text-left w-full sm:w-[320px] mx-auto px-4 sm:px-6">
-                    <h3 className="text-[30px] sm:text-[32px] md:text-[34px] font-black mb-1.5 sm:mb-2 text-white tracking-tight leading-tight">
-                      Duration.
-                    </h3>
-                    <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#A1A1A1] mb-8 sm:mb-9 font-medium leading-snug">
-                      Select your preferred session length.
-                    </p>
-                  </div>
-
-                  <div className="w-full animate-fade-in-up flex flex-col items-center gap-4 sm:gap-5 mt-1 sm:mt-2">
-                    <MinutesSelector
-                      plans={DURATION_PLANS}
-                      selectedMinutes={selectedMinutes}
-                      onSelectMinutes={(minutes) => {
-                        setSelectedMinutes(minutes);
-                        setBookingUnavailableMessage(null);
-                      }}
-                      disabled={isBusy}
-                    />
-
-                    {slots.isLoaded && slots.isFull && (
-                      <div className="w-[86%] sm:w-[320px] rounded-xl border border-amber-200/25 bg-amber-500/10 px-4 py-3.5">
-                        <div className="flex items-start gap-2.5">
-                          <svg className="w-5 h-5 text-amber-300 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                          onClick={() => {
+                            setSelectedStars(value);
+                            setAttemptedSubmit(false);
+                          }}
+                          onMouseEnter={() => setHoverStars(value)}
+                          onMouseLeave={() => setHoverStars(0)}
+                          className="transition-transform duration-200 hover:scale-110 cursor-pointer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            className={`h-8 w-8 ${
+                              isActive ? "fill-amber-400 text-amber-400" : "fill-transparent text-nd-line"
+                            }`}
+                          >
+                            <path
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              d="m12 2.5 2.94 5.95 6.56.95-4.75 4.63 1.12 6.54L12 17.47 6.13 20.57l1.12-6.54L2.5 9.4l6.56-.95L12 2.5Z"
+                            />
                           </svg>
-                          <div>
-                            <p className="text-[13px] text-amber-100 font-semibold">All slots are currently full</p>
-                            <p className="text-[11px] text-amber-200/70 mt-1 leading-relaxed">
-                              {slots.activeSessions} of {slots.maxSlots} sessions active.
-                              Please wait for a slot to free up.
-                            </p>
-                            <p className="text-[11px] text-amber-200/50 mt-1.5 font-mono">
-                              {slots.isChecking ? 'Checking...' : `Rechecking in ${nextCheckIn}s`}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-2 text-xs text-nd-dim">
+                    {selectedStars === 0 ? "Select a star rating to continue." : STAR_COPY[selectedStars]}
+                  </p>
+                  {attemptedSubmit && selectedStars === 0 && (
+                    <p className="mt-2 text-xs font-medium text-red-600">Please select a star rating to continue.</p>
+                  )}
+                </div>
 
-                    {bookingUnavailableMessage && !slots.isFull && (
-                      <div className="w-[86%] sm:w-[320px] rounded-xl border border-amber-200/30 bg-amber-500/10 px-4 py-3">
-                        <p className="text-[12px] text-amber-100 font-medium">{bookingUnavailableMessage}</p>
-                      </div>
-                    )}
+                <div className="w-full">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[11px] font-bold text-nd-dim uppercase tracking-wider">Comments</label>
+                    <span className="text-[11px] text-nd-dim">{comment.length}/1000</span>
+                  </div>
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Tell us what worked well or what should improve."
+                    rows={4}
+                    maxLength={1000}
+                    className="w-full px-4 py-3 rounded-xl bg-nd-panel border border-nd-line text-nd-ink placeholder-nd-dim text-sm font-medium outline-none focus:border-nd-accent transition-colors resize-none"
+                  />
+                </div>
 
-                    <div className="w-full flex justify-center pt-1 sm:pt-2">
-                      <button
-                        onClick={() => void handlePayNow()}
-                        disabled={!selectedDuration || isBusy || slots.isFull || isAwaitingInitialSlotCheck}
-                        className={`w-[86%] sm:w-[320px] h-[64px] rounded-2xl font-semibold text-lg transition-all duration-500 ${
-                          slots.isFull
-                            ? "bg-white/5 text-white/25 border border-white/8 cursor-not-allowed"
-                            : selectedDuration
-                              ? "bg-gradient-to-r from-pink-500 via-red-500 to-orange-500 text-white shadow-[0_10px_40px_rgba(255,80,80,0.35)] hover:scale-[1.02]"
-                              : "bg-white/10 text-white/30 border border-white/10"
-                        } disabled:cursor-not-allowed disabled:opacity-70`}
-                      >
-                        {isVerifyingPayment
-                          ? "Verifying Payment..."
-                          : isCreatingOrder
-                            ? "Opening Checkout..."
-                            : isAwaitingInitialSlotCheck
-                              ? "Checking Slots..."
-                            : slots.isFull
-                              ? "Waiting for Slots..."
-                              : "Pay Now"}
-                      </button>
+                {feedbackError && (
+                  <div className="w-full rounded-xl border border-red-200 bg-red-50 px-3 py-2">
+                    <p className="text-xs font-medium text-red-700">{feedbackError}</p>
+                  </div>
+                )}
+
+                <div className="w-full flex justify-center pt-1">
+                  <button
+                    onClick={handleFeedbackSubmit}
+                    disabled={isSubmittingFeedback}
+                    className="w-full h-[58px] rounded-2xl font-bold text-[15px] bg-nd-ink text-nd-bg transition-all duration-300 hover:bg-[#302C36] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    {isSubmittingFeedback ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Submitting Feedback...
+                      </span>
+                    ) : (
+                      "Submit Feedback"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="text-left w-full mb-7">
+                <h3 className="font-display text-[32px] sm:text-[34px] mb-1.5 text-nd-ink tracking-tight leading-tight">
+                  Duration.
+                </h3>
+                <p className="text-[14px] sm:text-[15px] text-nd-dim font-medium leading-snug">
+                  Select your preferred session length.
+                </p>
+              </div>
+
+              <div className="w-full flex flex-col items-center gap-4 sm:gap-5">
+                <MinutesSelector
+                  plans={DURATION_PLANS}
+                  selectedMinutes={selectedMinutes}
+                  onSelectMinutes={(minutes) => {
+                    setSelectedMinutes(minutes);
+                    setBookingUnavailableMessage(null);
+                  }}
+                  disabled={isBusy}
+                />
+
+                {slots.isLoaded && slots.isFull && (
+                  <div className="w-full rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3.5">
+                    <div className="flex items-start gap-2.5">
+                      <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <div>
+                        <p className="text-[13px] text-amber-800 font-semibold">All slots are currently full</p>
+                        <p className="text-[11px] text-amber-700/80 mt-1 leading-relaxed">
+                          {slots.activeSessions} of {slots.maxSlots} sessions active.
+                          Please wait for a slot to free up.
+                        </p>
+                        <p className="text-[11px] text-amber-700/60 mt-1.5 font-mono">
+                          {slots.isChecking ? 'Checking...' : `Rechecking in ${nextCheckIn}s`}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
+                )}
+
+                {bookingUnavailableMessage && !slots.isFull && (
+                  <div className="w-full rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3">
+                    <p className="text-[12px] text-amber-800 font-medium">{bookingUnavailableMessage}</p>
+                  </div>
+                )}
+
+                <div className="w-full flex justify-center pt-1">
+                  <button
+                    onClick={() => void handlePayNow()}
+                    disabled={!selectedDuration || isBusy || slots.isFull || isAwaitingInitialSlotCheck}
+                    className={`w-full h-[58px] rounded-2xl font-bold text-[15px] transition-all duration-300 cursor-pointer ${
+                      slots.isFull
+                        ? "bg-nd-panel text-nd-dim border border-nd-line cursor-not-allowed"
+                        : selectedDuration
+                          ? "bg-nd-ink text-nd-bg hover:bg-[#302C36]"
+                          : "bg-nd-panel text-nd-dim border border-nd-line"
+                    } disabled:cursor-not-allowed disabled:opacity-70`}
+                  >
+                    {isVerifyingPayment
+                      ? "Verifying Payment..."
+                      : isCreatingOrder
+                        ? "Opening Checkout..."
+                        : isAwaitingInitialSlotCheck
+                          ? "Checking Slots..."
+                        : slots.isFull
+                          ? "Waiting for Slots..."
+                          : "Pay Now"}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-    </div>
+    </NdModal>
   );
 }

@@ -28,20 +28,20 @@ function StatCard({
   loading?: boolean;
 }) {
   const ring: Record<string, string> = {
-    primary: 'border-primary/25 hover:border-primary/50 hover:shadow-[0_0_28px_rgba(97,37,216,0.18)]',
-    cyan: 'border-accent-blue/20 hover:border-accent-blue/45 hover:shadow-[0_0_28px_rgba(0,169,255,0.15)]',
-    amber: 'border-amber-500/20 hover:border-amber-400/45 hover:shadow-[0_0_28px_rgba(245,158,11,0.15)]',
-    emerald: 'border-emerald-500/20 hover:border-emerald-400/45 hover:shadow-[0_0_28px_rgba(16,185,129,0.15)]',
+    primary: 'border-nd-line hover:border-nd-accent/40',
+    cyan: 'border-nd-line hover:border-blue-300',
+    amber: 'border-nd-line hover:border-amber-300',
+    emerald: 'border-nd-line hover:border-emerald-300',
   };
   const iconBg: Record<string, string> = {
-    primary: 'bg-primary/20 text-primary-light',
-    cyan: 'bg-accent-blue/15 text-accent-cyan',
-    amber: 'bg-amber-500/15 text-amber-300',
-    emerald: 'bg-emerald-500/15 text-emerald-300',
+    primary: 'bg-nd-tint text-nd-accent',
+    cyan: 'bg-blue-50 text-blue-600',
+    amber: 'bg-amber-50 text-amber-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
   };
 
   return (
-    <div className={`glass border rounded-2xl p-4 sm:p-6 transition-all duration-300 ${ring[accent]}`}>
+    <div className={`bg-white border rounded-2xl p-4 sm:p-6 transition-all duration-300 ${ring[accent]}`}>
       <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center ${iconBg[accent]}`}>
           {icon}
@@ -49,14 +49,14 @@ function StatCard({
       </div>
       {loading ? (
         <div className="space-y-2 mt-1">
-          <div className="h-6 w-20 rounded-lg bg-white/10 animate-pulse" />
-          <div className="h-3 w-14 rounded bg-white/5 animate-pulse" />
+          <div className="h-6 w-20 rounded-lg bg-nd-panel animate-pulse" />
+          <div className="h-3 w-14 rounded bg-nd-panel animate-pulse" />
         </div>
       ) : (
         <>
-          <p className="font-sans font-extrabold text-xl sm:text-2xl text-white tracking-tight">{value}</p>
-          <p className="text-xs sm:text-sm font-semibold text-white/55 mt-1">{label}</p>
-          {sub && <p className="text-[10px] sm:text-xs text-white/30 mt-0.5">{sub}</p>}
+          <p className="font-nd-sans font-extrabold text-xl sm:text-2xl text-nd-ink tracking-tight">{value}</p>
+          <p className="text-xs sm:text-sm font-semibold text-nd-muted mt-1">{label}</p>
+          {sub && <p className="text-[10px] sm:text-xs text-nd-dim mt-0.5">{sub}</p>}
         </>
       )}
     </div>
@@ -70,14 +70,14 @@ function StarRating({ rating }: { rating?: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <svg
           key={i}
-          className={`w-3.5 h-3.5 ${i <= Math.round(r) ? 'text-amber-400' : 'text-white/15'}`}
+          className={`w-3.5 h-3.5 ${i <= Math.round(r) ? 'text-amber-400' : 'text-nd-line'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
-      <span className="ml-1.5 text-xs text-white/50">{r > 0 ? r.toFixed(1) : '—'}</span>
+      <span className="ml-1.5 text-xs text-nd-dim">{r > 0 ? r.toFixed(1) : '—'}</span>
     </div>
   );
 }
@@ -162,10 +162,10 @@ export default function InfluencerDashboard() {
   const revenue = myRecord?.revenue;
 
   return (
-    <div className="animate-fade-in-up delay-100 space-y-8">
+    <div className="animate-nd-up space-y-8">
       {/* Error Banner */}
       {error && (
-        <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 px-5 py-3 text-sm text-rose-300">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -225,38 +225,38 @@ export default function InfluencerDashboard() {
       {/* Influencer Leaderboard + Feedback */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Influencer Breakdown */}
-        <div className="glass border border-white/15 rounded-2xl p-6">
+        <div className="bg-white border border-nd-line rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <svg className="w-4 h-4 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-8 h-8 rounded-lg bg-nd-tint flex items-center justify-center">
+              <svg className="w-4 h-4 text-nd-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Your Performance</h3>
+            <h3 className="font-nd-sans font-bold text-base text-nd-ink">Your Performance</h3>
           </div>
 
           {loading ? (
             <div className="space-y-3">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div key={i} className="h-16 rounded-lg bg-nd-panel animate-pulse" />
               ))}
             </div>
           ) : !myRecord ? (
-            <p className="text-sm text-white/30 text-center py-6">No performance data available yet.</p>
+            <p className="text-sm text-nd-dim text-center py-6">No performance data available yet.</p>
           ) : (
             <div className="space-y-4">
               {/* My profile card */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-primary/35 bg-primary/10">
-                <div className="w-12 h-12 rounded-full bg-primary/25 flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-nd-accent/25 bg-nd-tint">
+                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-nd-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-base font-bold text-white truncate">
+                  <p className="text-base font-bold text-nd-ink truncate">
                     {myRecord.influencer_name || user?.name || 'You'}
                   </p>
-                  <p className="text-xs text-white/45 mt-0.5">
+                  <p className="text-xs text-nd-muted mt-0.5">
                     {(myRecord.calls ?? myRecord.sessions ?? 0)} calls &bull; {myRecord.minutes ?? 0} min
                   </p>
                 </div>
@@ -265,19 +265,19 @@ export default function InfluencerDashboard() {
 
               {/* Stats breakdown */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                <div className="rounded-xl bg-white/5 border border-white/8 p-2 sm:p-3 text-center">
-                  <p className="font-extrabold text-base sm:text-lg text-white">{myRecord.calls ?? myRecord.sessions ?? 0}</p>
-                  <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Calls</p>
+                <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-2 sm:p-3 text-center">
+                  <p className="font-extrabold text-base sm:text-lg text-nd-ink">{myRecord.calls ?? myRecord.sessions ?? 0}</p>
+                  <p className="text-[10px] sm:text-[11px] text-nd-dim mt-0.5">Calls</p>
                 </div>
-                <div className="rounded-xl bg-white/5 border border-white/8 p-2 sm:p-3 text-center">
-                  <p className="font-extrabold text-base sm:text-lg text-white">{myRecord.minutes ?? 0}</p>
-                  <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Minutes</p>
+                <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-2 sm:p-3 text-center">
+                  <p className="font-extrabold text-base sm:text-lg text-nd-ink">{myRecord.minutes ?? 0}</p>
+                  <p className="text-[10px] sm:text-[11px] text-nd-dim mt-0.5">Minutes</p>
                 </div>
-                <div className="rounded-xl bg-white/5 border border-white/8 p-2 sm:p-3 text-center">
-                  <p className="font-extrabold text-base sm:text-lg text-white">
+                <div className="rounded-xl bg-nd-panel border border-nd-line-soft p-2 sm:p-3 text-center">
+                  <p className="font-extrabold text-base sm:text-lg text-nd-ink">
                     {myRecord.avg_rating != null ? myRecord.avg_rating.toFixed(1) : '—'}
                   </p>
-                  <p className="text-[10px] sm:text-[11px] text-white/40 mt-0.5">Avg Rating</p>
+                  <p className="text-[10px] sm:text-[11px] text-nd-dim mt-0.5">Avg Rating</p>
                 </div>
               </div>
             </div>
@@ -285,59 +285,59 @@ export default function InfluencerDashboard() {
         </div>
 
         {/* Feedback Summary — personal view */}
-        <div className="glass border border-white/15 rounded-2xl p-6">
+        <div className="bg-white border border-nd-line rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
-              <svg className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Your Feedback</h3>
+            <h3 className="font-nd-sans font-bold text-base text-nd-ink">Your Feedback</h3>
           </div>
 
           {loading ? (
             <div className="space-y-3">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-16 rounded-lg bg-white/5 animate-pulse" />
+                <div key={i} className="h-16 rounded-lg bg-nd-panel animate-pulse" />
               ))}
             </div>
           ) : myFeedback ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-amber-500/30 bg-amber-500/8">
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-amber-200 bg-amber-50">
                 <div className="text-center">
-                  <p className="text-3xl font-extrabold text-white">{myFeedback.avg_rating?.toFixed(1) ?? '—'}</p>
-                  <p className="text-[10px] text-white/40 mt-0.5">avg rating</p>
+                  <p className="text-3xl font-extrabold text-nd-ink">{myFeedback.avg_rating?.toFixed(1) ?? '—'}</p>
+                  <p className="text-[10px] text-nd-dim mt-0.5">avg rating</p>
                 </div>
                 <div className="flex-1">
                   <StarRating rating={myFeedback.avg_rating} />
-                  <p className="text-xs text-white/35 mt-1">
+                  <p className="text-xs text-nd-muted mt-1">
                     {(myFeedback.total_feedback ?? myFeedback.feedback_count ?? 0)} review{(myFeedback.total_feedback ?? myFeedback.feedback_count ?? 0) !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
             </div>
           ) : !feedback?.influencer_feedback?.length && feedback?.overall_avg_rating != null ? (
-            <div className="p-4 rounded-xl bg-white/5 border border-white/8 text-center">
-              <p className="text-xs text-white/40 uppercase tracking-wider mb-1">Platform Average</p>
-              <p className="text-3xl font-extrabold text-white">{feedback.overall_avg_rating.toFixed(1)}</p>
+            <div className="p-4 rounded-xl bg-nd-panel border border-nd-line-soft text-center">
+              <p className="text-xs text-nd-dim uppercase tracking-wider mb-1">Platform Average</p>
+              <p className="text-3xl font-extrabold text-nd-ink">{feedback.overall_avg_rating.toFixed(1)}</p>
               <StarRating rating={feedback.overall_avg_rating} />
             </div>
           ) : (
-            <p className="text-sm text-white/30 text-center py-6">No feedback data available yet.</p>
+            <p className="text-sm text-nd-dim text-center py-6">No feedback data available yet.</p>
           )}
         </div>
       </div>
 
       {/* Usage Breakdown from /analytics/usage — personal view */}
       {!loading && usage && (
-        <div className="glass border border-white/15 rounded-2xl p-6">
+        <div className="bg-white border border-nd-line rounded-2xl p-6">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5">
-            <div className="w-8 h-8 rounded-lg bg-accent-blue/15 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
-            <h3 className="font-sans font-bold text-base text-white">Your Usage</h3>
+            <h3 className="font-nd-sans font-bold text-base text-nd-ink">Your Usage</h3>
           </div>
 
           {(() => {
@@ -346,18 +346,18 @@ export default function InfluencerDashboard() {
             );
 
             if (!myUsage) {
-              return <p className="text-sm text-white/30 text-center py-4">No usage data available for your account.</p>;
+              return <p className="text-sm text-nd-dim text-center py-4">No usage data available for your account.</p>;
             }
 
             return (
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-4 text-center">
-                  <p className="font-extrabold text-xl sm:text-2xl text-white">{myUsage.calls.toLocaleString()}</p>
-                  <p className="text-[10px] sm:text-xs text-white/40 mt-1">Total Calls</p>
+                <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 text-center">
+                  <p className="font-extrabold text-xl sm:text-2xl text-nd-ink">{myUsage.calls.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-nd-dim mt-1">Total Calls</p>
                 </div>
-                <div className="rounded-xl bg-accent-blue/8 border border-accent-blue/20 p-4 text-center">
-                  <p className="font-extrabold text-xl sm:text-2xl text-white">{myUsage.minutes.toLocaleString()}</p>
-                  <p className="text-[10px] sm:text-xs text-white/40 mt-1">Minutes</p>
+                <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 text-center">
+                  <p className="font-extrabold text-xl sm:text-2xl text-nd-ink">{myUsage.minutes.toLocaleString()}</p>
+                  <p className="text-[10px] sm:text-xs text-nd-dim mt-1">Minutes</p>
                 </div>
               </div>
             );

@@ -37,16 +37,16 @@ export default function ProtectedRoute({
 
   if (!isHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-nd-bg">
         <div className="flex flex-col items-center gap-5">
           <div
-            className="w-10 h-10 rounded-full border-2 border-white/10 border-t-primary animate-spin"
+            className="w-10 h-10 rounded-full border-2 border-nd-line border-t-nd-accent animate-spin"
             style={{ animationDuration: '0.8s' }}
           />
           <div className="flex gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-white/10 animate-soft-pulse" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 rounded-full bg-white/10 animate-soft-pulse" style={{ animationDelay: '200ms' }} />
-            <div className="w-2 h-2 rounded-full bg-white/10 animate-soft-pulse" style={{ animationDelay: '400ms' }} />
+            <div className="w-2 h-2 rounded-full bg-nd-line animate-soft-pulse" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 rounded-full bg-nd-line animate-soft-pulse" style={{ animationDelay: '200ms' }} />
+            <div className="w-2 h-2 rounded-full bg-nd-line animate-soft-pulse" style={{ animationDelay: '400ms' }} />
           </div>
         </div>
       </div>

@@ -133,25 +133,20 @@ export default async function TermsAndConditionsPage() {
   const termsBlocks = parseTermsText(termsText);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-black text-white selection:bg-primary/30">
-      <div className="fixed inset-0 pointer-events-none opacity-45">
-        <div className="absolute left-[-24vw] top-[-8vw] h-[clamp(240px,48vw,620px)] w-[clamp(240px,48vw,620px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.55)_0%,transparent_70%)]" />
-        <div className="absolute right-[-18vw] bottom-[-10vw] h-[clamp(220px,42vw,520px)] w-[clamp(220px,42vw,520px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.35)_0%,transparent_70%)]" />
-      </div>
-
+    <main className="relative min-h-screen overflow-x-hidden bg-nd-bg text-nd-ink selection:bg-nd-accent/20">
       <section className="relative z-10 container mx-auto max-w-5xl px-4 sm:px-6 md:px-10 pt-28 pb-16">
-        <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl tracking-tight text-nd-ink">
           Terms & Conditions
         </h1>
-        <p className="mt-3 text-sm sm:text-base text-white/65 max-w-2xl">
+        <p className="mt-3 text-sm sm:text-base text-nd-muted max-w-2xl">
           Please review these terms carefully before creating an account or starting a session.
         </p>
 
-        <article className="mt-8 rounded-2xl border border-white/15 bg-white/3 p-5 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.35)] space-y-4 text-sm leading-relaxed text-white/80">
+        <article className="mt-8 rounded-2xl border border-nd-line bg-white p-5 sm:p-7 shadow-[0_12px_40px_-16px_rgba(28,26,31,.15)] space-y-4 text-sm leading-relaxed text-[#3D3945]">
           {termsBlocks.map((block, index) => {
             if (block.type === "title") {
               return (
-                <h2 key={`${block.type}-${index}`} className="text-lg font-semibold text-white">
+                <h2 key={`${block.type}-${index}`} className="text-lg font-semibold text-nd-ink">
                   {block.text}
                 </h2>
               );
@@ -159,7 +154,7 @@ export default async function TermsAndConditionsPage() {
 
             if (block.type === "meta") {
               return (
-                <p key={`${block.type}-${index}`} className="text-sm font-medium text-white/70">
+                <p key={`${block.type}-${index}`} className="text-sm font-medium text-nd-muted">
                   {block.text}
                 </p>
               );
@@ -167,7 +162,7 @@ export default async function TermsAndConditionsPage() {
 
             if (block.type === "section") {
               return (
-                <h3 key={`${block.type}-${index}`} className="pt-2 text-base font-semibold text-white/95">
+                <h3 key={`${block.type}-${index}`} className="pt-2 text-base font-semibold text-nd-ink">
                   {block.text}
                 </h3>
               );
@@ -175,7 +170,7 @@ export default async function TermsAndConditionsPage() {
 
             if (block.type === "notice") {
               return (
-                <p key={`${block.type}-${index}`} className="font-semibold uppercase tracking-wide text-amber-200/95">
+                <p key={`${block.type}-${index}`} className="font-semibold uppercase tracking-wide text-amber-700">
                   {block.text}
                 </p>
               );
@@ -183,7 +178,7 @@ export default async function TermsAndConditionsPage() {
 
             if (block.type === "list") {
               return (
-                <ul key={`${block.type}-${index}`} className="list-disc space-y-2 pl-5 marker:text-white/70">
+                <ul key={`${block.type}-${index}`} className="list-disc space-y-2 pl-5 marker:text-nd-muted">
                   {block.items.map((item, itemIndex) => (
                     <li key={`${index}-${itemIndex}`}>{item}</li>
                   ))}

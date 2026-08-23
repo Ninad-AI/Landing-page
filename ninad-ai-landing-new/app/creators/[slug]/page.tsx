@@ -9,70 +9,29 @@ import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils
 import { PlayoutBuffer } from "../../lib/playbackUtils";
 import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
-import Aurora from "../../components/ui/Aurora";
+import NdModal from "../../components/ui/NdModal";
 import { toast } from "sonner";
 import { authApi, paymentApi, feedbackApi } from "../../lib/api";
 import { buildCreatorVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
+import { getCreatorBySlug } from "../../lib/creators-data";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
 /* ── Flow: idle → duration → auth (if needed) → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
 type CallPhase = "connecting" | "listening" | "speaking";
 
-const DEFAULT_PREFERRED_PROVIDER = "deepgram";
-
-
-/* ── Creator data ── */
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
-  "nirupam": {
-    name: "Nirupam Paritala",
-    image: "/assets/creators/nirupam.jpeg",
-    role: "Actor & Producer",
-    influencerId: "influencer_15",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  "aneri-thakkar": {
-    name: "Aneri Thakkar",
-    image: "/assets/creators/aneri-2.jpg",
-    role: "Coach & Influencer",
-    influencerId: "aneri",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  "anveshi-jain": {
-    name: "Anveshi Jain",
-    image: "/assets/creators/anveshi.jpg",
-    role: "Actress & Influencer",
-    influencerId: "anveshi_jain",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // "beauty-khan": {
-  //   name: "Beauty Khan",
-  //   image: "/assets/creators/beauty-khan.jpg",
-  //   role: "Artist and Creator",
-  //   influencerId: "beauty_khan",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  // },
-  "sona-dey": {
-    name: "Sona Dey",
-    image: "/assets/creators/sona.png",
-    role: "Model & Influencer",
-    influencerId: "sona_dey",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-};
-
 export default function CreatorProfilePage() {
   const router = useRouter();
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "creator";
-  const creatorData = CREATORS_DATA[slug];
-  const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
-  const creatorRole = creatorData?.role ?? "Creator";
-  const creatorInfluencerId = creatorData?.influencerId ?? "";
-  const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
+  const creatorData = getCreatorBySlug(slug);
+  const creatorName = creatorData.name;
+  const creatorImage = creatorData.image;
+  const creatorRole = creatorData.role;
+  const creatorBio = creatorData.bio;
+  const creatorInfluencerId = creatorData.influencerId;
+  const preferredProvider = creatorData.preferredProvider;
 
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
@@ -95,11 +54,6 @@ export default function CreatorProfilePage() {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const pendingSessionRef = useRef<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
 
-  /* ── Parallax refs ── */
-  const mousePosRef = useRef({ x: 0, y: 0 });
-  const mouseTargetRef = useRef({ x: 0, y: 0 });
-  const avatarRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   /* ── Audio streaming refs ── */
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
@@ -116,33 +70,10 @@ export default function CreatorProfilePage() {
      Effects
      ═══════════════════════════════════════ */
 
-  // Entrance animation + mouse parallax
+  // Entrance animation
   useEffect(() => {
     const timeout = setTimeout(() => setIsVisible(true), 100);
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseTargetRef.current = {
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20,
-      };
-    };
-    let frameId: number;
-    const animate = () => {
-      mousePosRef.current.x += (mouseTargetRef.current.x - mousePosRef.current.x) * 0.1;
-      mousePosRef.current.y += (mouseTargetRef.current.y - mousePosRef.current.y) * 0.1;
-      avatarRefs.current.forEach((el, i) => {
-        if (!el) return;
-        const m = i === 0 ? 0.5 : -1;
-        el.style.transform = `translate3d(${mousePosRef.current.x * m}px, ${mousePosRef.current.y * m}px, 0)`;
-      });
-      frameId = requestAnimationFrame(animate);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    animate();
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener("mousemove", handleMouseMove);
-      cancelAnimationFrame(frameId);
-    };
+    return () => clearTimeout(timeout);
   }, []);
 
   /* ═══════════════════════════════════════
@@ -545,14 +476,8 @@ export default function CreatorProfilePage() {
      ═══════════════════════════════════════ */
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-[#0F0F13] text-white font-sans selection:bg-rose-500/30">
-      {/* Background Aurora */}
-      <div className="absolute inset-0 pointer-events-none">
-        <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={flowState === "active" ? 0.6 : 1.0} speed={0.5} />
-      </div>
-
-      {/* Main Content */}
-      <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 py-14 sm:py-16 md:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+    <main className="relative min-h-screen w-full bg-nd-bg text-nd-ink font-nd-sans selection:bg-nd-accent/20">
+      <div className={`relative z-10 w-full min-h-screen transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
         {flowState === "active" ? (
           <CreatorVoiceSessionUI
             isSpeaking={isSpeaking}
@@ -561,105 +486,141 @@ export default function CreatorProfilePage() {
             totalTime={selectedMinutes ? selectedMinutes * 60 : 0}
             creatorName={creatorName}
             creatorImage={creatorImage}
+            onClose={handleEndCall}
           />
         ) : (
-          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-4 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
-            <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
-              <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
-                • {creatorRole}
-              </h2>
-              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
-                <span className="block">{creatorName.split(" ")[0]}</span>
-                <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
-                  {creatorName.split(" ").slice(1).join(" ")}.
-                </span>
-              </h1>
-
-              <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                  <span className="flex items-center gap-3">
-                    Start Session
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
+          <>
+            {/* Mobile: full-bleed portrait banner with overlaid back button (desktop keeps the portrait in the sticky sidebar below) */}
+            <div className="md:hidden relative h-[280px] w-full">
+              <Image src={creatorImage} alt={creatorName} fill className="object-cover" priority sizes="100vw" />
               <div
-                ref={(el) => { avatarRefs.current[1] = el; }}
-                className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
-                style={{ borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%" }}
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(180deg, rgba(28,26,31,.42) 0%, rgba(28,26,31,0) 34%, rgba(28,26,31,.06) 62%, var(--nd-bg) 100%)" }}
+              />
+              <button
+                onClick={() => router.push("/creators")}
+                aria-label="All creators"
+                className="absolute left-4 top-[calc(env(safe-area-inset-top)+16px)] w-9 h-9 rounded-full bg-nd-bg/90 flex items-center justify-center text-nd-ink cursor-pointer"
               >
-                <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
-              </div>
-              <div className="absolute -top-4 -right-4 sm:-top-12 sm:-right-12 w-10 h-10 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />
-              <div className="absolute bottom-12 -left-3 sm:-left-16 w-10 h-10 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
-            </div>
-
-            <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
-              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                Start Session
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                </svg>
+                ←
               </button>
             </div>
-          </div>
+
+            <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 pt-4 md:pt-32 lg:pt-36 pb-16 sm:pb-20 md:pb-24 -mt-6 md:mt-0 relative">
+              <button
+                onClick={() => router.push("/creators")}
+                className="hidden md:inline-block mb-7 text-[13.5px] font-bold text-nd-dim hover:text-nd-ink transition-colors cursor-pointer"
+              >
+                ← All creators
+              </button>
+
+              <div className="grid grid-cols-1 md:grid-cols-[1.15fr_.85fr] gap-10 md:gap-16 items-start">
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-nd-ink px-3 py-1.5">
+                      <span className="w-[5px] h-[5px] rounded-full bg-[#7FD1A0] animate-nd-blink" />
+                      <span className="text-[10px] font-extrabold tracking-wide text-nd-bg">LIVE NOW</span>
+                    </span>
+                    <span className="text-xs font-bold text-nd-accent bg-nd-tint px-3 py-1.5 rounded-full">
+                      ✓ Voice licensed
+                    </span>
+                  </div>
+                  <h1 className="font-display text-[42px] sm:text-[54px] md:text-[62px] leading-[1.02] tracking-tight text-nd-ink mb-2">
+                    {creatorName}
+                  </h1>
+                  <p className="text-base font-semibold text-nd-muted mb-6">{creatorRole}</p>
+                  {creatorBio && (
+                    <p className="text-[16px] sm:text-[16.5px] leading-relaxed text-[#3D3945] max-w-[560px] mb-8">
+                      {creatorBio}
+                    </p>
+                  )}
+
+                  {/* Mobile: CTA card sits inline here (portrait already shown above); desktop shows it in the sticky sidebar instead */}
+                  <div className="md:hidden mb-8">
+                    <div className="rounded-[20px] bg-nd-ink text-nd-bg p-5 sm:p-6">
+                      <div className="text-[13px] text-[#A8A2AE] mb-1">Voice call</div>
+                      <div className="font-display text-2xl leading-tight">Pick your minutes next</div>
+                      <button
+                        onClick={handleStartSession}
+                        className="mt-5 w-full rounded-[13px] bg-nd-bg text-nd-ink font-bold text-[15px] py-4 flex items-center justify-center gap-2 hover:bg-nd-tint transition-colors cursor-pointer"
+                      >
+                        <span className="w-2 h-2 rounded-full bg-[#5F7A63]" />
+                        Start voice chat
+                      </button>
+                      <p className="text-[11.5px] text-[#6F6878] mt-3 text-center leading-relaxed">
+                        No subscription. Call ends when the timer does.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-nd-tint px-5 py-4 max-w-[560px]">
+                    <p className="text-[13px] leading-relaxed text-nd-accent-dark">
+                      <strong className="font-extrabold">This is an AI persona.</strong> {creatorName.split(" ")[0]} licensed their voice and approved what it knows. It won&apos;t give medical, legal, or financial advice, and it will tell you when it doesn&apos;t know something.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="hidden md:block md:sticky md:top-28">
+                  <div className="relative w-full aspect-[4/4.4] rounded-[22px] overflow-hidden bg-nd-tint mb-4">
+                    <Image src={creatorImage} alt={creatorName} fill className="object-cover" priority sizes="(max-width: 768px) 100vw, 420px" />
+                  </div>
+                  <div className="rounded-[20px] bg-nd-ink text-nd-bg p-5 sm:p-6">
+                    <div className="text-[13px] text-[#A8A2AE] mb-1">Voice call</div>
+                    <div className="font-display text-2xl leading-tight">Pick your minutes next</div>
+                    <button
+                      onClick={handleStartSession}
+                      className="mt-5 w-full rounded-[13px] bg-nd-bg text-nd-ink font-bold text-[15px] py-4 flex items-center justify-center gap-2 hover:bg-nd-tint transition-colors cursor-pointer"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-[#5F7A63]" />
+                      Start voice chat
+                    </button>
+                    <p className="text-[11.5px] text-[#6F6878] mt-3 text-center leading-relaxed">
+                      No subscription. Call ends when the timer does.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
       {flowState === "auth" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeAuthModal} />
-          <div className="relative w-[92vw] max-w-[380px] sm:w-full sm:max-w-md animate-fade-in-up">
-            <div className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 py-8 sm:py-10 overflow-hidden" style={{ borderRadius: "1.5rem" }}>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
-
-              <div className="relative z-10">
-                {/* Header */}
-                <div className="text-center mb-7">
-                  <h2 className="text-xl font-extrabold text-white tracking-tight mb-1">Sign in to continue</h2>
-                  <p className="text-xs text-white/40 font-sans">Connect with your Google account to start a session</p>
-                </div>
-
-                {/* Google Sign-In */}
-                {authLoading ? (
-                  <div className="w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-                    <span className="text-sm text-white/50 font-sans">Signing you in…</span>
-                  </div>
-                ) : (
-                  <div className="flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
-                    <GoogleLogin
-                      onSuccess={handleGoogleAuthSuccess}
-                      onError={handleGoogleAuthError}
-                      theme="filled_black"
-                      size="large"
-                      shape="rectangular"
-                      text="continue_with"
-                      width="340"
-                      logo_alignment="left"
-                      useOneTap={false}
-                    />
-                  </div>
-                )}
-
-                <p className="text-center text-[11px] text-white/25 mt-5 font-sans leading-relaxed">
-                  By continuing, you agree to Ninad AI&apos;s{" "}
-                  <a href="/terms-and-conditions" className="text-white/40 hover:text-white/60 transition-colors underline underline-offset-2">
-                    Terms of Service
-                  </a>
-                  .
-                </p>
-              </div>
-            </div>
+        <NdModal onClose={closeAuthModal} maxWidth={420}>
+          <div className="text-center mb-7">
+            <h2 className="font-display text-[28px] text-nd-ink mb-1.5">Sign in to continue</h2>
+            <p className="text-[13px] text-nd-dim">Connect with your Google account to start a session</p>
           </div>
-        </div>
+
+          {authLoading ? (
+            <div className="w-full py-4 rounded-xl bg-nd-panel border border-nd-line flex items-center justify-center gap-3">
+              <div className="w-5 h-5 border-2 border-nd-line border-t-nd-accent rounded-full animate-spin" />
+              <span className="text-sm text-nd-muted">Signing you in…</span>
+            </div>
+          ) : (
+            <div className="flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
+              <GoogleLogin
+                onSuccess={handleGoogleAuthSuccess}
+                onError={handleGoogleAuthError}
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                text="continue_with"
+                width="340"
+                logo_alignment="left"
+                useOneTap={false}
+              />
+            </div>
+          )}
+
+          <p className="text-center text-[11px] text-nd-dim mt-5 leading-relaxed">
+            By continuing, you agree to Ninad AI&apos;s{" "}
+            <a href="/terms-and-conditions" className="text-nd-muted hover:text-nd-ink underline underline-offset-2">
+              Terms of Service
+            </a>
+            .
+          </p>
+        </NdModal>
       )}
 
       <PaymentModal

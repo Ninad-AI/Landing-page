@@ -116,15 +116,15 @@ export default function BookDemoForm() {
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+    <div className="rounded-3xl border border-nd-line bg-white p-6 md:p-8 shadow-[0_20px_60px_-20px_rgba(28,26,31,.15)]">
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="space-y-2">
-            <span className="text-white/70 text-sm font-inter">Name *</span>
+            <span className="text-nd-muted text-sm font-nd-sans">Name *</span>
             <input
               value={form.name}
               onChange={(e) => onChange("name", e.target.value)}
-              className="w-full h-12 rounded-2xl bg-black/30 border border-white/10 px-4 text-white placeholder:text-white/30 outline-none focus:border-white/25"
+              className="w-full h-12 rounded-2xl bg-nd-panel border border-nd-line px-4 text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent"
               placeholder="Your name"
               autoComplete="name"
               required
@@ -132,12 +132,12 @@ export default function BookDemoForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-white/70 text-sm font-inter">Email *</span>
+            <span className="text-nd-muted text-sm font-nd-sans">Email *</span>
             <input
               type="email"
               value={form.email}
               onChange={(e) => onChange("email", e.target.value)}
-              className="w-full h-12 rounded-2xl bg-black/30 border border-white/10 px-4 text-white placeholder:text-white/30 outline-none focus:border-white/25"
+              className="w-full h-12 rounded-2xl bg-nd-panel border border-nd-line px-4 text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent"
               placeholder="you@company.com"
               autoComplete="email"
               required
@@ -145,22 +145,22 @@ export default function BookDemoForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-white/70 text-sm font-inter">Company</span>
+            <span className="text-nd-muted text-sm font-nd-sans">Company</span>
             <input
               value={form.company}
               onChange={(e) => onChange("company", e.target.value)}
-              className="w-full h-12 rounded-2xl bg-black/30 border border-white/10 px-4 text-white placeholder:text-white/30 outline-none focus:border-white/25"
+              className="w-full h-12 rounded-2xl bg-nd-panel border border-nd-line px-4 text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent"
               placeholder="Company name"
               autoComplete="organization"
             />
           </label>
 
           <label className="space-y-2">
-            <span className="text-white/70 text-sm font-inter">Phone</span>
+            <span className="text-nd-muted text-sm font-nd-sans">Phone</span>
             <input
               value={form.phone}
               onChange={(e) => onChange("phone", e.target.value)}
-              className="w-full h-12 rounded-2xl bg-black/30 border border-white/10 px-4 text-white placeholder:text-white/30 outline-none focus:border-white/25"
+              className="w-full h-12 rounded-2xl bg-nd-panel border border-nd-line px-4 text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent"
               placeholder="e.g. +91 99999 99999"
               autoComplete="tel"
               required
@@ -169,11 +169,11 @@ export default function BookDemoForm() {
         </div>
 
         <label className="space-y-2 block">
-          <span className="text-white/70 text-sm font-inter">What are you building?</span>
+          <span className="text-nd-muted text-sm font-nd-sans">What are you building?</span>
           <textarea
             value={form.message}
             onChange={(e) => onChange("message", e.target.value)}
-            className="w-full min-h-28 rounded-2xl bg-black/30 border border-white/10 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-white/25 resize-y"
+            className="w-full min-h-28 rounded-2xl bg-nd-panel border border-nd-line px-4 py-3 text-nd-ink placeholder:text-nd-dim outline-none focus:border-nd-accent resize-y"
             placeholder="Tell us about your product, volume, latency requirements, etc."
           />
         </label>
@@ -182,20 +182,20 @@ export default function BookDemoForm() {
           <button
             type="submit"
             disabled={!canSubmit || status.type === "loading"}
-            className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-white text-black font-sans font-bold text-sm hover:bg-gray-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center h-12 px-6 rounded-full bg-nd-ink text-nd-bg font-nd-sans font-bold text-sm hover:bg-[#302C36] transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             {status.type === "loading" ? "Sending…" : "Request demo"}
           </button>
 
           {status.type === "success" ? (
-            <p className="text-sm text-emerald-300/90 font-inter">{status.message}</p>
+            <p className="text-sm text-emerald-600 font-nd-sans">{status.message}</p>
           ) : null}
           {status.type === "error" ? (
-            <p className="text-sm text-red-300/90 font-inter">{status.message}</p>
+            <p className="text-sm text-red-600 font-nd-sans">{status.message}</p>
           ) : null}
 
           {status.type === "idle" ? (
-            <p className="text-sm text-white/45 font-inter">
+            <p className="text-sm text-nd-dim font-nd-sans">
               We’ll respond within 1–2 business days.
             </p>
           ) : null}

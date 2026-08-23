@@ -1,103 +1,32 @@
-'use client';
+import { Fragment } from "react";
 
-import { useState } from 'react';
+const LANGUAGES = ["हिन्दी", "मराठी", "ગુજરાતી", "தமிழ்", "తెలుగు", "বাংলা", "ಕನ್ನಡ", "മലയാളം", "ਪੰਜਾਬੀ", "English"];
+const REPEATED = [...LANGUAGES, ...LANGUAGES, ...LANGUAGES];
 
-const languages = [
-  "English",
-  "Hindi",
-  "Marathi",
-  "Tamil",
-  "Telugu",
-  "Kannada",
-  "Bengali"
-];
-
-const indicLanguages = [
-  "English",
-  "हिंदी",
-  "मराठी",
-  "தமிழ்",
-  "తెలుగు",
-  "ಕನ್ನಡ",
-  "বাংলা"
-];
+function LanguageRow({ hidden }: { hidden?: boolean }) {
+  return (
+    <div className="flex items-center gap-8 pr-8 flex-none" aria-hidden={hidden}>
+      {REPEATED.map((lang, i) => (
+        <Fragment key={i}>
+          {i > 0 && <span className="font-devanagari text-base leading-none text-nd-dim">·</span>}
+          <span className="font-devanagari text-base leading-none text-nd-muted whitespace-nowrap">{lang}</span>
+        </Fragment>
+      ))}
+    </div>
+  );
+}
 
 export default function Languages() {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   return (
-    <section className="relative overflow-hidden bg-black py-16 sm:py-20 md:py-28">
-      {/* Background Decor */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 h-[clamp(260px,52vw,500px)] w-[clamp(260px,52vw,500px)] bg-primary/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 opacity-30" />
+    <div className="relative border-y border-nd-line-soft bg-nd-panel py-4 overflow-hidden">
+      <div className="flex w-max animate-nd-marquee">
+        <LanguageRow />
+        <LanguageRow hidden />
       </div>
-
-      {/* Content */}
-      <div className="relative z-10 mb-12 sm:mb-14 md:mb-16 container mx-auto px-4 sm:px-6 md:px-10 text-center">
-        <h2 className="font-sans font-bold text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] mb-4 sm:mb-6 pb-1 leading-[1.1] tracking-tight bg-gradient-to-b from-[#FFFFFF] to-[#999999] bg-clip-text text-transparent">
-          Speak Every Language
-        </h2>
-
-        <div className="font-roboto text-base sm:text-lg md:text-2xl text-muted max-w-3xl mx-auto px-1">
-          <p>Ninad AI supports native speech in multiple languages.</p>
-          <p>Localize any voice to any accent or language seamlessly.</p>
-        </div>
-      </div>
-
-      {/* Marquee Container */}
-      <div className="relative flex w-full flex-col gap-3 sm:gap-4 overflow-hidden py-4 sm:py-6">
-        {/* Row 1 */}
-        <div
-          className="flex gap-4 animate-marquee min-w-full overflow-visible"
-          style={{ animationPlayState: hoveredIndex !== null && hoveredIndex < 100 ? 'paused' : 'running' }}
-        >
-          {[...languages, ...languages, ...languages, ...languages].map((lang, index) => (
-            <div
-              key={`row1-${index}`}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              className={`
-                flex-shrink-0 w-[130px] sm:w-[180px] md:w-[206px] h-10 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
-                transition-all duration-150 relative z-20
-                ${hoveredIndex === index
-                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
-                  : 'bg-white border border-black/10'
-                }
-              `}
-            >
-              <span className={`font-sans font-bold text-sm md:text-base tracking-widest ${hoveredIndex === index ? 'text-white' : 'text-black'}`}>
-                {lang}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Row 2 (brick offset) */}
-        <div
-          className="flex gap-4 animate-marquee min-w-full translate-x-6 sm:translate-x-16 md:translate-x-[111px] overflow-visible"
-          style={{ animationPlayState: hoveredIndex !== null && hoveredIndex >= 100 ? 'paused' : 'running' }}
-        >
-          {[...indicLanguages, ...indicLanguages, ...indicLanguages, ...indicLanguages].map((lang, index) => (
-            <div
-              key={`row2-${index}`}
-              onMouseEnter={() => setHoveredIndex(index + 100)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              className={`
-                flex-shrink-0 w-[130px] sm:w-[180px] md:w-[206px] h-10 sm:h-14 md:h-[61px] flex items-center justify-center rounded-xl sm:rounded-2xl 
-                transition-all duration-150 relative z-20
-                ${hoveredIndex === index + 100
-                  ? 'bg-primary border-2 border-primary/80 scale-110 shadow-[0_0_50px_rgba(168,85,247,0.95)]'
-                  : 'bg-white border border-black/10'
-                }
-              `}
-            >
-              <span className={`font-sans font-bold text-sm md:text-base tracking-widest ${hoveredIndex === index + 100 ? 'text-white' : 'text-black'}`}>
-                {lang}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "linear-gradient(90deg, #F3EFE8 0%, rgba(243,239,232,0) 10%, rgba(243,239,232,0) 90%, #F3EFE8 100%)" }}
+      />
+    </div>
   );
 }

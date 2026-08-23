@@ -26,6 +26,27 @@
   --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ─── "Ninad Live" redesign tokens (additive — the dark tokens above stay
+     untouched for admin/dashboard/analytics, which are out of scope) ─── */
+  --nd-bg: #FAF8F4;
+  --nd-ink: #1C1A1F;
+  --nd-accent: #6B4BA8;
+  --nd-accent-dark: #4E3480;
+  --nd-muted: #5A5563;
+  --nd-dim: #918B99;
+  --nd-line: #E4DED4;
+  --nd-line-soft: #E9E3DA;
+  --nd-panel: #F3EFE8;
+  --nd-tint: #EFE9F8;
+  --nd-dark: #1C1A1F;
+  --nd-darker: #14121A;
+  --nd-dark-panel: #221E2C;
+  --nd-dark-line: #302C36;
+
+  --font-instrument-serif: 'Instrument Serif', Georgia, serif;
+  --font-manrope: 'Manrope', system-ui, sans-serif;
+  --font-noto-devanagari: 'Noto Serif Devanagari', serif;
 }
 
 /* Global smooth scrolling & GPU-accelerated rendering */
@@ -73,6 +94,24 @@ body {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-ibm-mono);
   --font-hand: var(--font-caveat);
+
+  --color-nd-bg: var(--nd-bg);
+  --color-nd-ink: var(--nd-ink);
+  --color-nd-accent: var(--nd-accent);
+  --color-nd-accent-dark: var(--nd-accent-dark);
+  --color-nd-muted: var(--nd-muted);
+  --color-nd-dim: var(--nd-dim);
+  --color-nd-line: var(--nd-line);
+  --color-nd-line-soft: var(--nd-line-soft);
+  --color-nd-panel: var(--nd-panel);
+  --color-nd-tint: var(--nd-tint);
+  --color-nd-dark: var(--nd-dark);
+  --color-nd-darker: var(--nd-darker);
+  --color-nd-dark-panel: var(--nd-dark-panel);
+  --color-nd-dark-line: var(--nd-dark-line);
+  --font-display: var(--font-instrument-serif);
+  --font-nd-sans: var(--font-manrope);
+  --font-devanagari: var(--font-noto-devanagari);
 }
 
 *, *::before, *::after {
@@ -83,13 +122,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Every live page now paints its own explicit background (bg-nd-bg,
+   bg-nd-darker on the call screen, etc.) — this is just the default so any
+   gap shows the new cream theme instead of the old dark one, e.g. before a
+   page-level class applies or in an unstyled edge case. */
 body {
-  background:
-    radial-gradient(900px circle at 15% 18%, rgba(97, 37, 216, 0.26), transparent 58%),
-    radial-gradient(840px circle at 82% 22%, rgba(0, 169, 255, 0.22), transparent 52%),
-    radial-gradient(1200px circle at 50% 65%, rgba(30, 27, 75, 0.35), transparent 70%),
-    #05030b;
-  color: var(--foreground);
+  background: var(--nd-bg, #FAF8F4);
+  color: var(--nd-ink, #1C1A1F);
   font-family: var(--font-inter);
   overflow-x: hidden;
   overscroll-behavior-x: none;
@@ -758,4 +797,47 @@ a, button, [role="button"] {
   pointer-events: none;
   z-index: 50;
   mix-blend-mode: overlay;
+}
+
+/* ═══════════════════════════════════════════════
+   "Ninad Live" redesign — keyframes & utilities
+   ═══════════════════════════════════════════════ */
+
+@keyframes nd-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes nd-ripple { 0% { transform: scale(.72); opacity: .45; } 100% { transform: scale(1.85); opacity: 0; } }
+@keyframes nd-bar { 0%, 100% { transform: scaleY(.16); } 50% { transform: scaleY(1); } }
+@keyframes nd-spin { to { transform: rotate(360deg); } }
+@keyframes nd-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes nd-blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+@keyframes nd-marquee { to { transform: translateX(-50%); } }
+@keyframes nd-pop { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes nd-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes nd-ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(107,75,168,.35); } 50% { box-shadow: 0 0 0 14px rgba(107,75,168,0); } }
+@keyframes nd-sheet { from { transform: translateY(101%); } to { transform: none; } }
+
+.animate-nd-breathe { animation: nd-breathe 2.2s ease-in-out infinite; }
+.animate-nd-ripple { animation: nd-ripple 3.4s ease-out infinite; }
+.animate-nd-bar { animation: nd-bar 1.15s ease-in-out infinite; }
+.animate-nd-spin { animation: nd-spin 11s linear infinite; }
+.animate-nd-up { animation: nd-up .22s ease forwards; }
+.animate-nd-blink { animation: nd-blink 1.7s ease-in-out infinite; }
+/* Slower on narrow screens (less width visible per word = less reading time
+   at a fixed px/sec speed), faster once there's more runway. Plain
+   media-query overrides on the same selector — a CSS custom property here
+   gets statically folded to its fallback by the build's CSS optimizer,
+   discarding the responsive cascade, so this avoids var() entirely. */
+.animate-nd-marquee { animation: nd-marquee 34s linear infinite; }
+@media (min-width: 640px) {
+  .animate-nd-marquee { animation-duration: 28s; }
+}
+@media (min-width: 1024px) {
+  .animate-nd-marquee { animation-duration: 22s; }
+}
+.animate-nd-pop { animation: nd-pop .28s cubic-bezier(.22,.9,.3,1) forwards; }
+.animate-nd-fade { animation: nd-fade .3s ease forwards; }
+.animate-nd-ring { animation: nd-ring 2.6s ease-in-out infinite; }
+.animate-nd-sheet { animation: nd-sheet .3s cubic-bezier(.22,.9,.3,1) forwards; }
+
+@media (min-width: 640px) {
+  .nd-modal-card { max-width: var(--nd-modal-max, 420px); }
 }

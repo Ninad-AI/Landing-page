@@ -3,57 +3,35 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="relative bg-black w-full border-t border-white/10">
-      {/* Main Footer Section */}
-      <div className="w-full py-12 px-6 md:px-12 lg:px-20">
-        <div className="container mx-auto max-w-400">
-          {/* Main Footer Content */}
-          <div className="flex flex-col items-center md:items-start mb-12">
-            {/* Logo and Description */}
-            <div className="space-y-6 flex flex-col items-center md:items-start text-center md:text-left">
-              {/* Logo */}
-              <div className="relative w-36 h-9">
-                <Image
-                  src="/assets/ninad-ai.png"
-                  alt="Ninad AI"
-                  fill
-                  sizes="144px"
-                  className="object-contain object-left"
-                />
-              </div>
-
-              {/* Description */}
-              <p className="font-roboto font-normal text-sm text-foreground/80 leading-relaxed max-w-xs">
-                Low-latency, expressive speech for apps, agents, and experiences
-                ready to integrate in minutes.
-              </p>
-            </div>
+    <footer className="bg-nd-panel border-t border-nd-line">
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 md:px-10 py-12 sm:py-14 flex flex-wrap justify-between gap-12">
+        <div>
+          <div className="relative w-36 h-5">
+            <Image src="/assets/ninad-ai.png" alt="Ninad AI" fill sizes="144px" className="object-contain object-left" />
           </div>
-
-          {/* Divider */}
-          <div className="w-full h-px bg-white/10 mb-8" />
-
-          {/* Bottom Footer Section */}
-          <div className="flex flex-col justify-center md:justify-start items-center md:items-start gap-2">
-            <div className="text-sm text-muted font-roboto">
-              © 2025 Ninad AI. All rights reserved.
-            </div>
-            <a
-              href="mailto:ninad.company@gmail.com"
-              className="text-sm font-roboto text-white/65 hover:text-white transition-colors"
-            >
+          <p className="text-[13px] leading-relaxed text-nd-dim mt-3.5 max-w-[300px]">
+            Voice personas, licensed and operated end to end. Made in Bengaluru.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-14">
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[11px] font-extrabold tracking-[0.12em] text-nd-dim uppercase">Product</span>
+            <Link href="/creators" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">Creators</Link>
+            <Link href="/for-creators" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">For creators</Link>
+            <Link href="/#safety" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">Safety</Link>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[11px] font-extrabold tracking-[0.12em] text-nd-dim uppercase">Company</span>
+            <a href="mailto:ninad.company@gmail.com" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">
               ninad.company@gmail.com
             </a>
-            <Link
-              href="/terms-and-conditions"
-              className="text-sm font-roboto text-white/65 hover:text-white transition-colors"
-            >
-              Terms & Conditions
+            <Link href="/terms-and-conditions" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">
+              Terms &amp; Conditions
             </Link>
+            <span className="text-[13.5px] font-semibold text-nd-dim">© 2025 Ninad AI</span>
           </div>
         </div>
       </div>
     </footer>
   );
 }
-

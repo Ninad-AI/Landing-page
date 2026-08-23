@@ -46,48 +46,40 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 py-20 sm:py-24">
-      {/* Background glows */}
-      <div className="absolute inset-0 pointer-events-none opacity-50">
-        <div className="absolute left-[-24vw] top-[-10vw] h-[clamp(240px,48vw,600px)] w-[clamp(240px,48vw,600px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.55)_0%,transparent_70%)] animate-glow-drift" />
-        <div className="absolute right-[-20vw] bottom-[-8vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.35)_0%,transparent_70%)] animate-glow-drift-reverse" />
-      </div>
-
-      <div className="relative z-10 w-full max-w-md page-enter">
-        {/* Glass Card */}
-        <div className="glass-card border border-white/15 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl">
+    <main className="relative min-h-screen overflow-hidden bg-nd-bg flex items-center justify-center px-4 sm:px-6 py-20 sm:py-24">
+      <div className="relative z-10 w-full max-w-md animate-nd-up">
+        <div className="bg-white border border-nd-line rounded-3xl p-6 sm:p-8 md:p-10 shadow-[0_30px_70px_-24px_rgba(28,26,31,.15)]">
 
           {/* Header */}
-           <div className="text-center mb-8">
-
-            <h1 className="font-sans font-extrabold text-3xl md:text-4xl text-white tracking-tight mb-2">
+          <div className="text-center mb-8">
+            <h1 className="font-display text-3xl md:text-4xl text-nd-ink tracking-tight mb-2">
               Welcome to Ninad AI
             </h1>
-            <p className="font-sans text-sm text-white/50">
+            <p className="font-nd-sans text-sm text-nd-muted">
               Sign in to access your personalized AI voice experience
             </p>
           </div>
 
           {/* Divider */}
           <div className="flex items-center gap-3 mb-7">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-white/30 font-sans uppercase tracking-wider">Continue with</span>
-            <div className="flex-1 h-px bg-white/10" />
+            <div className="flex-1 h-px bg-nd-line" />
+            <span className="text-xs text-nd-dim font-nd-sans uppercase tracking-wider">Continue with</span>
+            <div className="flex-1 h-px bg-nd-line" />
           </div>
 
           {/* Google Sign-In Button */}
           <div className="flex flex-col items-center gap-4">
             {loading ? (
-              <div className="w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
-                <div className="w-5 h-5 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                <span className="font-sans text-sm text-white/60">Signing you in…</span>
+              <div className="w-full py-4 rounded-xl bg-nd-panel border border-nd-line flex items-center justify-center gap-3">
+                <div className="w-5 h-5 border-2 border-nd-line border-t-nd-accent rounded-full animate-spin" />
+                <span className="font-nd-sans text-sm text-nd-muted">Signing you in…</span>
               </div>
             ) : (
               <div className="w-full flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
-                  theme="filled_black"
+                  theme="outline"
                   size="large"
                   shape="rectangular"
                   text="continue_with"
@@ -99,16 +91,16 @@ export default function LoginPage() {
             )}
 
             {/* Privacy note */}
-            <p className="text-center text-xs text-white/25 font-sans leading-relaxed px-2">
+            <p className="text-center text-xs text-nd-dim font-nd-sans leading-relaxed px-2">
               By continuing, you agree to Ninad AI&apos;s{' '}
-              <a href="/terms-and-conditions" className="text-white/40 hover:text-white/70 transition-colors underline underline-offset-2">
+              <a href="/terms-and-conditions" className="text-nd-muted hover:text-nd-ink transition-colors underline underline-offset-2">
                 Terms of Service
               </a>
               . Your Google account info is used only to authenticate you.
             </p>
           </div>
-            </div>
-          </div>
+        </div>
+      </div>
     </main>
   );
 }

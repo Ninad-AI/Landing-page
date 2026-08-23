@@ -5,58 +5,17 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import ProtectedRoute from "../../../components/ProtectedRoute";
 import CreatorVoiceSessionUI from "../../../components/CreatorVoiceSessionUI";
-import Aurora from "../../../components/ui/Aurora";
 import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUtils";
 import { PlayoutBuffer } from "../../../lib/playbackUtils";
 import { buildCreatorVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
-
-const DEFAULT_PREFERRED_PROVIDER = "deepgram";
+import { getCreatorBySlug } from "../../../lib/creators-data";
 
 type CallPhase = "connecting" | "listening" | "speaking";
 
 function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
-
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
-  "nirupam": {
-    name: "Nirupam Paritala",
-    image: "/assets/creators/nirupam.jpeg",
-    role: "Actor & Producer",
-    influencerId: "nirupam",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  "aneri-thakkar": {
-    name: "Aneri Thakkar",
-    image: "/assets/creators/aneri-2.jpg",
-    role: "Coach & Influencer",
-    influencerId: "aneri",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  "anveshi-jain": {
-    name: "Anveshi Jain",
-    image: "/assets/creators/anveshi.jpg",
-    role: "Actress & Influencer",
-    influencerId: "anveshi_jain",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // "beauty-khan": {
-  //   name: "Beauty Khan",
-  //   image: "/assets/creators/beauty-khan.jpg",
-  //   role: "Artist and Creator",
-  //   influencerId: "beauty_khan",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  // },
-  "sona-dey": {
-    name: "Sona Dey",
-    image: "/assets/creators/sona.png",
-    role: "Model & Influencer",
-    influencerId: "sona_dey",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-};
 
 export default function CreatorVoiceChatPage() {
   return (
@@ -72,11 +31,11 @@ function VoiceChatContent() {
   const searchParams = useSearchParams();
 
   const slug = typeof params.slug === "string" ? params.slug : "creator";
-  const creatorData = CREATORS_DATA[slug];
-  const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
-  const creatorInfluencerId = creatorData?.influencerId ?? "";
-  const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
+  const creatorData = getCreatorBySlug(slug);
+  const creatorName = creatorData.name;
+  const creatorImage = creatorData.image;
+  const creatorInfluencerId = creatorData.influencerId;
+  const preferredProvider = creatorData.preferredProvider;
   const bookingId = searchParams.get("booking_id");
 
   const durationValue = searchParams.get("duration");
@@ -434,18 +393,14 @@ function VoiceChatContent() {
 
   if (!durationMinutes) {
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#0F0F13] text-white">
-        <div className="absolute inset-0 pointer-events-none">
-          <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={0.8} speed={0.5} />
-        </div>
-
+      <main className="relative min-h-screen overflow-hidden bg-nd-bg text-nd-ink">
         <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
-          <div className="max-w-md w-full rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl p-8 text-center">
-            <h1 className="text-2xl font-bold">Invalid Session Link</h1>
-            <p className="mt-3 text-sm text-white/60">Missing or invalid duration. Please start the flow again from creator page.</p>
+          <div className="max-w-md w-full rounded-2xl border border-nd-line bg-white p-8 text-center">
+            <h1 className="font-display text-2xl">Invalid Session Link</h1>
+            <p className="mt-3 text-sm text-nd-muted">Missing or invalid duration. Please start the flow again from creator page.</p>
             <button
               onClick={() => router.push(`/creators/${slug}`)}
-              className="mt-6 inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 transition-colors"
+              className="mt-6 inline-flex items-center justify-center px-6 py-3 rounded-xl bg-nd-ink text-nd-bg font-bold text-sm hover:bg-[#302C36] transition-colors cursor-pointer"
             >
               Back To Creator
             </button>
@@ -456,23 +411,17 @@ function VoiceChatContent() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0F0F13] text-white">
-      <div className="absolute inset-0 pointer-events-none">
-        <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={0.6} speed={0.5} />
-      </div>
+    <main className="relative min-h-screen overflow-hidden bg-nd-darker text-white">
+      <CreatorVoiceSessionUI
+        isSpeaking={isSpeaking}
+        callPhase={callPhase}
+        timeLeft={timeLeft}
+        totalTime={totalTime}
+        creatorName={creatorName}
+        creatorImage={creatorImage}
+      />
 
-      <div className="relative z-10 min-h-screen">
-        <CreatorVoiceSessionUI
-          isSpeaking={isSpeaking}
-          callPhase={callPhase}
-          timeLeft={timeLeft}
-          totalTime={totalTime}
-          creatorName={creatorName}
-          creatorImage={creatorImage}
-        />
-      </div>
-
-      <p className="pointer-events-none fixed bottom-12 left-1/2 z-110 -translate-x-1/2 text-[10px] font-normal tracking-wide text-white/60 sm:bottom-14 sm:text-[11px]">
+      <p className="pointer-events-none fixed bottom-12 left-1/2 z-[110] -translate-x-1/2 text-[10px] font-normal tracking-wide text-white/60 sm:bottom-14 sm:text-[11px]">
         Ninad AI can make mistakes.
       </p>
     </main>
