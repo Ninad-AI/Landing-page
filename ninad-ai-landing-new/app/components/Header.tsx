@@ -81,7 +81,7 @@ export default function Header() {
           : "bg-nd-bg/90 backdrop-blur-xl py-5 border-b border-transparent shadow-[0_1px_0_rgba(28,26,31,0.04)]"
         }`}
     >
-      <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 flex items-center justify-between lg:justify-center relative">
+      <div className="container mx-auto px-6 md:px-12 lg:px-12 xl:px-20 h-8 md:h-10 flex items-center justify-between lg:justify-center relative">
         {/* Logo */}
         <button
           onClick={handleLogoClick}

@@ -22,6 +22,7 @@ const STATUS_BY_PHASE = {
 export default function VoiceSessionUI({
   callPhase,
   timeLeft,
+  totalTime,
   creatorName,
   creatorImage,
   onClose,
@@ -36,21 +37,57 @@ export default function VoiceSessionUI({
   const status = STATUS_BY_PHASE[callPhase];
   const statusLabel = status.label ?? `${creatorName.split(' ')[0]} is speaking`;
 
+  const ringRadius = 102;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const progress = totalTime > 0 ? Math.max(0, Math.min(1, timeLeft / totalTime)) : 1;
+  const ringOffset = ringCircumference * (1 - progress);
+
   return (
     <Ripple className="z-50 bg-nd-darker">
       <div className="relative h-full w-full px-4">
         {/* Anchored to the exact same center point Ripple uses for its rings (50%/50%),
             rather than being centered as part of a taller stack with the timer/status
-            below it — otherwise the group's midpoint, not the photo's, lands on-center. */}
+            below it — otherwise the group's midpoint, not the photo's, lands on-center.
+            Ring + photo share one scaled wrapper so they move together as a unit. */}
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden scale-[0.85] sm:scale-95 md:scale-100"
-          style={{
-            width: 200,
-            height: 200,
-            boxShadow: 'inset 0 -18px 44px rgba(28,18,54,.35), 0 22px 60px -14px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08)',
-          }}
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.85] sm:scale-95 md:scale-100"
+          style={{ width: 200, height: 200 }}
         >
-          <Image src={creatorImage} alt={creatorName} fill className="object-cover" sizes="200px" priority />
+          <svg
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-90"
+            style={{ width: ringRadius * 2 + 8, height: ringRadius * 2 + 8 }}
+            viewBox={`0 0 ${ringRadius * 2 + 8} ${ringRadius * 2 + 8}`}
+          >
+            <circle
+              cx={ringRadius + 4}
+              cy={ringRadius + 4}
+              r={ringRadius}
+              fill="none"
+              stroke="rgba(255,255,255,.14)"
+              strokeWidth="2.5"
+            />
+            <circle
+              cx={ringRadius + 4}
+              cy={ringRadius + 4}
+              r={ringRadius}
+              fill="none"
+              stroke="#8E76BE"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={ringCircumference}
+              strokeDashoffset={ringOffset}
+              style={{ transition: 'stroke-dashoffset 1s linear' }}
+            />
+          </svg>
+
+          <div
+            className="relative h-full w-full rounded-full overflow-hidden"
+            style={{
+              boxShadow: 'inset 0 -18px 44px rgba(28,18,54,.35), 0 22px 60px -14px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08)',
+            }}
+          >
+            <Image src={creatorImage} alt={creatorName} fill className="object-cover" sizes="200px" priority />
+          </div>
         </div>
 
         <div
