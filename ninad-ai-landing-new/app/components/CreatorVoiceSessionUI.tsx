@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Ripple from './ui/Ripple';
+import Aurora from './ui/Aurora';
 
 interface VoiceSessionUIProps {
   isSpeaking: boolean;
@@ -45,6 +46,14 @@ export default function VoiceSessionUI({
   return (
     <Ripple className="z-50 bg-nd-darker">
       <div className="relative h-full w-full px-4">
+        {/* Atmospheric background wash, behind the photo/timer via DOM order (both are
+            absolutely positioned siblings placed after this one, with equal z-auto
+            stacking, so later-in-DOM wins). Toned down via opacity since Aurora's raw
+            output is quite saturated by default. */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-60">
+          <Aurora colorStops={['#4E3480', '#8E76BE', '#3E2A6B']} amplitude={0.8} blend={0.6} />
+        </div>
+
         {/* Anchored to the exact same center point Ripple uses for its rings (50%/50%),
             rather than being centered as part of a taller stack with the timer/status
             below it — otherwise the group's midpoint, not the photo's, lands on-center.

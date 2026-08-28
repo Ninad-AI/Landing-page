@@ -10,7 +10,7 @@ export default function Footer() {
             <Image src="/assets/ninad-ai.png" alt="Ninad AI" fill sizes="144px" className="object-contain object-left" />
           </div>
           <p className="text-[13px] leading-relaxed text-nd-dim mt-3.5 max-w-[300px]">
-            Voice personas, licensed and operated end to end. Made in Bengaluru.
+            Voice personas, licensed and operated end to end.
           </p>
         </div>
         <div className="flex flex-wrap gap-14">
@@ -28,7 +28,7 @@ export default function Footer() {
             <Link href="/terms-and-conditions" className="text-[13.5px] font-semibold text-nd-muted hover:text-nd-ink transition-colors">
               Terms &amp; Conditions
             </Link>
-            <span className="text-[13.5px] font-semibold text-nd-dim">© 2025 Ninad AI</span>
+            <span className="text-[13.5px] font-semibold text-nd-dim">© 2026 Ninad AI</span>
           </div>
         </div>
       </div>
