@@ -1,9 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { creatorApplicationApi } from "../lib/api";
+
+interface ValidationErrorDetail {
+  msg?: string;
+}
+
+function getApplicationErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as {
+    response?: {
+      data?: {
+        detail?: string | ValidationErrorDetail[];
+        message?: string;
+      };
+    };
+  };
+
+  const detail = apiError.response?.data?.detail;
+
+  if (typeof detail === "string" && detail.length > 0) {
+    return detail;
+  }
+
+  if (Array.isArray(detail) && detail.length > 0) {
+    const messages = detail.map((d) => d.msg).filter((m): m is string => Boolean(m));
+    if (messages.length > 0) return messages.join(" ");
+  }
+
+  return apiError.response?.data?.message || fallback;
+}
 
 const CREATOR_STEPS = [
-  { n: "01", title: "One studio session", body: "Ninety minutes reading scripts we wrote to capture your range — laughing, thinking, disagreeing." },
+  { n: "01", title: "One studio session", body: "Ten minutes reading scripts we wrote to capture your range — laughing, thinking, disagreeing." },
   { n: "02", title: "Hand us your archive", body: "Interviews, podcasts, books, old posts, a voice note of things you actually believe. We do the ingestion." },
   { n: "03", title: "Approve the persona", body: "You talk to it first. Tell us what sounds wrong and what it should never discuss. We version every change." },
   { n: "04", title: "Post your link", body: "ninad.live/creators/your-name goes in your bio. That is the whole distribution step." },
@@ -21,13 +50,43 @@ export default function ForCreatorsPage() {
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
   const [knownFor, setKnownFor] = useState("");
-  const [applied, setApplied] = useState(false);
+  const [status, setStatus] = useState<
+    | { type: "idle" }
+    | { type: "loading" }
+    | { type: "success" }
+    | { type: "error"; message: string }
+  >({ type: "idle" });
 
-  const canSubmit = name.trim().length > 0 && handle.trim().length > 0;
+  const canSubmit =
+    name.trim().length > 0 && handle.trim().length > 0 && knownFor.trim().length > 0;
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    setApplied(true);
+  useEffect(() => {
+    if (status.type !== "success") return;
+    const t = window.setTimeout(() => setStatus({ type: "idle" }), 5000);
+    return () => window.clearTimeout(t);
+  }, [status.type]);
+
+  const handleSubmit = async () => {
+    if (!canSubmit || status.type === "loading") return;
+    setStatus({ type: "loading" });
+
+    try {
+      await creatorApplicationApi.submit({
+        name: name.trim(),
+        social_handle: handle.trim(),
+        known_for: knownFor.trim(),
+      });
+
+      setStatus({ type: "success" });
+      setName("");
+      setHandle("");
+      setKnownFor("");
+    } catch (err) {
+      setStatus({
+        type: "error",
+        message: getApplicationErrorMessage(err, "Something went wrong. Please try again."),
+      });
+    }
   };
 
   // Desktop: sticky sidebar next to the hero. Mobile: same card, moved to
@@ -40,7 +99,7 @@ export default function ForCreatorsPage() {
         We onboard a handful a month. Tell us who you are and we&apos;ll come back within a week.
       </p>
 
-      {applied ? (
+      {status.type === "success" ? (
         <div className="rounded-2xl bg-white border border-[#D6E2D8] text-center p-6 animate-nd-up">
           <div className="text-2xl mb-2">✓</div>
           <div className="text-[15px] font-bold text-nd-ink">We&apos;ve got it.</div>
@@ -68,11 +127,14 @@ export default function ForCreatorsPage() {
           />
           <button
             onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={!canSubmit || status.type === "loading"}
             className="w-full py-4 rounded-xl bg-nd-ink text-nd-bg font-bold text-[14.5px] hover:bg-[#302C36] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            Send application
+            {status.type === "loading" ? "Sending…" : "Send application"}
           </button>
+          {status.type === "error" ? (
+            <p className="text-[13px] text-red-600 leading-relaxed">{status.message}</p>
+          ) : null}
         </div>
       )}
     </div>
@@ -91,11 +153,11 @@ export default function ForCreatorsPage() {
             </p>
             <div className="flex gap-8 sm:gap-10 py-6 border-y border-nd-line">
               <div>
-                <div className="font-display text-3xl sm:text-4xl text-nd-ink leading-none">70%</div>
+                <div className="font-display text-3xl sm:text-4xl text-nd-ink leading-none">50%</div>
                 <div className="text-xs text-nd-dim mt-2 leading-tight">of every session, to you</div>
               </div>
               <div>
-                <div className="font-display text-3xl sm:text-4xl text-nd-ink leading-none">90min</div>
+                <div className="font-display text-3xl sm:text-4xl text-nd-ink leading-none">10min</div>
                 <div className="text-xs text-nd-dim mt-2 leading-tight">one studio session, once</div>
               </div>
               <div>
@@ -127,7 +189,7 @@ export default function ForCreatorsPage() {
                 <span className="flex-none text-[#8E76BE] text-sm leading-relaxed">→</span>
                 <div className="flex-1 min-w-0 text-[14.5px] leading-relaxed">
                   <span className="font-bold text-nd-bg">{h.title}</span>
-                  <span className="text-[#A8A2AE]"> — {h.body}</span>
+                  <span className="text-[#A8A2AE]"> - {h.body}</span>
                 </div>
               </div>
             ))}

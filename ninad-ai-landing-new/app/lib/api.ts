@@ -2,11 +2,6 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   AuthResponse,
   GoogleSignInRequest,
-  SessionCreateRequest,
-  Session,
-  SessionResult,
-  CheckoutRequest,
-  CheckoutResponse,
   AnalyticsDashboardResponse,
   AnalyticsUsageResponse,
   AnalyticsBookingsResponse,
@@ -24,9 +19,10 @@ import type {
   UserBooking,
   VoiceSessionFeedbackRequest,
   VoiceSessionFeedbackResponse,
-  TrialStatusResponse,
+  CreatorApplicationRequest,
+  CreatorApplicationResponse,
 } from './types';
-import { API_BASE, buildVoiceWsUrl } from './config';
+import { API_BASE } from './config';
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
@@ -338,20 +334,8 @@ export const authApi = {
   },
 };
 
-// ─── Session Endpoints ───
-export const sessionApi = {
-  create: (data: SessionCreateRequest) =>
-    api.post<Session>('/session', data).then((r) => r.data),
-
-  getResult: (requestId: string) =>
-    api.get<SessionResult>(`/result/${requestId}`).then((r) => r.data),
-};
-
 // ─── Payment Endpoints ───
 export const paymentApi = {
-  createCheckout: (data: CheckoutRequest) =>
-    api.post<CheckoutResponse>('/payment/create-checkout', data).then((r) => r.data),
-
   createRazorpayOrder: (data: RazorpayCreateOrderRequest) =>
     api
       .post<RazorpayCreateOrderResponse>('/payment/create-order', data)
@@ -416,12 +400,6 @@ export const feedbackApi = {
     const response = await api.post<VoiceSessionFeedbackResponse>(FEEDBACK_PATH, payload);
     return response.data;
   },
-};
-
-// ─── Trial Endpoints ───
-export const trialApi = {
-  getStatus: () =>
-    api.get<TrialStatusResponse>('/trial/status').then((r) => r.data),
 };
 
 // ─── Analytics Endpoints ───
@@ -514,7 +492,8 @@ export const systemApi = {
   health: () => fetchSystemHealth(),
 };
 
-// ─── WebSocket URL builder ───
-export function getVoiceWsUrl(influencerId: string): string {
-  return buildVoiceWsUrl(influencerId);
-}
+// ─── Creator Application Endpoint ───
+export const creatorApplicationApi = {
+  submit: (data: CreatorApplicationRequest) =>
+    api.post<CreatorApplicationResponse>('/applications', data).then((r) => r.data),
+};

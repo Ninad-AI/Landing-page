@@ -12,18 +12,6 @@ export interface User {
   influencer_id?: string;
 }
 
-export interface TrialStatus {
-  influencer_id: string;
-  display_name: string;
-  available: boolean;
-  used_at: string | null;
-}
-
-export interface TrialStatusResponse {
-  user_id: number;
-  trials: TrialStatus[];
-}
-
 export interface AuthTokens {
   access_token: string;
   token_type: string;
@@ -38,54 +26,7 @@ export interface AuthResponse {
   tokens: AuthTokens;
 }
 
-// ─── Creator / Influencer ───
-export interface Creator {
-  id: string;
-  name: string;
-  role: string;
-  image_url: string;
-  handle: string;
-  status: 'active' | 'inactive';
-  bio?: string;
-  followers?: number;
-  following?: number;
-  voice_id?: string;
-}
-
-// ─── Session ───
-export interface Session {
-  id: string;
-  user_id: string;
-  influencer_id: string;
-  duration_minutes: number;
-  status: 'pending' | 'active' | 'completed' | 'cancelled';
-  created_at: string;
-  ended_at?: string;
-}
-
-export interface SessionCreateRequest {
-  influencer_id: string;
-  duration_minutes: number;
-}
-
-export interface SessionResult {
-  request_id: string;
-  status: string;
-  result?: Record<string, unknown>;
-}
-
 // ─── Payment ───
-export interface CheckoutRequest {
-  session_id: string;
-  amount: number;
-  currency: string;
-}
-
-export interface CheckoutResponse {
-  checkout_url: string;
-  session_id: string;
-}
-
 export type AllowedDurationMinutes = 1 | 3 | 5 | 10 | 15;
 
 export interface RazorpayCreateOrderRequest {
@@ -168,45 +109,10 @@ export interface VoiceSessionFeedbackResponse {
 }
 
 // ─── Analytics ───
-export interface UsageAnalytics {
-  total_sessions: number;
-  total_minutes: number;
-  active_users: number;
-  avg_session_duration: number;
-  daily_usage: DailyUsage[];
-  provider_breakdown: ProviderBreakdown[];
-}
-
 export interface DailyUsage {
   date: string;
   sessions: number;
   minutes: number;
-}
-
-export interface ProviderBreakdown {
-  provider: string;
-  sessions: number;
-  percentage: number;
-}
-
-export interface BookingAnalytics {
-  total_bookings: number;
-  revenue: number;
-  conversion_rate: number;
-  daily_bookings: DailyBooking[];
-  top_creators: TopCreator[];
-}
-
-export interface DailyBooking {
-  date: string;
-  bookings: number;
-  revenue: number;
-}
-
-export interface TopCreator {
-  name: string;
-  bookings: number;
-  revenue: number;
 }
 
 export interface AnalyticsDashboardResponse {
@@ -325,9 +231,14 @@ export interface HealthResponse {
   [key: string]: unknown;
 }
 
-// ─── API ───
-export interface ApiError {
-  message: string;
-  status: number;
-  detail?: string;
+// ─── Creator Applications ───
+export interface CreatorApplicationRequest {
+  name: string;
+  social_handle: string;
+  known_for: string;
+}
+
+export interface CreatorApplicationResponse {
+  status: string;
+  application_id: number;
 }
