@@ -134,7 +134,6 @@ export default function CreatorProfilePage() {
   useEffect(() => {
     if (flowState !== "active") return;
     let disposed = false;
-    let initAckReceived = false;
 
     setIsSpeaking(false);
     setCallPhase("connecting");
@@ -199,7 +198,6 @@ export default function CreatorProfilePage() {
 
           if (msg.type === "init_ack") {
             // Server confirmed session — now begin audio streaming
-            initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
             void startMic();

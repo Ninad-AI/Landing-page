@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '../lib/stores';
 import { useSystemHealthStore } from '../lib/systemHealthStore';
@@ -39,19 +38,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const startHealthPolling = useSystemHealthStore((s) => s.startPolling);
   const stopHealthPolling = useSystemHealthStore((s) => s.stopPolling);
 
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 30_000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
-
   useEffect(() => {
     startHealthPolling();
     return () => stopHealthPolling();
@@ -59,28 +45,26 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <QueryClientProvider client={queryClient}>
-        <AuthHydrator>
-          {children}
-        </AuthHydrator>
-        <Toaster
-          position="top-right"
-          duration={2500}
-          toastOptions={{
-            style: {
-              background: 'rgba(250, 248, 244, 0.96)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid #E4DED4',
-              color: '#1C1A1F',
-              fontFamily: 'var(--font-manrope)',
-              borderRadius: '16px',
-              boxShadow: '0 20px 60px -20px rgba(28,26,31,0.25)',
-            },
-          }}
-          richColors
-        />
-      </QueryClientProvider>
+      <AuthHydrator>
+        {children}
+      </AuthHydrator>
+      <Toaster
+        position="top-right"
+        duration={2500}
+        toastOptions={{
+          style: {
+            background: 'rgba(250, 248, 244, 0.96)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid #E4DED4',
+            color: '#1C1A1F',
+            fontFamily: 'var(--font-manrope)',
+            borderRadius: '16px',
+            boxShadow: '0 20px 60px -20px rgba(28,26,31,0.25)',
+          },
+        }}
+        richColors
+      />
     </GoogleOAuthProvider>
   );
 }

@@ -572,68 +572,6 @@ h6 {
 }
 
 /* ═══════════════════════════════════════════════
-   Form Field Stagger Animation
-   ═══════════════════════════════════════════════ */
-
-@keyframes fieldSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.form-field {
-  opacity: 0;
-  animation: fieldSlideIn 0.5s var(--ease-out-expo) forwards;
-}
-
-/* ═══════════════════════════════════════════════
-   Floating Glow Drift Animations
-   ═══════════════════════════════════════════════ */
-
-@keyframes glowDrift {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  25% {
-    transform: translate(30px, -20px) scale(1.05);
-  }
-  50% {
-    transform: translate(-10px, 15px) scale(0.97);
-  }
-  75% {
-    transform: translate(15px, 10px) scale(1.03);
-  }
-}
-
-@keyframes glowDriftReverse {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  25% {
-    transform: translate(-20px, 15px) scale(1.03);
-  }
-  50% {
-    transform: translate(15px, -25px) scale(0.96);
-  }
-  75% {
-    transform: translate(-10px, -10px) scale(1.05);
-  }
-}
-
-.animate-glow-drift {
-  animation: glowDrift 12s ease-in-out infinite;
-}
-
-.animate-glow-drift-reverse {
-  animation: glowDriftReverse 14s ease-in-out infinite;
-}
-
-/* ═══════════════════════════════════════════════
    Smooth Pulse (softer than default)
    ═══════════════════════════════════════════════ */
 
@@ -648,57 +586,6 @@ h6 {
 
 .animate-soft-pulse {
   animation: softPulse 3s ease-in-out infinite;
-}
-
-/* ═══════════════════════════════════════════════
-   Marquee Animations
-   ═══════════════════════════════════════════════ */
-
-@keyframes marquee {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@keyframes marquee-reverse {
-  0% {
-    transform: translate3d(-50%, 0, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-  will-change: transform;
-}
-
-.animate-marquee-reverse {
-  animation: marquee-reverse 30s linear infinite;
-  will-change: transform;
-}
-
-/* ═══════════════════════════════════════════════
-   Fade In Up Animation
-   ═══════════════════════════════════════════════ */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s var(--ease-out-expo) forwards;
 }
 
 .delay-100 {
@@ -730,94 +617,16 @@ a, button, [role="button"] {
 }
 
 /* ═══════════════════════════════════════════════
-   Skeleton/Loading Shimmer
-   ═══════════════════════════════════════════════ */
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.loading-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
-}
-
-/* ═══════════════════════════════════════════════
-   Float Animation (Creator pages)
-   ═══════════════════════════════════════════════ */
-
-@keyframes float {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -20px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-/* ═══════════════════════════════════════════════
-   Noise Overlay (Creator pages)
-   ═══════════════════════════════════════════════ */
-
-.noise-overlay {
-  position: relative;
-}
-
-.noise-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url('/noise.svg');
-  background-repeat: repeat;
-  opacity: 0.04;
-  pointer-events: none;
-  z-index: 50;
-  mix-blend-mode: overlay;
-}
-
-/* ═══════════════════════════════════════════════
    "Ninad Live" redesign — keyframes & utilities
    ═══════════════════════════════════════════════ */
 
-@keyframes nd-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
-@keyframes nd-ripple { 0% { transform: scale(.72); opacity: .45; } 100% { transform: scale(1.85); opacity: 0; } }
-@keyframes nd-bar { 0%, 100% { transform: scaleY(.16); } 50% { transform: scaleY(1); } }
-@keyframes nd-spin { to { transform: rotate(360deg); } }
 @keyframes nd-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes nd-blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
 @keyframes nd-marquee { to { transform: translateX(-50%); } }
 @keyframes nd-pop { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
 @keyframes nd-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes nd-ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(107,75,168,.35); } 50% { box-shadow: 0 0 0 14px rgba(107,75,168,0); } }
 @keyframes nd-sheet { from { transform: translateY(101%); } to { transform: none; } }
 
-.animate-nd-breathe { animation: nd-breathe 2.2s ease-in-out infinite; }
-.animate-nd-ripple { animation: nd-ripple 3.4s ease-out infinite; }
-.animate-nd-bar { animation: nd-bar 1.15s ease-in-out infinite; }
-.animate-nd-spin { animation: nd-spin 11s linear infinite; }
 .animate-nd-up { animation: nd-up .22s ease forwards; }
 .animate-nd-blink { animation: nd-blink 1.7s ease-in-out infinite; }
 /* Slower on narrow screens (less width visible per word = less reading time
@@ -834,7 +643,6 @@ a, button, [role="button"] {
 }
 .animate-nd-pop { animation: nd-pop .28s cubic-bezier(.22,.9,.3,1) forwards; }
 .animate-nd-fade { animation: nd-fade .3s ease forwards; }
-.animate-nd-ring { animation: nd-ring 2.6s ease-in-out infinite; }
 .animate-nd-sheet { animation: nd-sheet .3s cubic-bezier(.22,.9,.3,1) forwards; }
 
 @media (min-width: 640px) {

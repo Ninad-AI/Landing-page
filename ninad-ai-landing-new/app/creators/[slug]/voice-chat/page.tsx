@@ -218,7 +218,6 @@ function VoiceChatContent() {
     if (!durationMinutes) return;
 
     let disposed = false;
-    let initAckReceived = false;
 
     const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
@@ -283,7 +282,6 @@ function VoiceChatContent() {
 
           if (msg.type === "init_ack") {
             // Server confirmed session — now begin audio streaming
-            initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
             void startMic();
