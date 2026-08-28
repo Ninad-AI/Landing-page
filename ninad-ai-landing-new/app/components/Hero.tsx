@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import ParticleOrb from "./ui/ParticleOrb";
 
 export default function Hero() {
   const router = useRouter();
@@ -47,29 +48,8 @@ export default function Hero() {
               <span className="px-2.5 py-1.5 rounded-full bg-[#221E2C] text-xs font-bold text-nd-bg tabular-nums">02:14</span>
             </div>
 
-            <div className="flex justify-center py-4 pb-6">
-              <div className="relative w-[168px] h-[168px] flex items-center justify-center">
-                <span className="absolute rounded-full animate-nd-ripple" style={{ width: 140, height: 140, border: "1px solid rgba(142,118,190,.5)" }} />
-                <span className="absolute rounded-full animate-nd-ripple" style={{ width: 140, height: 140, border: "1px solid rgba(142,118,190,.4)", animationDelay: "1.7s" }} />
-                <span
-                  className="absolute rounded-full animate-nd-spin"
-                  style={{
-                    width: 152,
-                    height: 152,
-                    background: "conic-gradient(from 0deg, rgba(142,118,190,.42), rgba(107,75,168,.05), rgba(192,96,60,.3), rgba(142,118,190,.42))",
-                    filter: "blur(22px)",
-                  }}
-                />
-                <span
-                  className="relative rounded-full animate-nd-breathe"
-                  style={{
-                    width: 112,
-                    height: 112,
-                    background: "radial-gradient(120% 120% at 32% 26%, #C9B6EC 0%, #8E76BE 42%, #5A3E96 78%, #3E2A6B 100%)",
-                    boxShadow: "inset 0 -12px 28px rgba(28,18,54,.6), 0 16px 40px -12px rgba(107,75,168,.65)",
-                  }}
-                />
-              </div>
+            <div className="flex justify-center py-3 pb-5">
+              <ParticleOrb size={220} />
             </div>
 
             <div className="flex flex-col gap-3 min-h-[92px]">
