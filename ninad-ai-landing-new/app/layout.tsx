@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import Header from "./components/Header";
+import ComingSoonBanner from "./components/ComingSoonBanner";
 import Providers from "./components/Providers";
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
+          <ComingSoonBanner />
           <Header />
           {children}
         </Providers>

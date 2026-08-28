@@ -89,7 +89,7 @@ export default function Header() {
      ═══════════════════════════════════════════════ */
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isMobileMenuOpen
+      className={`fixed top-9 left-0 w-full z-50 transition-[background-color,padding] duration-300 ease-out ${isMobileMenuOpen
         ? "bg-transparent py-6 border-b border-transparent"
         : isScrolled
           ? "bg-black/55 backdrop-blur-xl py-6 border-b border-white/10"
