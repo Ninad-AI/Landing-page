@@ -52,6 +52,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     bio: "A model and influencer known for bold, expressive visuals and a magnetic presence.",
   },
+  {
+    id: "ganesha-001",
+    name: "Ganesha",
+    role: "Guide & Guardian",
+    imageUrl: "/assets/creators/ganesha.jpg",
+    handle: "ganesha",
+    status: "Active",
+    bio: "A divine guide and guardian offering wisdom, blessings, and protection for life's new beginnings.",
+  },
 ];
 
 export default function CreatorsPage() {

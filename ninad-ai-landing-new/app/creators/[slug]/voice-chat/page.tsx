@@ -56,6 +56,13 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "sona_dey",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "ganesha": {
+    name: "Ganesha",
+    image: "/assets/creators/ganesha.jpg",
+    role: "God & Guardian",
+    influencerId: "ganeshji",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
