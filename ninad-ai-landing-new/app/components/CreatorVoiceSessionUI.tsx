@@ -16,6 +16,8 @@ interface VoiceSessionUIProps {
   isPttActive?: boolean;
   onPttPress?: () => void;
   onPttRelease?: () => void;
+  /** True between releasing the button and the agent's response actually starting. */
+  isAwaitingResponse?: boolean;
 }
 
 export default function VoiceSessionUI({
@@ -30,6 +32,7 @@ export default function VoiceSessionUI({
   isPttActive = false,
   onPttPress,
   onPttRelease,
+  isAwaitingResponse = false,
 }: VoiceSessionUIProps) {
   const RING_SIZE = 240;
   const IMG_SIZE = 180;
@@ -47,13 +50,22 @@ export default function VoiceSessionUI({
     return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
+  // Held while the agent is still talking counts as "queued" (waiting for it
+  // to be safe to actually capture) — the button/status shouldn't look
+  // "listening" while nothing is actually being captured yet. A press during
+  // "thinking" is NOT queued (it starts a new turn), so it isn't included.
+  const pttQueued = isPttActive && isSpeaking;
+  const pttListening = isPttActive && !pttQueued;
+
   // In push-to-talk mode the mic is muted except while the button is held, so the
   // status readout reflects that instead of the raw (always-on-VAD) call phase.
   const effectivePhase = pushToTalk
     ? isSpeaking
       ? 'speaking'
-      : isPttActive
+      : pttListening
       ? 'listening'
+      : isAwaitingResponse
+      ? 'thinking'
       : callPhase === 'connecting'
       ? 'connecting'
       : 'idle'
@@ -61,7 +73,7 @@ export default function VoiceSessionUI({
 
   const phaseLabel = effectivePhase === 'idle' ? 'hold to talk' : effectivePhase;
 
-  const statusDotColor = effectivePhase === 'connecting'
+  const statusDotColor = effectivePhase === 'connecting' || effectivePhase === 'thinking'
     ? { ping: 'bg-amber-400', dot: 'bg-amber-500' }
     : effectivePhase === 'listening'
     ? { ping: 'bg-emerald-400', dot: 'bg-emerald-500' }
@@ -150,7 +162,7 @@ export default function VoiceSessionUI({
                 `}</style>
 
                 <div className="relative flex items-center justify-center">
-                  {isPttActive && (
+                  {pttListening && (
                     <>
                       <span
                         className="pointer-events-none absolute inset-0 rounded-full border-2 border-emerald-400/60"
@@ -166,7 +178,7 @@ export default function VoiceSessionUI({
                   <button
                     type="button"
                     aria-pressed={isPttActive}
-                    aria-label={isPttActive ? 'Release to send' : 'Hold to talk (or hold space)'}
+                    aria-label={pttListening ? 'Release to send' : pttQueued ? 'Waiting for the agent to finish' : 'Hold to talk (or hold space)'}
                     disabled={callPhase === 'connecting'}
                     onPointerDown={(e) => {
                       e.currentTarget.setPointerCapture(e.pointerId);
@@ -192,15 +204,21 @@ export default function VoiceSessionUI({
                       }
                     }}
                     className={`relative flex h-14 w-14 select-none items-center justify-center rounded-full border backdrop-blur-md transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:h-16 sm:w-16 ${
-                      isPttActive
+                      pttListening
                         ? 'border-emerald-300/70 bg-gradient-to-b from-emerald-400 to-emerald-600 text-white shadow-[0_0_35px_rgba(16,185,129,0.5)]'
+                        : pttQueued
+                        ? 'border-amber-300/50 bg-amber-500/15 text-amber-100/90'
                         : 'border-white/20 bg-white/10 text-white/85 hover:bg-white/15'
                     }`}
                     style={{
                       touchAction: 'none',
                       transition: 'transform 150ms ease-out, box-shadow 150ms ease-out, background-color 150ms ease-out',
-                      transform: isPttActive ? 'scale(1.08)' : undefined,
-                      animation: isPttActive || callPhase === 'connecting' ? 'none' : 'ptt-breathe 2.8s ease-in-out infinite',
+                      transform: pttListening ? 'scale(1.08)' : undefined,
+                      animation: pttQueued
+                        ? 'ptt-breathe 1s ease-in-out infinite'
+                        : isPttActive || callPhase === 'connecting'
+                        ? 'none'
+                        : 'ptt-breathe 2.8s ease-in-out infinite',
                     }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 sm:h-7 sm:w-7">
@@ -214,19 +232,19 @@ export default function VoiceSessionUI({
 
                 <span
                   className={`font-roboto text-[10px] font-medium uppercase tracking-[0.4em] sm:text-[11px] sm:tracking-[0.6em] ${
-                    isSpeaking
+                    effectivePhase === 'speaking'
                       ? 'text-rose-300/80'
-                      : isPttActive
+                      : effectivePhase === 'listening'
                       ? 'text-emerald-300'
-                      : callPhase === 'connecting'
+                      : effectivePhase === 'thinking' || effectivePhase === 'connecting'
                       ? 'text-amber-400/70'
                       : 'text-white/40'
                   }`}
                 >
-                  {isSpeaking ? 'speaking' : isPttActive ? 'listening' : callPhase === 'connecting' ? 'connecting' : 'hold to talk'}
+                  {phaseLabel}
                 </span>
 
-                {!isPttActive && !isSpeaking && callPhase !== 'connecting' && (
+                {effectivePhase === 'idle' && (
                   <span className="hidden font-roboto text-[9px] font-normal normal-case tracking-normal text-white/30 sm:block">
                     or hold space
                   </span>

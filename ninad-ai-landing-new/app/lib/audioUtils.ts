@@ -21,6 +21,21 @@ interface StreamingMicOptions {
   onSpeechStart?: () => void;
   /** Called when VAD detects the user stopped speaking */
   onSpeechEnd?: () => void;
+  /**
+   * When false, skip energy-based speech_start/speech_end detection entirely —
+   * for callers (e.g. push-to-talk) that are the sole source of truth for turn
+   * boundaries. Raw PCM frames still stream normally. Defaults to true.
+   */
+  vadEnabled?: boolean;
+  /**
+   * When true, keep sending 20 ms frames of pure silence while muted instead of
+   * stopping the stream. Server-side agents (e.g. Deepgram Voice Agent) detect
+   * end-of-turn by hearing silence AFTER speech — if the stream simply stops
+   * when a push-to-talk button is released, they never see that silence and
+   * never respond. Real mic audio is still never transmitted while muted.
+   * Defaults to false.
+   */
+  streamSilenceWhileMuted?: boolean;
 }
 
 /**
@@ -41,6 +56,8 @@ export const startStreamingMic = async (
     silenceMs = 600,
     onSpeechStart,
     onSpeechEnd,
+    vadEnabled = true,
+    streamSilenceWhileMuted = false,
   } = options;
 
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -91,7 +108,7 @@ export const startStreamingMic = async (
   const processInputChunk = (input: Float32Array) => {
     if (ws.readyState !== WebSocket.OPEN) return;
 
-    if (muted) {
+    if (muted && !streamSilenceWhileMuted) {
       if (typeof onAudioLevel === "function") {
         onAudioLevel(0);
       }
@@ -102,10 +119,14 @@ export const startStreamingMic = async (
     const targetSampleRate = 16000;
     const ratio = audioContext.sampleRate / targetSampleRate;
     const newLength = Math.floor(input.length / ratio);
+    // Float32Array is zero-filled: while muted (with streamSilenceWhileMuted)
+    // we deliberately leave it as silence rather than copying the mic input.
     const downsampled = new Float32Array(newLength);
 
-    for (let i = 0; i < newLength; i++) {
-      downsampled[i] = input[Math.floor(i * ratio)];
+    if (!muted) {
+      for (let i = 0; i < newLength; i++) {
+        downsampled[i] = input[Math.floor(i * ratio)];
+      }
     }
 
     // ── Compute RMS energy on downsampled buffer ──
@@ -115,36 +136,38 @@ export const startStreamingMic = async (
     }
     const rms = Math.sqrt(energySum / downsampled.length);
 
-    // ── Dynamic noise-floor calibration (first 0.5 s) ──
-    const elapsed = performance.now() - streamStartTime;
-    if (elapsed < calibrationMs) {
-      noiseSum += rms;
-      noiseCount += 1;
-    }
-
-    let threshold = energyThreshold;
-    if (noiseCount > 0) {
-      const estNoise = noiseSum / noiseCount;
-      threshold = Math.max(energyThreshold, estNoise * 3.0);
-    }
-
-    // ── VAD decision ──
-    const now = performance.now();
-
-    if (rms >= threshold) {
-      lastSpeechTs = now;
-
-      if (!isSpeaking) {
-        isSpeaking = true;
-        safeSend(JSON.stringify({ type: "speech_start" }));
-        if (typeof onSpeechStart === "function") onSpeechStart();
+    if (vadEnabled && !muted) {
+      // ── Dynamic noise-floor calibration (first 0.5 s) ──
+      const elapsed = performance.now() - streamStartTime;
+      if (elapsed < calibrationMs) {
+        noiseSum += rms;
+        noiseCount += 1;
       }
-    } else if (isSpeaking) {
-      const silenceElapsed = now - lastSpeechTs;
-      if (silenceElapsed >= silenceMs) {
-        isSpeaking = false;
-        safeSend(JSON.stringify({ type: "speech_end" }));
-        if (typeof onSpeechEnd === "function") onSpeechEnd();
+
+      let threshold = energyThreshold;
+      if (noiseCount > 0) {
+        const estNoise = noiseSum / noiseCount;
+        threshold = Math.max(energyThreshold, estNoise * 3.0);
+      }
+
+      // ── VAD decision ──
+      const now = performance.now();
+
+      if (rms >= threshold) {
+        lastSpeechTs = now;
+
+        if (!isSpeaking) {
+          isSpeaking = true;
+          safeSend(JSON.stringify({ type: "speech_start" }));
+          if (typeof onSpeechStart === "function") onSpeechStart();
+        }
+      } else if (isSpeaking) {
+        const silenceElapsed = now - lastSpeechTs;
+        if (silenceElapsed >= silenceMs) {
+          isSpeaking = false;
+          safeSend(JSON.stringify({ type: "speech_end" }));
+          if (typeof onSpeechEnd === "function") onSpeechEnd();
+        }
       }
     }
 
@@ -218,6 +241,7 @@ export const startStreamingMic = async (
 
   return {
     setMuted: (nextMuted: boolean) => {
+      const wasMuted = muted;
       muted = nextMuted;
       stream.getAudioTracks().forEach((track) => {
         track.enabled = !nextMuted;
@@ -227,6 +251,13 @@ export const startStreamingMic = async (
         safeSend(JSON.stringify({ type: "speech_end" }));
         isSpeaking = false;
         if (typeof onSpeechEnd === "function") onSpeechEnd();
+      }
+
+      if (!nextMuted && wasMuted) {
+        // Starting a fresh capture window — drop any partial-frame bytes left
+        // over from before muting so they don't get glued onto the next
+        // utterance's audio.
+        pcmRemainder = new Int16Array(0);
       }
     },
 

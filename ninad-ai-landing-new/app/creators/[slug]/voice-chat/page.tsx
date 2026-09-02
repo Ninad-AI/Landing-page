@@ -107,6 +107,10 @@ function VoiceChatContent() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
   const [isPttActive, setIsPttActive] = useState(false);
+  // Ganesha-only: true between "you released the button" and "the agent's
+  // response actually starts" — the backend does a RAG lookup in that window,
+  // which can take a few seconds, so the UI shouldn't just look idle.
+  const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
@@ -119,6 +123,36 @@ function VoiceChatContent() {
   const agentSpeakingRef = useRef(false);
   const playoutRef = useRef<PlayoutBuffer | null>(null);
   const sessionEndTimeRef = useRef<number | null>(null);
+  // True while the push-to-talk button is held but it isn't safe to capture yet
+  // (mic still initializing, or the agent is still speaking) — applied the
+  // instant it becomes safe.
+  const pttPendingRef = useRef(false);
+  // True once speech_start has actually been sent + the mic unmuted for the
+  // current hold, so release only sends speech_end for holds that really started.
+  const pttCapturingRef = useRef(false);
+  // Ref mirror of isAwaitingResponse, readable from the [] -dep callbacks below
+  // without going stale.
+  const awaitingResponseRef = useRef(false);
+  const awaitingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const AWAITING_RESPONSE_TIMEOUT_MS = 20_000;
+  const setAwaitingResponse = useCallback((value: boolean) => {
+    awaitingResponseRef.current = value;
+    setIsAwaitingResponse(value);
+    if (awaitingTimeoutRef.current) {
+      clearTimeout(awaitingTimeoutRef.current);
+      awaitingTimeoutRef.current = null;
+    }
+    if (value) {
+      // Safety net: never let the "thinking" indicator wedge itself if the
+      // backend never sends a response for this turn.
+      awaitingTimeoutRef.current = setTimeout(() => {
+        awaitingTimeoutRef.current = null;
+        awaitingResponseRef.current = false;
+        setIsAwaitingResponse(false);
+      }, AWAITING_RESPONSE_TIMEOUT_MS);
+    }
+  }, []);
+
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -175,18 +209,26 @@ function VoiceChatContent() {
 
   const stopSessionResources = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
+    if (awaitingTimeoutRef.current) {
+      clearTimeout(awaitingTimeoutRef.current);
+      awaitingTimeoutRef.current = null;
+    }
     micControllerRef.current?.stop();
     micControllerRef.current = null;
     const ws = wsRef.current;
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
-      ws.close();
-    } else if (ws && ws.readyState === WebSocket.CONNECTING) {
-      // Defer close until the handshake finishes to avoid the
-      // "WebSocket is closed before the connection is established" console error.
-      ws.onopen = () => {
-        try { ws.close(); } catch { /* ignore */ }
-      };
+    if (ws) {
+      if (ws.readyState === WebSocket.OPEN) {
+        try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
+      }
+      // Close immediately rather than deferring until a still-connecting socket
+      // finishes its handshake. Deferring left a real, live second connection
+      // open (visible as two websockets in the network tab) whenever this ran
+      // twice in quick succession — e.g. React Strict Mode's dev-only
+      // mount→cleanup→mount — with its original onmessage handler still fully
+      // wired, silently double-processing real backend messages against the
+      // same shared component state. A cosmetic "closed before established"
+      // console warning is a fair trade for that not happening.
+      try { ws.close(); } catch { /* ignore */ }
     }
     wsRef.current = null;
     ttsActiveRef.current = false;
@@ -303,6 +345,16 @@ function VoiceChatContent() {
         const micHandle = await startStreamingMic(ws, () => {}, {
           energyThreshold: 0.01,
           silenceMs: 600,
+          // Push-to-talk creators drive speech_start/speech_end from the
+          // button/spacebar directly (see handlePttPress/handlePttRelease) —
+          // the VAD's own energy-based detection would otherwise send a second,
+          // conflicting pair of turn-boundary messages for the same utterance.
+          vadEnabled: !isPushToTalk,
+          // Deepgram's Voice Agent decides end-of-turn by hearing silence after
+          // speech. If we simply stop sending frames when the button is
+          // released, it never sees that silence and never responds — so keep
+          // the stream alive with zeros while muted (no real mic audio leaks).
+          streamSilenceWhileMuted: isPushToTalk,
           onSpeechStart: () => {
             if (!ttsActiveRef.current) setCallPhase("listening");
           },
@@ -322,15 +374,29 @@ function VoiceChatContent() {
         }
 
         micControllerRef.current = micHandle;
+
+        if (isPushToTalk && pttPendingRef.current && !agentSpeakingRef.current) {
+          // The button was pressed (and is still held) before mic setup finished —
+          // start capturing right now instead of dropping that first press.
+          setAwaitingResponse(false);
+          try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
+          micHandle.setMuted(false);
+          pttCapturingRef.current = true;
+        }
       } catch {
         // mic failed
       }
     };
 
     ws.onmessage = (event: MessageEvent) => {
+      // A disposed effect instance's socket may still receive in-flight
+      // messages for a moment after cleanup — never let it mutate state.
+      if (disposed) return;
+
       if (event.data instanceof ArrayBuffer) {
         ttsActiveRef.current = true;
         setIsSpeaking(true);
+        setAwaitingResponse(false);
         setCallPhase("speaking");
         processBinaryChunk(event.data);
       } else {
@@ -353,6 +419,7 @@ function VoiceChatContent() {
           }
 
           if (msg.type === "error") {
+            setAwaitingResponse(false);
             const errMsg: string = msg.error || msg.message || "An error occurred.";
             const lower = errMsg.toLowerCase();
             if (lower.includes("no active booking")) {
@@ -374,6 +441,7 @@ function VoiceChatContent() {
           if (msg.type === "tts_start") {
             ttsActiveRef.current = true;
             setIsSpeaking(true);
+            setAwaitingResponse(false);
             setCallPhase("speaking");
           }
           if (msg.type === "tts_end") {
@@ -392,11 +460,23 @@ function VoiceChatContent() {
 
           if (msg.type === "AgentAudioStart") {
             agentSpeakingRef.current = true;
+            setAwaitingResponse(false);
             micControllerRef.current?.setMuted(true);
           }
           if (msg.type === "AgentAudioDone") {
             agentSpeakingRef.current = false;
-            micControllerRef.current?.setMuted(false);
+            // Push-to-talk creators stay muted until the button is held again;
+            // auto-unmuting here would silently reopen the mic between turns.
+            if (!isPushToTalk) {
+              micControllerRef.current?.setMuted(false);
+            } else if (pttPendingRef.current && micControllerRef.current) {
+              // The button was pressed (and is still held) while the agent was
+              // still talking — start capturing now that it's actually safe to,
+              // instead of unmuting into the agent's own playback (echo).
+              try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
+              micControllerRef.current.setMuted(false);
+              pttCapturingRef.current = true;
+            }
           }
         } catch {
           // non-JSON
@@ -448,13 +528,58 @@ function VoiceChatContent() {
   }, [durationMinutes, handleEndCall, sessionStorageKey]);
 
   const handlePttPress = useCallback(() => {
-    micControllerRef.current?.setMuted(false);
     setIsPttActive(true);
+
+    if (!micControllerRef.current || agentSpeakingRef.current) {
+      // Mic setup hasn't finished yet, or the agent is still talking — queue
+      // the press and start capturing the instant it's safe (see startMic /
+      // AgentAudioDone), instead of unmuting into the agent's own playback
+      // (which the mic would pick up as echo). Note: a pending "thinking"
+      // state deliberately does NOT block a new press — the user must always
+      // be able to talk, even if a response never arrives.
+      pttPendingRef.current = true;
+      return;
+    }
+
+    setAwaitingResponse(false);
+
+    // Tell the server the turn is starting immediately, rather than waiting for
+    // the VAD energy threshold to notice speech a beat later.
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
+    }
+    micControllerRef.current.setMuted(false);
+    pttCapturingRef.current = true;
   }, []);
 
   const handlePttRelease = useCallback(() => {
-    micControllerRef.current?.setMuted(true);
+    const wasPending = pttPendingRef.current;
+    pttPendingRef.current = false;
     setIsPttActive(false);
+
+    if (!pttCapturingRef.current) {
+      // This hold never actually got to capture anything — it was pressed and
+      // released entirely while Ganesha was still busy. Say so, instead of the
+      // press silently vanishing with nothing to show for it.
+      if (wasPending) {
+        toast.info("Ganesha is still finishing up — hold again once he's done.");
+      }
+      return;
+    }
+    pttCapturingRef.current = false;
+
+    // Send speech_end unconditionally on release — the button is the source of
+    // truth for turn end. Leaving this to the VAD's internal isSpeaking flag can
+    // miss short/quiet utterances and leave the server waiting indefinitely.
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      try { ws.send(JSON.stringify({ type: "speech_end" })); } catch { /* ignore */ }
+    }
+    micControllerRef.current?.setMuted(true);
+    // The backend does a RAG lookup before the agent can respond — surface that
+    // wait instead of the UI just going quiet until audio eventually arrives.
+    setAwaitingResponse(true);
   }, []);
 
   // Ganesha-only: holding the spacebar anywhere on the page works like holding the button.
@@ -530,6 +655,7 @@ function VoiceChatContent() {
           isPttActive={isPttActive}
           onPttPress={handlePttPress}
           onPttRelease={handlePttRelease}
+          isAwaitingResponse={isAwaitingResponse}
         />
       </div>
 
