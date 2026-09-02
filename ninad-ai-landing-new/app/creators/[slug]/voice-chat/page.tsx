@@ -19,7 +19,7 @@ function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
 
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
+const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string; pushToTalk?: boolean }> = {
   "nirupam": {
     name: "Nirupam Paritala",
     image: "/assets/creators/nirupam.jpeg",
@@ -59,9 +59,10 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
   "ganesha": {
     name: "Ganesha",
     image: "/assets/creators/ganesha.jpg",
-    role: "God & Guardian",
+    role: "Guide & Guardian",
     influencerId: "ganeshji",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    pushToTalk: true,
   },
 };
 
@@ -84,6 +85,7 @@ function VoiceChatContent() {
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
+  const isPushToTalk = creatorData?.pushToTalk ?? false;
   const bookingId = searchParams.get("booking_id");
 
   const durationValue = searchParams.get("duration");
@@ -104,6 +106,7 @@ function VoiceChatContent() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
+  const [isPttActive, setIsPttActive] = useState(false);
 
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
@@ -313,6 +316,11 @@ function VoiceChatContent() {
           return;
         }
 
+        if (isPushToTalk) {
+          // Push-to-talk creators start muted; audio is only sent while the button is held.
+          micHandle.setMuted(true);
+        }
+
         micControllerRef.current = micHandle;
       } catch {
         // mic failed
@@ -413,7 +421,7 @@ function VoiceChatContent() {
       stopSessionResources();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creatorInfluencerId, durationMinutes, preferredProvider, processBinaryChunk, stopSessionResources]);
+  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, processBinaryChunk, stopSessionResources]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey) return;
@@ -438,6 +446,48 @@ function VoiceChatContent() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [durationMinutes, handleEndCall, sessionStorageKey]);
+
+  const handlePttPress = useCallback(() => {
+    micControllerRef.current?.setMuted(false);
+    setIsPttActive(true);
+  }, []);
+
+  const handlePttRelease = useCallback(() => {
+    micControllerRef.current?.setMuted(true);
+    setIsPttActive(false);
+  }, []);
+
+  // Ganesha-only: holding the spacebar anywhere on the page works like holding the button.
+  useEffect(() => {
+    if (!isPushToTalk || callPhase === 'connecting') return;
+
+    const isTypingTarget = (target: EventTarget | null) =>
+      target instanceof HTMLElement &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || e.repeat || isTypingTarget(e.target)) return;
+      e.preventDefault();
+      handlePttPress();
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code !== 'Space' || isTypingTarget(e.target)) return;
+      e.preventDefault();
+      handlePttRelease();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    // Release if focus leaves the window/tab while space is held down.
+    window.addEventListener('blur', handlePttRelease);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handlePttRelease);
+    };
+  }, [isPushToTalk, callPhase, handlePttPress, handlePttRelease]);
 
   if (!durationMinutes) {
     return (
@@ -476,6 +526,10 @@ function VoiceChatContent() {
           totalTime={totalTime}
           creatorName={creatorName}
           creatorImage={creatorImage}
+          pushToTalk={isPushToTalk}
+          isPttActive={isPttActive}
+          onPttPress={handlePttPress}
+          onPttRelease={handlePttRelease}
         />
       </div>
 
