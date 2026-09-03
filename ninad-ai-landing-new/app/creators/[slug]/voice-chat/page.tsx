@@ -57,7 +57,7 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
   "ganesha": {
-    name: "Ganesha",
+    name: "Lord Ganesha",
     image: "/assets/creators/ganesha.jpg",
     role: "Guide & Guardian",
     influencerId: "ganeshji",

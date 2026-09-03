@@ -54,7 +54,7 @@ const CREATORS: Creator[] = [
   },
   {
     id: "ganesha-001",
-    name: "Ganesha",
+    name: "Lord Ganesha",
     role: "Guide & Guardian",
     imageUrl: "/assets/creators/ganesha.jpg",
     handle: "ganesha",
