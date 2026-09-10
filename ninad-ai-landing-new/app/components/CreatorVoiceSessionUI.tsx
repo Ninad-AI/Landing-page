@@ -59,7 +59,7 @@ export default function VoiceSessionUI({
             below it — otherwise the group's midpoint, not the photo's, lands on-center.
             Ring + photo share one scaled wrapper so they move together as a unit. */}
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.85] sm:scale-95 md:scale-100"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.85] sm:scale-95 md:scale-100 short:scale-[0.62]"
           style={{ width: 200, height: 200 }}
         >
           <svg
@@ -99,11 +99,8 @@ export default function VoiceSessionUI({
           </div>
         </div>
 
-        <div
-          className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-5"
-          style={{ top: 'calc(50% + 140px)' }}
-        >
-          <span className="tabular-nums text-4xl font-light tracking-tight text-[#FAF8F4] sm:text-5xl">
+        <div className="absolute left-1/2 top-[calc(50%+140px)] -translate-x-1/2 flex flex-col items-center gap-5 short:top-[calc(50%+76px)] short:gap-2">
+          <span className="tabular-nums text-4xl font-light tracking-tight text-[#FAF8F4] sm:text-5xl short:text-3xl">
             {formatTime(timeLeft)}
           </span>
           <div className="flex items-center gap-2 rounded-full bg-[#221E2C] px-4 py-2">

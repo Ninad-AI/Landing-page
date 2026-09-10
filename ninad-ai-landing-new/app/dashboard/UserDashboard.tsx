@@ -149,7 +149,7 @@ export default function UserDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Start Voice Session */}
-        <div className="bg-white border border-nd-line rounded-2xl p-8 hover:border-nd-accent/30 transition-all duration-300 group">
+        <div className="bg-white border border-nd-line rounded-2xl p-5 sm:p-8 hover:border-nd-accent/30 transition-all duration-300 group">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-xl bg-nd-tint flex items-center justify-center group-hover:bg-nd-tint/80 transition-colors">
               <svg className="w-6 h-6 text-nd-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -173,7 +173,7 @@ export default function UserDashboard() {
         </div>
 
         {/* My Active Bookings */}
-        <div className="bg-white border border-nd-line rounded-2xl p-8 hover:border-blue-200 transition-all duration-300 group">
+        <div className="bg-white border border-nd-line rounded-2xl p-5 sm:p-8 hover:border-blue-200 transition-all duration-300 group">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
               <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

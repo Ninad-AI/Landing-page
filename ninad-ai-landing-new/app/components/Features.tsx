@@ -18,9 +18,9 @@ export default function Features() {
             <p className="text-[15px] leading-relaxed text-[#A8A2AE] max-w-[380px] mb-7">
               Speech in, speech out. No typing, no waiting for a paragraph to render.
             </p>
-            <div className="inline-flex items-center gap-3 rounded-2xl bg-[#262230] px-5 py-4">
+            <div className="inline-flex max-w-full flex-wrap items-center gap-3 rounded-2xl bg-[#262230] px-5 py-4">
               <span className="font-display text-3xl leading-none">~1.5–1.7s</span>
-              <span className="text-[13px] leading-tight text-[#A8A2AE] max-w-[200px]">round trip - about the length of a held breath.</span>
+              <span className="min-w-[150px] flex-1 text-[13px] leading-tight text-[#A8A2AE] sm:max-w-[200px]">round trip - about the length of a held breath.</span>
             </div>
           </div>
           <div className="flex flex-col">

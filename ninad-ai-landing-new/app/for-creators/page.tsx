@@ -151,7 +151,7 @@ export default function ForCreatorsPage() {
             <p className="text-base sm:text-[17px] leading-relaxed text-nd-muted max-w-[480px] mb-8">
               You have more people wanting your time than there are hours. Ninad turns your archive and your voice into a persona that can be in ten thousand conversations at once — and pays you for every one.
             </p>
-            <div className="flex gap-8 sm:gap-10 py-6 border-y border-nd-line">
+            <div className="flex flex-wrap gap-x-8 gap-y-5 sm:gap-x-10 py-6 border-y border-nd-line">
               <div>
                 <div className="font-display text-3xl sm:text-4xl text-nd-ink leading-none">50%</div>
                 <div className="text-xs text-nd-dim mt-2 leading-tight">of every session, to you</div>
