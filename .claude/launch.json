@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ninad-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "ninad-ai-landing-new", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
