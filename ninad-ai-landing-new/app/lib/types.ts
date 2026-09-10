@@ -16,11 +16,14 @@ export interface TrialStatus {
   influencer_id: string;
   display_name: string;
   available: boolean;
+  duration_seconds: number;
   used_at: string | null;
 }
 
 export interface TrialStatusResponse {
   user_id: number;
+  enabled: boolean;
+  duration_seconds: number;
   trials: TrialStatus[];
 }
 

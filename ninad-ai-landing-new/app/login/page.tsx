@@ -77,13 +77,20 @@ export default function LoginPage() {
 
           {/* Google Sign-In Button */}
           <div className="flex flex-col items-center gap-4">
-            {loading ? (
-              <div className="w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
-                <div className="w-5 h-5 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
-                <span className="font-sans text-sm text-white/60">Signing you in…</span>
-              </div>
-            ) : (
-              <div className="w-full flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
+            <div className="relative w-full">
+              {loading && (
+                <div className="absolute inset-0 z-10 w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-primary rounded-full animate-spin" />
+                  <span className="font-sans text-sm text-white/60">Signing you in…</span>
+                </div>
+              )}
+              {/* Kept mounted (never swapped for the spinner via a ternary) so
+                  Google's script doesn't get re-initialized on every attempt. */}
+              <div
+                className={`w-full flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none ${
+                  loading ? 'invisible pointer-events-none' : ''
+                }`}
+              >
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleError}
@@ -96,7 +103,7 @@ export default function LoginPage() {
                   useOneTap={false}
                 />
               </div>
-            )}
+            </div>
 
             {/* Privacy note */}
             <p className="text-center text-xs text-white/25 font-sans leading-relaxed px-2">

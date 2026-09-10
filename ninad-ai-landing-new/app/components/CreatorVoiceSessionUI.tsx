@@ -18,6 +18,8 @@ interface VoiceSessionUIProps {
   onPttRelease?: () => void;
   /** True between releasing the button and the agent's response actually starting. */
   isAwaitingResponse?: boolean;
+  /** Authoritative from the server (init_ack.is_trial) — never assumed client-side. */
+  isTrialSession?: boolean;
 }
 
 export default function VoiceSessionUI({
@@ -33,6 +35,7 @@ export default function VoiceSessionUI({
   onPttPress,
   onPttRelease,
   isAwaitingResponse = false,
+  isTrialSession = false,
 }: VoiceSessionUIProps) {
   const RING_SIZE = 240;
   const IMG_SIZE = 180;
@@ -144,6 +147,11 @@ export default function VoiceSessionUI({
               pushToTalk ? 'translate-y-24 gap-3 sm:translate-y-32 sm:gap-4' : 'translate-y-32 gap-4 sm:translate-y-44 sm:gap-6'
             }`}
           >
+            {isTrialSession && (
+              <span className="rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] text-black sm:text-[10px]">
+                Free Trial
+              </span>
+            )}
             <span className="tabular-nums text-3xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
               {formatTime(timeLeft)}
             </span>

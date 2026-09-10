@@ -101,12 +101,25 @@ function VoiceChatContent() {
     return `ninad_voice_session_end_${suffix}`;
   }, [bookingId, durationMinutes, slug]);
 
-  const totalTime = durationMinutes ? getSessionDurationSeconds(durationMinutes) : 0;
+  // Seeded from the URL's rough minute estimate; corrected to the authoritative
+  // second-precision value from init_ack.trial_duration_seconds for trials.
+  const [totalTimeSeconds, setTotalTimeSeconds] = useState(() =>
+    durationMinutes ? getSessionDurationSeconds(durationMinutes) : 0
+  );
 
   const [timeLeft, setTimeLeft] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  // Authoritative signal from init_ack — never assumed from the URL or hardcoded.
+  const [isTrialSession, setIsTrialSession] = useState(false);
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
   const [isPttActive, setIsPttActive] = useState(false);
+  // A failure the server reported over the socket (as opposed to a silent
+  // drop). `retryable` comes straight from the server — on a retryable
+  // failure it has already refunded the trial, so retrying costs nothing.
+  const [connectionError, setConnectionError] = useState<{ message: string; retryable: boolean } | null>(null);
+  // Bumping this re-runs the socket effect — the only way a reconnect ever
+  // happens. There is deliberately no automatic reconnect loop.
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
   // Ganesha-only: true between "you released the button" and "the agent's
   // response actually starts" — the backend does a RAG lookup in that window,
   // which can take a few seconds, so the UI shouldn't just look idle.
@@ -308,10 +321,13 @@ function VoiceChatContent() {
   }, [clearPersistedSession, durationMinutes, handleEndCall, sessionStorageKey]);
 
   useEffect(() => {
-    if (!durationMinutes) return;
+    if (!durationMinutes || connectionError) return;
 
     let disposed = false;
     let initAckReceived = false;
+    // The server closes the socket right after reporting an error. Tracking
+    // that here lets onclose tell an expected close apart from a real drop.
+    let errorMessageReceived = false;
 
     const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
@@ -408,6 +424,24 @@ function VoiceChatContent() {
             initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
+
+            // is_trial / trial_duration_seconds are the sole authority on
+            // whether — and for how long — this session is a trial. The
+            // duration passed in the URL was only ever a rough estimate;
+            // correct the countdown to the authoritative second-precision
+            // value now, rather than trusting our own guess.
+            const isTrial = msg.is_trial === true;
+            setIsTrialSession(isTrial);
+            if (isTrial && typeof msg.trial_duration_seconds === "number") {
+              const newEndTime = Date.now() + msg.trial_duration_seconds * 1000;
+              sessionEndTimeRef.current = newEndTime;
+              setTotalTimeSeconds(msg.trial_duration_seconds);
+              setTimeLeft(msg.trial_duration_seconds);
+              if (typeof window !== "undefined" && sessionStorageKey) {
+                sessionStorage.setItem(sessionStorageKey, String(newEndTime));
+              }
+            }
+
             void startMic();
             return;
           }
@@ -418,11 +452,59 @@ function VoiceChatContent() {
             return;
           }
 
-          if (msg.type === "error") {
+          if (msg.type === "trial_warning") {
+            // Drive this off seconds_remaining generically — there may be more
+            // than one warning mark, and the marks themselves may change.
+            if (typeof msg.message === "string") toast.info(msg.message);
+            if (typeof msg.seconds_remaining === "number") {
+              const newEndTime = Date.now() + msg.seconds_remaining * 1000;
+              sessionEndTimeRef.current = newEndTime;
+              setTimeLeft(msg.seconds_remaining);
+              if (typeof window !== "undefined" && sessionStorageKey) {
+                sessionStorage.setItem(sessionStorageKey, String(newEndTime));
+              }
+            }
+            return;
+          }
+
+          if (msg.type === "trial_ended") {
+            // The server force-closes the socket right after this (with a 5s
+            // grace period) — that close is expected, not a network error, so
+            // we proactively tear down and redirect here rather than waiting
+            // for it. Landing back on the profile page re-fetches
+            // /trial/status, which flips the affordance to "used" and shows
+            // the normal purchase flow.
+            toast.info(msg.message || `Your free trial with ${creatorName} has ended. Purchase a session to continue.`);
+            handleEndCall();
+            return;
+          }
+
+          if (msg.type === "error" || typeof msg.error === "string") {
+            errorMessageReceived = true;
             setAwaitingResponse(false);
             const errMsg: string = msg.error || msg.message || "An error occurred.";
+
+            // Branch on the `retryable` flag and on whether the session had
+            // already been accepted — never on the wording of the message.
+            // A failure after init_ack means the session was accepted and
+            // then broke, so bouncing the user to the purchase flow would be
+            // wrong: on a retryable failure the backend has refunded the
+            // trial, and either way only /trial/status can say what's left.
+            if (msg.retryable === true || initAckReceived) {
+              stopSessionResources();
+              setIsSpeaking(false);
+              setIsTrialSession(false);
+              setCallPhase("connecting");
+              setConnectionError({ message: errMsg, retryable: msg.retryable === true });
+              return;
+            }
+
+            // Pre-session errors — existing handling, unchanged.
             const lower = errMsg.toLowerCase();
-            if (lower.includes("no active booking")) {
+            if (lower.includes("trial") && lower.includes("used")) {
+              toast.error(`You've already used your free trial with ${creatorName}. Purchase a session to continue.`);
+              handleEndCall();
+            } else if (lower.includes("no active booking")) {
               toast.error("No active booking found. Please purchase a session.");
               handleEndCall();
             } else if (lower.includes("capacity") || lower.includes("full capacity")) {
@@ -493,6 +575,10 @@ function VoiceChatContent() {
     ws.onclose = () => {
       if (disposed) return;
       setIsSpeaking(false);
+      // Expected: the server always closes straight after an error message,
+      // which the handler above has already turned into a Retry screen.
+      // Anything else is a genuine drop and keeps the existing handling.
+      if (errorMessageReceived) return;
       setCallPhase("connecting");
     };
 
@@ -501,10 +587,10 @@ function VoiceChatContent() {
       stopSessionResources();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, processBinaryChunk, stopSessionResources]);
+  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, processBinaryChunk, stopSessionResources, connectionAttempt, connectionError]);
 
   useEffect(() => {
-    if (!durationMinutes || !sessionStorageKey) return;
+    if (!durationMinutes || !sessionStorageKey || connectionError) return;
 
     const tick = () => {
       const endTimeMs = sessionEndTimeRef.current;
@@ -525,7 +611,17 @@ function VoiceChatContent() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [durationMinutes, handleEndCall, sessionStorageKey]);
+    // connectionError pauses the countdown while the Retry screen is up, so a
+    // failed attempt can't quietly burn the clock; clearing it resumes.
+  }, [durationMinutes, handleEndCall, sessionStorageKey, connectionError]);
+
+  const handleRetryConnection = useCallback(() => {
+    setConnectionError(null);
+    setIsSpeaking(false);
+    setCallPhase("connecting");
+    setAwaitingResponse(false);
+    setConnectionAttempt((attempt) => attempt + 1);
+  }, [setAwaitingResponse]);
 
   const handlePttPress = useCallback(() => {
     setIsPttActive(true);
@@ -637,6 +733,44 @@ function VoiceChatContent() {
     );
   }
 
+  if (connectionError) {
+    return (
+      <main className="relative min-h-screen overflow-hidden bg-[#0F0F13] text-white">
+        <div className="absolute inset-0 pointer-events-none">
+          <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={0.8} speed={0.5} />
+        </div>
+
+        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
+          <div className="max-w-md w-full rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl p-8 text-center">
+            <h1 className="text-2xl font-bold">
+              {connectionError.retryable ? `Couldn't connect to ${creatorName}` : "Something went wrong"}
+            </h1>
+            <p className="mt-3 text-sm text-white/60">
+              {connectionError.retryable
+                ? connectionError.message
+                : "The session ended unexpectedly. You can try again."}
+            </p>
+
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handleRetryConnection}
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 transition-colors"
+              >
+                Retry
+              </button>
+              <button
+                onClick={() => handleEndCall()}
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-white/15 bg-white/5 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+              >
+                Back To Creator
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#0F0F13] text-white">
       <div className="absolute inset-0 pointer-events-none">
@@ -648,7 +782,7 @@ function VoiceChatContent() {
           isSpeaking={isSpeaking}
           callPhase={callPhase}
           timeLeft={timeLeft}
-          totalTime={totalTime}
+          totalTime={totalTimeSeconds}
           creatorName={creatorName}
           creatorImage={creatorImage}
           pushToTalk={isPushToTalk}
@@ -656,6 +790,7 @@ function VoiceChatContent() {
           onPttPress={handlePttPress}
           onPttRelease={handlePttRelease}
           isAwaitingResponse={isAwaitingResponse}
+          isTrialSession={isTrialSession}
         />
       </div>
 

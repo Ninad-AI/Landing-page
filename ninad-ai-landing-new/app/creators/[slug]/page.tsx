@@ -11,10 +11,18 @@ import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi, feedbackApi } from "../../lib/api";
+import { authApi, paymentApi, feedbackApi, trialApi } from "../../lib/api";
 import { buildCreatorVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
-import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
+import type { AllowedDurationMinutes, FeedbackStars, TrialStatus } from "../../lib/types";
+
+function formatTrialDuration(seconds: number): string {
+  if (seconds > 0 && seconds % 60 === 0) {
+    const minutes = seconds / 60;
+    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+  }
+  return `${seconds} seconds`;
+}
 
 /* ── Flow: idle → duration → auth (if needed) → active ── */
 type FlowState = "idle" | "auth" | "duration" | "active";
@@ -92,6 +100,11 @@ export default function CreatorProfilePage() {
   const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
   const [isVisible, setIsVisible] = useState(false);
 
+  /* ── Free trial state (server is the sole authority: driven entirely by
+     /trial/status — no persona id or duration is ever hardcoded here) ── */
+  const [myTrial, setMyTrial] = useState<TrialStatus | null>(null);
+  const trialAvailable = !!myTrial?.available;
+
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
   const [autoStartDuration, setAutoStartDuration] = useState<AllowedDurationMinutes | null>(null);
@@ -151,6 +164,29 @@ export default function CreatorProfilePage() {
       cancelAnimationFrame(frameId);
     };
   }, []);
+
+  // Trial eligibility can only be checked once signed in (the endpoint requires
+  // a JWT). Also re-runs whenever we come back to this page after a trial
+  // session ends, so the affordance correctly flips to "used".
+  useEffect(() => {
+    if (!isHydrated || !isAuthenticated) return;
+    let cancelled = false;
+    trialApi
+      .getStatus()
+      .then((status) => {
+        if (cancelled) return;
+        const trial = status.enabled
+          ? status.trials.find((t) => t.influencer_id === creatorInfluencerId) ?? null
+          : null;
+        setMyTrial(trial);
+      })
+      .catch(() => {
+        // Silently ignore — the trial affordance just won't show; paid flow is unaffected.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isHydrated, isAuthenticated, creatorInfluencerId]);
 
   /* ═══════════════════════════════════════
      Audio helpers
@@ -430,6 +466,15 @@ export default function CreatorProfilePage() {
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
+  // No booking_id, no payment step — the server decides is_trial from
+  // influencer_id + the signed-in user alone. The duration here is only an
+  // initial estimate for the countdown UI; voice-chat corrects it from
+  // init_ack.trial_duration_seconds once connected.
+  const redirectToTrialSession = (durationSeconds: number) => {
+    const minutes = Math.max(1, Math.round(durationSeconds / 60));
+    router.push(`/creators/${slug}/voice-chat?duration=${minutes}`);
+  };
+
   const handleStartSession = async () => {
     setShowFeedback(false);
 
@@ -445,6 +490,13 @@ export default function CreatorProfilePage() {
         }
       } catch {
         // Continue to payment flow if active booking check fails
+      }
+
+      // A paid booking always wins; a free trial is only offered when there's
+      // no active booking to resume.
+      if (trialAvailable && myTrial) {
+        redirectToTrialSession(myTrial.duration_seconds);
+        return;
       }
     }
 
@@ -490,6 +542,23 @@ export default function CreatorProfilePage() {
       } catch {
         // Continue to payment flow if active booking check fails
       }
+
+      // Freshly signed in — the mount-time trial fetch may not have resolved
+      // yet, so check directly rather than reading possibly-stale state.
+      try {
+        const status = await trialApi.getStatus();
+        const trial = status.enabled
+          ? status.trials.find((t) => t.influencer_id === creatorInfluencerId) ?? null
+          : null;
+        setMyTrial(trial);
+        if (trial?.available) {
+          redirectToTrialSession(trial.duration_seconds);
+          return;
+        }
+      } catch {
+        // Continue to payment flow if the trial check fails
+      }
+
       setFlowState("duration");
     } catch (error) {
       const apiError = error as { response?: { data?: { detail?: string; message?: string } } };
@@ -583,9 +652,14 @@ export default function CreatorProfilePage() {
               </h1>
 
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+                {trialAvailable && myTrial && (
+                  <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]">
+                    {formatTrialDuration(myTrial.duration_seconds)} free trial
+                  </span>
+                )}
+                <button onClick={handleStartSession} className="group relative flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                   <span className="flex items-center gap-3">
-                    Start Session
+                    {trialAvailable ? "Start Free Trial" : "Start Session"}
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
                     </svg>
@@ -607,9 +681,14 @@ export default function CreatorProfilePage() {
               <div className="absolute bottom-12 -left-3 sm:-left-16 w-10 h-10 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
             </div>
 
-            <div className="animate-fade-in-up mt-6 md:hidden w-full flex justify-center z-30">
+            <div className="animate-fade-in-up mt-6 md:hidden w-full flex flex-col items-center gap-3 z-30">
+              {trialAvailable && myTrial && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]">
+                  {formatTrialDuration(myTrial.duration_seconds)} free trial
+                </span>
+              )}
               <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                Start Session
+                {trialAvailable ? "Start Free Trial" : "Start Session"}
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
                 </svg>
@@ -635,13 +714,20 @@ export default function CreatorProfilePage() {
                 </div>
 
                 {/* Google Sign-In */}
-                {authLoading ? (
-                  <div className="w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
-                    <span className="text-sm text-white/50 font-sans">Signing you in…</span>
-                  </div>
-                ) : (
-                  <div className="flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none">
+                <div className="relative w-full">
+                  {authLoading && (
+                    <div className="absolute inset-0 z-10 w-full py-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center gap-3">
+                      <div className="w-5 h-5 border-2 border-white/20 border-t-white/70 rounded-full animate-spin" />
+                      <span className="text-sm text-white/50 font-sans">Signing you in…</span>
+                    </div>
+                  )}
+                  {/* Kept mounted (never swapped for the spinner via a ternary)
+                      so Google's script doesn't get re-initialized on every attempt. */}
+                  <div
+                    className={`flex justify-center [&>div]:!w-full [&_div[role=button]]:!w-full [&_div[role=button]]:!max-w-none ${
+                      authLoading ? 'invisible pointer-events-none' : ''
+                    }`}
+                  >
                     <GoogleLogin
                       onSuccess={handleGoogleAuthSuccess}
                       onError={handleGoogleAuthError}
@@ -654,7 +740,7 @@ export default function CreatorProfilePage() {
                       useOneTap={false}
                     />
                   </div>
-                )}
+                </div>
 
                 <p className="text-center text-[11px] text-white/25 mt-5 font-sans leading-relaxed">
                   By continuing, you agree to Ninad AI&apos;s{" "}
