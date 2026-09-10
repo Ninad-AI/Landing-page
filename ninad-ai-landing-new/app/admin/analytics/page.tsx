@@ -259,7 +259,7 @@ function AnalyticsContent() {
         <div className="absolute right-[-20vw] bottom-[6vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-20 md:pb-24">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Page Header */}
         <div className="mb-8 animate-fade-in-up">
           <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-2">

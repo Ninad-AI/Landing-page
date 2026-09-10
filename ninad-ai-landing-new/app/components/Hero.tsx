@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative flex w-full min-h-svh md:min-h-screen flex-col items-center justify-center overflow-hidden pt-32 md:pt-36 pb-14 sm:pb-16 md:pb-20">
+    <section id="hero" className="relative flex w-full min-h-svh md:min-h-screen flex-col items-center justify-center overflow-hidden pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-16 md:pb-20">
       {/* ===== Background glows ===== */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         <div className="absolute left-[-30vw] top-[-18vw] h-[clamp(280px,62vw,780px)] w-[clamp(280px,60vw,760px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />

@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 pt-36 pb-16 sm:pt-40 sm:pb-20 md:pt-44">
+    <main className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 sm:px-6 py-20 sm:py-24">
       {/* Background glows */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         <div className="absolute left-[-24vw] top-[-10vw] h-[clamp(240px,48vw,600px)] w-[clamp(240px,48vw,600px)] rounded-full blur-[140px] bg-[radial-gradient(circle,rgba(97,37,216,0.55)_0%,transparent_70%)] animate-glow-drift" />

@@ -628,7 +628,7 @@ export default function CreatorProfilePage() {
       </div>
 
       {/* Main Content */}
-      <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 pt-32 pb-14 sm:pb-16 md:pt-36 md:pb-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+      <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 py-14 sm:py-16 md:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
         {flowState === "active" ? (
           <CreatorVoiceSessionUI
             isSpeaking={isSpeaking}
@@ -644,7 +644,7 @@ export default function CreatorProfilePage() {
               <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
                 • {creatorRole}
               </h2>
-              <h1 className="text-[clamp(2rem,7vw,6rem)] font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
+              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
                 <span className="block">{creatorName.split(" ")[0]}</span>
                 <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
                   {creatorName.split(" ").slice(1).join(" ")}.
@@ -702,7 +702,7 @@ export default function CreatorProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={closeAuthModal} />
           <div className="relative w-[92vw] max-w-[380px] sm:w-full sm:max-w-md animate-fade-in-up">
-            <div className="relative max-h-[calc(100dvh-1.5rem)] overflow-y-auto overflow-x-hidden bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 py-8 sm:py-10" style={{ borderRadius: "1.5rem" }}>
+            <div className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 py-8 sm:py-10 overflow-hidden" style={{ borderRadius: "1.5rem" }}>
               <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
 

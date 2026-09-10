@@ -256,7 +256,7 @@ export default function Header() {
           role="dialog"
           aria-modal="true"
           aria-label="Navigation menu"
-          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex min-h-dvh flex-col items-center justify-start gap-6 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+9.5rem)] transition-transform duration-500 ease-in-out ${isMobileMenuOpen
+          className={`fixed inset-0 bg-black/95 backdrop-blur-xl z-40 flex min-h-dvh flex-col items-center justify-start gap-6 overflow-y-auto px-6 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+5.5rem)] transition-transform duration-500 ease-in-out ${isMobileMenuOpen
             ? "translate-x-0"
             : "translate-x-full"
             }`}

@@ -174,7 +174,7 @@ export default function AdminDashboard() {
             <Link
               key={item.href}
               href={item.href}
-              className={`glass border border-white/15 rounded-2xl p-5 sm:p-8 transition-all duration-300 group ${item.glow}`}
+              className={`glass border border-white/15 rounded-2xl p-8 transition-all duration-300 group ${item.glow}`}
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">

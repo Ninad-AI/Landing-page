@@ -396,27 +396,26 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                         }}
                     />
 
-                    {/* Name/role and the Talk pill share one bottom row so they can never overlap */}
-                    <div className="absolute inset-x-5 bottom-5 z-10 flex items-end justify-between gap-3 sm:inset-x-6 sm:bottom-6">
-                    <div className="min-w-0 flex-1 text-left transform translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+                    {/* Name & Role pinned to bottom-left */}
+                    <div className="absolute left-6 bottom-6 z-10 max-w-[calc(100%-9.5rem)] text-left transform translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
                         <div className="mb-1 flex items-center gap-2 min-w-0">
-                            <h2 className="min-w-0 text-xl sm:text-2xl font-bold leading-tight tracking-[0.01em] text-white drop-shadow-md line-clamp-2">{name}</h2>
+                            <h2 className="text-2xl font-bold leading-tight tracking-[0.01em] text-white drop-shadow-md truncate">{name}</h2>
                             {/* Verified Badge Icon */}
                             <svg className="w-4 h-4 shrink-0 text-blue-400 drop-shadow-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
                         </div>
-                        <p className="text-left text-xs sm:text-sm font-medium leading-relaxed text-gray-200 opacity-90 line-clamp-2 drop-shadow-sm">
+                        <p className="text-left text-sm font-medium leading-relaxed text-gray-200 opacity-90 line-clamp-2 drop-shadow-sm">
                             {title}
                         </p>
                     </div>
 
-                    {/* Talk pill */}
-                    <div className="shrink-0">
+                    {/* Talk pill pinned to bottom-right */}
+                    <div className="absolute right-6 bottom-6 z-10">
                         <div
                             aria-hidden="true"
                             className="
                                 group/btn relative overflow-hidden
                                 bg-white/10 backdrop-blur-md border border-white/20
-                                text-white px-4 py-2 rounded-full text-xs font-bold
+                                text-white px-5 py-2 rounded-full text-xs font-bold
                                 hover:bg-white/20 hover:border-white/40 transition-all duration-300
                                 shadow-[0_4px_14px_0_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.23)]
                                 active:scale-95 flex items-center gap-2
@@ -430,7 +429,6 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                             {/* Shine Effect */}
                             <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/20 to-transparent" />
                         </div>
-                    </div>
                     </div>
 
                 </div>

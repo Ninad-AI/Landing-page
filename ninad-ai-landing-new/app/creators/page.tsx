@@ -135,7 +135,7 @@ export default function CreatorsPage() {
         <div className="absolute left-[20%] bottom-[-18vw] h-[clamp(260px,46vw,600px)] w-[clamp(360px,62vw,800px)] rounded-full blur-[160px] bg-[radial-gradient(circle,rgba(147,51,234,0.4)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16 pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-20 md:pb-24">
+      <div className="relative z-10 container mx-auto max-w-[1600px] px-4 sm:px-6 md:px-10 lg:px-16 pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         <div className={`text-center mb-8 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
           <h1 className="font-sans font-black text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[110px] leading-none tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40 pb-3 sm:pb-4">
             CREATORS
