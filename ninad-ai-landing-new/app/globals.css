@@ -1,6 +1,14 @@
 /* Google Fonts - loaded via link in layout.tsx for Tailwind v4 compatibility */
 @import "tailwindcss";
 
+/* Short viewports (landscape phones, small browser windows): lets components
+   tighten vertical layout with a `short:` prefix, independent of width. */
+@custom-variant short {
+  @media (max-height: 600px) {
+    @slot;
+  }
+}
+
 :root {
   /* Colors */
   --background: #000000;
@@ -262,9 +270,11 @@ button::-moz-focus-inner {
     min-height: 36px;
   }
 
-  /* Prevent horizontal overflow on very small screens */
+  /* Prevent horizontal overflow on very small screens. `clip` (not `hidden`)
+     so the section doesn't become a scroll container, which would break
+     position: sticky inside it and could add stray vertical scrollbars. */
   section {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 }
 
@@ -359,11 +369,12 @@ button::-moz-focus-inner {
   }
 }
 
-/* Content visibility for performance (below-fold sections) */
+/* Content visibility for performance (below-fold sections).
+   #products and #safety are deliberately excluded: they position elements from
+   measured getBoundingClientRect() values, and a skipped (off-screen) subtree
+   reports stale/zero rects, leaving their indicators misaligned on first view. */
 #features,
-#products,
 #use-cases,
-#safety,
 #waitlist,
 footer {
   content-visibility: auto;
@@ -386,7 +397,21 @@ h4,
 h5,
 h6 {
   overflow-wrap: anywhere;
+}
+
+p {
   hyphens: auto;
+}
+
+/* Headings keep their words intact — auto-hyphenation splits brand and
+   display copy ("Empower-ing") on narrow screens. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  hyphens: manual;
 }
 
 /* ═══════════════════════════════════════════════
@@ -529,8 +554,11 @@ h6 {
   }
 }
 
+/* No `forwards` fill: the final keyframe equals the natural state, and keeping a
+   transform/filter applied would make this wrapper the containing block for
+   every position: fixed descendant (modals, call-screen overlays). */
 .page-enter {
-  animation: pageEnter 0.7s var(--ease-out-expo) forwards;
+  animation: pageEnter 0.7s var(--ease-out-expo);
 }
 
 /* ═══════════════════════════════════════════════

@@ -139,7 +139,7 @@ export default async function TermsAndConditionsPage() {
         <div className="absolute right-[-18vw] bottom-[-10vw] h-[clamp(220px,42vw,520px)] w-[clamp(220px,42vw,520px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.35)_0%,transparent_70%)]" />
       </div>
 
-      <section className="relative z-10 container mx-auto max-w-5xl px-4 sm:px-6 md:px-10 pt-28 pb-16">
+      <section className="relative z-10 container mx-auto max-w-5xl px-4 sm:px-6 md:px-10 pt-32 sm:pt-36 pb-16">
         <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white">
           Terms & Conditions
         </h1>

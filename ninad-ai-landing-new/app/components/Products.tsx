@@ -73,9 +73,17 @@ export default function Products() {
     // Use requestAnimationFrame for smoother initial positioning
     const rafId = requestAnimationFrame(updatePositions);
     window.addEventListener('resize', updatePositions);
+    // The line and description are placed from measured rects, so re-measure
+    // whenever the list changes size without a window resize (web fonts
+    // finishing, text re-wrapping at a breakpoint, first layout of the section).
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => updatePositions()) : null;
+    if (listRef.current) observer?.observe(listRef.current);
+    document.fonts?.ready.then(updatePositions).catch(() => {});
     return () => {
       window.removeEventListener('resize', updatePositions);
       cancelAnimationFrame(rafId);
+      observer?.disconnect();
     };
   }, [activeProduct]);
 
@@ -220,7 +228,7 @@ export default function Products() {
                         bottom: `calc(100% - ${linePosition}px)`
                       }}
                     >
-                      <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                      <p className="font-anonymous text-2xl xl:text-3xl leading-relaxed text-white/90">
                         {products[activeProduct].description}
                       </p>
                     </div>
@@ -234,7 +242,7 @@ export default function Products() {
                         top: `${linePosition}px`
                       }}
                     >
-                      <p className="font-anonymous text-lg sm:text-xl md:text-2xl lg:text-3xl leading-relaxed text-white/90">
+                      <p className="font-anonymous text-2xl xl:text-3xl leading-relaxed text-white/90">
                         {products[activeProduct].descriptionPosition === 'split'
                           ? products[activeProduct].descriptionPart2
                           : products[activeProduct].description}

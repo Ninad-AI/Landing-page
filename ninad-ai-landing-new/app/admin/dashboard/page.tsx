@@ -252,7 +252,7 @@ function AdminDashboardContent() {
   if (isLoading) {
     return (
       <main className="relative min-h-screen overflow-x-hidden">
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-20 md:pb-24">
           <div className="glass border border-white/10 rounded-2xl p-8 flex items-center gap-4">
             <div className="w-5 h-5 border-2 border-white/25 border-t-white rounded-full animate-spin" />
             <p className="text-white/70 font-medium">Loading admin analytics...</p>
@@ -270,14 +270,14 @@ function AdminDashboardContent() {
         <div className="absolute right-[-20vw] top-[22vw] h-[clamp(220px,42vw,500px)] w-[clamp(220px,42vw,500px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(0,169,255,0.3)_0%,transparent_70%)]" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-28 sm:pt-32 md:pt-40 pb-16 sm:pb-20 md:pb-24">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16 max-w-[1400px] pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-20 md:pb-24">
         {/* Page Header */}
         <div className="mb-10 animate-fade-in-up">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_#4ade80] animate-pulse" />
             <span className="text-xs font-bold text-green-400/80 uppercase tracking-wider">Live</span>
           </div>
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="font-sans font-extrabold text-3xl md:text-5xl text-white tracking-tight mb-2">
                 Admin Dashboard
@@ -289,7 +289,7 @@ function AdminDashboardContent() {
             <button
               onClick={() => void loadAnalytics(true)}
               disabled={isRefreshing}
-              className="px-4 py-2 rounded-xl border border-white/15 bg-white/5 text-white/80 text-sm font-semibold transition-colors hover:bg-white/10 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="self-start shrink-0 px-4 py-2 rounded-xl border border-white/15 bg-white/5 text-white/80 text-sm font-semibold transition-colors hover:bg-white/10 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
@@ -330,7 +330,7 @@ function AdminDashboardContent() {
         {/* Promote Influencer */}
         <div className="glass border border-white/10 rounded-2xl p-6 animate-fade-in-up delay-200 mb-6">
           <h3 className="font-sans font-bold text-lg text-white mb-5">Promote to Influencer</h3>
-          <form onSubmit={handlePromote} className="flex flex-col sm:flex-row gap-3 items-end">
+          <form onSubmit={handlePromote} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1 w-full">
               <label className="block text-xs text-white/40 font-semibold mb-1.5">User ID</label>
               <input
@@ -354,7 +354,7 @@ function AdminDashboardContent() {
             <button
               type="submit"
               disabled={promoting}
-              className="px-5 py-2.5 rounded-xl bg-primary/80 text-white text-sm font-bold transition-all hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary/80 text-white text-sm font-bold transition-all hover:bg-primary disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {promoting ? 'Promoting...' : 'Promote'}
             </button>
@@ -387,7 +387,7 @@ function AdminDashboardContent() {
 
             <div className="space-y-2">
               {(usageData?.influencer_breakdown ?? []).map((entry, index) => (
-                <div key={`${entry.influencer_id || entry.influencer_name || 'row'}-${index}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2">
+                <div key={`${entry.influencer_id || entry.influencer_name || 'row'}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/3 px-3 py-2">
                   <span className="text-sm text-white/85 font-medium">{entry.influencer_name || entry.influencer_id || 'Influencer'}</span>
                   <span className="text-xs text-white/50 tabular-nums">{formatNumber(entry.calls)} calls • {formatNumber(entry.minutes)} min</span>
                 </div>
@@ -422,7 +422,7 @@ function AdminDashboardContent() {
             <h3 className="font-sans font-bold text-lg text-white mb-5">User Growth Trends</h3>
             <div className="space-y-2">
               {(usersData?.growth_trends ?? []).slice(0, 10).map((trend, index) => (
-                <div key={`${trend.date}-${index}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2">
+                <div key={`${trend.date}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/3 px-3 py-2">
                   <span className="text-sm text-white/80">{trend.date}</span>
                   <span className="text-xs text-white/50 tabular-nums">
                     Active: {formatNumber(trend.active_users ?? 0)} • New: {formatNumber(trend.new_users ?? 0)}
@@ -450,7 +450,7 @@ function AdminDashboardContent() {
 
             <div className="space-y-2">
               {(feedbackData?.influencer_feedback ?? []).map((item, index) => (
-                <div key={`${item.influencer_id || item.influencer_name || 'feedback'}-${index}`} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2">
+                <div key={`${item.influencer_id || item.influencer_name || 'feedback'}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/3 px-3 py-2">
                   <span className="text-sm text-white/85 font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
                   <span className="text-xs text-white/50 tabular-nums">{(item.avg_rating ?? 0).toFixed(2)} ★ • {formatNumber(item.total_feedback ?? item.feedback_count ?? 0)} reviews</span>
                 </div>
@@ -521,7 +521,7 @@ function AdminDashboardContent() {
                     key={`${item.influencer_id || item.influencer_name || 'influencer'}-${index}`}
                     onClick={() => item.influencer_id && handleInfClick(item.influencer_id)}
                     disabled={!item.influencer_id}
-                    className="w-full flex items-center justify-between rounded-xl border border-white/10 bg-white/3 px-3 py-2 hover:bg-white/8 hover:border-primary/30 transition-all text-left cursor-pointer disabled:cursor-default"
+                    className="w-full flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/10 bg-white/3 px-3 py-2 hover:bg-white/8 hover:border-primary/30 transition-all text-left cursor-pointer disabled:cursor-default"
                   >
                     <span className="text-sm text-white/85 font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
                     <span className="text-xs text-white/50 tabular-nums">
@@ -541,7 +541,7 @@ function AdminDashboardContent() {
             <div className="space-y-2">
               {recentBookings.map((booking, index) => (
                 <div key={`${booking.id}-${index}`} className="rounded-xl border border-white/10 bg-white/3 px-3 py-2">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                     <span className="text-sm text-white/85 font-medium">{booking.user_name || 'User'} • {booking.influencer_name || 'Influencer'}</span>
                     <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${bookingStatusClass(booking.status)}`}>
                       {booking.status || 'unknown'}

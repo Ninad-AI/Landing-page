@@ -44,7 +44,7 @@ export default function MinutesSelector({
               <>
                 <span className="flex h-full w-full flex-col items-center justify-center rounded-[10px] sm:rounded-[14px] bg-[#0F0F13]">
                   <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold mb-0.5 text-pink-200">
-                    {plan.label.toUpperCase()}
+                    <span className="sm:hidden">{plan.minutes} MIN</span><span className="hidden sm:inline">{plan.label.toUpperCase()}</span>
                   </span>
                   <span
                     className={`text-xs sm:text-sm font-bold leading-none ${
@@ -62,7 +62,7 @@ export default function MinutesSelector({
               </>
             ) : (
               <>
-                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold mb-0.5">{plan.label.toUpperCase()}</span>
+                <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold mb-0.5"><span className="sm:hidden">{plan.minutes} MIN</span><span className="hidden sm:inline">{plan.label.toUpperCase()}</span></span>
                 <span className="text-xs sm:text-sm font-bold leading-none">₹{plan.price}</span>
               </>
             )}

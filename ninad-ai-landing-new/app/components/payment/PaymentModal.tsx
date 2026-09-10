@@ -300,13 +300,13 @@ export default function PaymentModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={handleClose} />
       <div className="relative w-[92vw] max-w-[360px] sm:w-full sm:max-w-md animate-fade-in-up">
         <div
-          className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[400px] sm:min-h-[440px] flex flex-col justify-center overflow-hidden"
+          className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[min(400px,calc(100dvh-1.5rem))] sm:min-h-[min(440px,calc(100dvh-1.5rem))] max-h-[calc(100dvh-1.5rem)] flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ borderRadius: "1.5rem" }}
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col h-full justify-center items-center">
+          <div className="relative z-10 my-auto flex w-full flex-col items-center">
             <div className="w-full max-w-[340px] flex flex-col justify-center">
               {feedbackMode ? (
                 <div className="w-full">

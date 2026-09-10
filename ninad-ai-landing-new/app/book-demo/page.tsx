@@ -8,7 +8,7 @@ export const metadata = {
 export default function BookDemoPage() {
   return (
     <main className="relative min-h-screen w-full bg-black overflow-hidden">
-      <section className="relative w-full min-h-screen pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-20 flex items-center justify-center">
+      <section className="relative w-full min-h-screen pt-32 md:pt-36 pb-14 sm:pb-20 flex items-center justify-center">
         {/* Background glows to match homepage */}
         <div className="absolute inset-0 pointer-events-none opacity-50 overflow-hidden">
           <div className="absolute left-[-30vw] top-[-18vw] h-[clamp(280px,62vw,780px)] w-[clamp(280px,60vw,760px)] rounded-full blur-[120px] bg-[radial-gradient(circle,rgba(97,37,216,0.65)_0%,transparent_70%)]" />
@@ -17,7 +17,7 @@ export default function BookDemoPage() {
         </div>
 
         <div className="relative z-10 container mx-auto px-4 sm:px-6 md:px-10 lg:px-16">
-          <div className="mx-auto w-full max-w-6xl -translate-y-2 sm:-translate-y-4 md:-translate-y-6 lg:-translate-y-10">
+          <div className="mx-auto w-full max-w-6xl md:-translate-y-6 lg:-translate-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-14 items-center">
               <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
                 <p className="text-white/60 font-inter text-sm tracking-widest uppercase">

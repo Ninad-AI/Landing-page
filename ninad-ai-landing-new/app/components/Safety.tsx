@@ -69,9 +69,16 @@ export default function Safety() {
 
     const handleResize = () => updateActiveTabStyle();
     window.addEventListener("resize", handleResize);
+    // The highlight is positioned from measured rects; keep it in sync when the
+    // tab row re-wraps or fonts load without a window resize.
+    const observer =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => updateActiveTabStyle()) : null;
+    if (tabContainerRef.current) observer?.observe(tabContainerRef.current);
+    document.fonts?.ready.then(updateActiveTabStyle).catch(() => {});
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      observer?.disconnect();
     };
   }, [updateActiveTabStyle]);
 

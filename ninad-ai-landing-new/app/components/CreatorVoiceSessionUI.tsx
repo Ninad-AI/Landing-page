@@ -94,7 +94,7 @@ export default function VoiceSessionUI({
 
       <div className="relative flex h-full w-full items-center justify-center px-4">
         <div
-          className="relative flex items-center justify-center scale-[0.85] sm:scale-100"
+          className="relative flex items-center justify-center scale-[0.85] sm:scale-100 short:scale-[0.7]"
           style={{ width: RING_SIZE, height: RING_SIZE }}
         >
           <svg
@@ -144,7 +144,9 @@ export default function VoiceSessionUI({
 
           <div
             className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 flex-col items-center ${
-              pushToTalk ? 'translate-y-24 gap-3 sm:translate-y-32 sm:gap-4' : 'translate-y-32 gap-4 sm:translate-y-44 sm:gap-6'
+              pushToTalk
+                ? 'translate-y-28 gap-3 sm:translate-y-32 sm:gap-4 short:translate-y-28 short:gap-2'
+                : 'translate-y-32 gap-4 sm:translate-y-44 sm:gap-6 short:translate-y-28 short:gap-2'
             }`}
           >
             {isTrialSession && (
@@ -152,7 +154,7 @@ export default function VoiceSessionUI({
                 Free Trial
               </span>
             )}
-            <span className="tabular-nums text-3xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl">
+            <span className="tabular-nums text-3xl font-extralight tracking-tight text-white/95 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] sm:text-6xl short:text-3xl">
               {formatTime(timeLeft)}
             </span>
 
@@ -239,7 +241,7 @@ export default function VoiceSessionUI({
                 </div>
 
                 <span
-                  className={`font-roboto text-[10px] font-medium uppercase tracking-[0.4em] sm:text-[11px] sm:tracking-[0.6em] ${
+                  className={`font-roboto text-[10px] font-medium uppercase tracking-[0.4em] sm:text-[11px] sm:tracking-[0.6em] short:text-sm ${
                     effectivePhase === 'speaking'
                       ? 'text-rose-300/80'
                       : effectivePhase === 'listening'
@@ -264,7 +266,7 @@ export default function VoiceSessionUI({
                   <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${statusDotColor.ping}`} />
                   <span className={`relative inline-flex h-2 w-2 sm:h-1.5 sm:w-1.5 rounded-full ${statusDotColor.dot}`} />
                 </span>
-                <span className="text-[10px] sm:text-[11px] font-light uppercase tracking-[0.4em] sm:tracking-[0.6em] text-white/40">
+                <span className="text-[10px] sm:text-[11px] font-light uppercase tracking-[0.4em] sm:tracking-[0.6em] text-white/40 short:text-sm">
                   {phaseLabel}
                 </span>
               </div>
