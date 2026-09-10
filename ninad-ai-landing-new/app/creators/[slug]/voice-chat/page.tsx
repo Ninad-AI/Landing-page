@@ -19,7 +19,23 @@ function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
 
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string; pushToTalk?: boolean }> = {
+const CREATORS_DATA: Record<
+  string,
+  {
+    name: string;
+    image: string;
+    role: string;
+    influencerId: string;
+    preferredProvider: string;
+    pushToTalk?: boolean;
+    /**
+     * When true, starting a turn while the agent is still talking cuts the
+     * agent off (barge-in) instead of queueing behind it. Opt-in per creator —
+     * it needs backend support for the `interrupt` message to be clean.
+     */
+    allowInterruption?: boolean;
+  }
+> = {
   "nirupam": {
     name: "Nirupam Paritala",
     image: "/assets/creators/nirupam.jpeg",
@@ -63,6 +79,7 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     influencerId: "ganeshji",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     pushToTalk: true,
+    allowInterruption: true,
   },
 };
 
@@ -86,6 +103,7 @@ function VoiceChatContent() {
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const isPushToTalk = creatorData?.pushToTalk ?? false;
+  const canInterrupt = creatorData?.allowInterruption ?? false;
   const bookingId = searchParams.get("booking_id");
 
   const durationValue = searchParams.get("duration");
@@ -143,6 +161,16 @@ function VoiceChatContent() {
   // True once speech_start has actually been sent + the mic unmuted for the
   // current hold, so release only sends speech_end for holds that really started.
   const pttCapturingRef = useRef(false);
+  // Why the current press had to be queued, so release can say something true
+  // about it rather than guessing.
+  const pttPendingReasonRef = useRef<"mic" | "agent" | null>(null);
+  // Interruption-enabled creators only: true from the moment the user barges in
+  // until the agent's turn reaches a boundary. Everything the agent sends in
+  // that window belongs to the turn the user cut off, so it gets dropped —
+  // otherwise the tail of it resumes playing over the user. Deliberately has no
+  // wall-clock escape hatch: if the backend ignores the interrupt and keeps
+  // streaming, timing out would resume the abandoned response mid-sentence.
+  const dropAgentAudioRef = useRef(false);
   // Ref mirror of isAwaitingResponse, readable from the [] -dep callbacks below
   // without going stale.
   const awaitingResponseRef = useRef(false);
@@ -203,6 +231,19 @@ function VoiceChatContent() {
     playHeadRef.current = 0;
   }, []);
 
+  // Barge-in: cut the agent off mid-sentence so the user can take the turn.
+  // Unlike stopPlayback this keeps the AudioContext and the PlayoutBuffer alive
+  // (stop() resets them for reuse) — tearing the context down and rebuilding it
+  // would add latency to the response the user is about to ask for.
+  const interruptAgentPlayback = useCallback(() => {
+    playoutRef.current?.stop();
+    ttsActiveRef.current = false;
+    agentSpeakingRef.current = false;
+    dropAgentAudioRef.current = true;
+    setIsSpeaking(false);
+    setCallPhase("listening");
+  }, []);
+
   const processBinaryChunk = useCallback((buf: ArrayBuffer) => {
     const i16 = new Int16Array(buf);
     const f32 = new Float32Array(i16.length);
@@ -246,6 +287,10 @@ function VoiceChatContent() {
     wsRef.current = null;
     ttsActiveRef.current = false;
     agentSpeakingRef.current = false;
+    pttPendingRef.current = false;
+    pttCapturingRef.current = false;
+    pttPendingReasonRef.current = null;
+    dropAgentAudioRef.current = false;
     stopPlayback();
   }, [stopPlayback]);
 
@@ -391,12 +436,18 @@ function VoiceChatContent() {
 
         micControllerRef.current = micHandle;
 
-        if (isPushToTalk && pttPendingRef.current && !agentSpeakingRef.current) {
+        if (isPushToTalk && pttPendingRef.current && (canInterrupt || !agentSpeakingRef.current)) {
           // The button was pressed (and is still held) before mic setup finished —
           // start capturing right now instead of dropping that first press.
           setAwaitingResponse(false);
+          if (agentSpeakingRef.current) {
+            interruptAgentPlayback();
+            try { ws.send(JSON.stringify({ type: "interrupt" })); } catch { /* ignore */ }
+          }
           try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
           micHandle.setMuted(false);
+          pttPendingRef.current = false;
+          pttPendingReasonRef.current = null;
           pttCapturingRef.current = true;
         }
       } catch {
@@ -410,6 +461,10 @@ function VoiceChatContent() {
       if (disposed) return;
 
       if (event.data instanceof ArrayBuffer) {
+        // Audio for a turn the user has already interrupted — drop it instead
+        // of letting the agent's old answer play over their new question.
+        if (dropAgentAudioRef.current) return;
+
         ttsActiveRef.current = true;
         setIsSpeaking(true);
         setAwaitingResponse(false);
@@ -424,6 +479,7 @@ function VoiceChatContent() {
             initAckReceived = true;
             setCallPhase("listening");
             ttsActiveRef.current = false;
+            dropAgentAudioRef.current = false;
 
             // is_trial / trial_duration_seconds are the sole authority on
             // whether — and for how long — this session is a trial. The
@@ -521,12 +577,24 @@ function VoiceChatContent() {
           }
 
           if (msg.type === "tts_start") {
+            // A response that starts while the user is already mid-hold answers
+            // the turn they just interrupted — talking over them now would undo
+            // the barge-in, so drop it and re-assert the interrupt.
+            if (canInterrupt && pttCapturingRef.current) {
+              dropAgentAudioRef.current = true;
+              try { ws.send(JSON.stringify({ type: "interrupt" })); } catch { /* ignore */ }
+              return;
+            }
+            dropAgentAudioRef.current = false;
             ttsActiveRef.current = true;
             setIsSpeaking(true);
             setAwaitingResponse(false);
             setCallPhase("speaking");
           }
           if (msg.type === "tts_end") {
+            // Turn boundary: whatever the user interrupted is fully drained, so
+            // the next response is safe to play again.
+            dropAgentAudioRef.current = false;
             const pending = [...sourceEndPromisesRef.current];
             const done = () => {
               ttsActiveRef.current = false;
@@ -541,11 +609,20 @@ function VoiceChatContent() {
           }
 
           if (msg.type === "AgentAudioStart") {
+            // Same as tts_start: never mute the user mid-hold to make room for
+            // the answer to the turn they just cut off.
+            if (canInterrupt && pttCapturingRef.current) {
+              dropAgentAudioRef.current = true;
+              try { ws.send(JSON.stringify({ type: "interrupt" })); } catch { /* ignore */ }
+              return;
+            }
+            dropAgentAudioRef.current = false;
             agentSpeakingRef.current = true;
             setAwaitingResponse(false);
             micControllerRef.current?.setMuted(true);
           }
           if (msg.type === "AgentAudioDone") {
+            dropAgentAudioRef.current = false;
             agentSpeakingRef.current = false;
             // Push-to-talk creators stay muted until the button is held again;
             // auto-unmuting here would silently reopen the mic between turns.
@@ -555,8 +632,12 @@ function VoiceChatContent() {
               // The button was pressed (and is still held) while the agent was
               // still talking — start capturing now that it's actually safe to,
               // instead of unmuting into the agent's own playback (echo).
+              // Interruption-enabled creators never reach this: the press cut
+              // the agent off at the moment it happened.
               try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
               micControllerRef.current.setMuted(false);
+              pttPendingRef.current = false;
+              pttPendingReasonRef.current = null;
               pttCapturingRef.current = true;
             }
           }
@@ -587,7 +668,7 @@ function VoiceChatContent() {
       stopSessionResources();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, processBinaryChunk, stopSessionResources, connectionAttempt, connectionError]);
+  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, canInterrupt, interruptAgentPlayback, processBinaryChunk, stopSessionResources, connectionAttempt, connectionError]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey || connectionError) return;
@@ -626,40 +707,69 @@ function VoiceChatContent() {
   const handlePttPress = useCallback(() => {
     setIsPttActive(true);
 
-    if (!micControllerRef.current || agentSpeakingRef.current) {
-      // Mic setup hasn't finished yet, or the agent is still talking — queue
-      // the press and start capturing the instant it's safe (see startMic /
-      // AgentAudioDone), instead of unmuting into the agent's own playback
-      // (which the mic would pick up as echo). Note: a pending "thinking"
-      // state deliberately does NOT block a new press — the user must always
-      // be able to talk, even if a response never arrives.
+    const mic = micControllerRef.current;
+    // Barge-in: for creators that allow it, pressing while the agent is talking
+    // cuts the agent off and takes the turn immediately. Everyone else queues
+    // behind it as before.
+    //
+    // Both turn-marker families count as "the agent has the floor" —
+    // AgentAudioStart/Done and tts_start/tts_end — since which one the backend
+    // emits depends on the provider, and missing one would silently skip the
+    // barge-in.
+    const interrupting = canInterrupt && (agentSpeakingRef.current || ttsActiveRef.current);
+
+    if (!mic || (agentSpeakingRef.current && !canInterrupt)) {
+      // Mic setup hasn't finished yet, or the agent is still talking and this
+      // creator can't be interrupted — queue the press and start capturing the
+      // instant it's safe (see startMic / AgentAudioDone), instead of unmuting
+      // into the agent's own playback (which the mic would pick up as echo).
+      // Note: a pending "thinking" state deliberately does NOT block a new
+      // press — the user must always be able to talk, even if a response never
+      // arrives.
+      pttPendingReasonRef.current = mic ? "agent" : "mic";
       pttPendingRef.current = true;
       return;
     }
 
     setAwaitingResponse(false);
 
+    const ws = wsRef.current;
+    if (interrupting) {
+      // Silence the agent locally *before* opening the mic, so the tail of its
+      // own voice can't be captured back as the user's question, and tell the
+      // server to abandon the rest of the turn.
+      interruptAgentPlayback();
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try { ws.send(JSON.stringify({ type: "interrupt" })); } catch { /* ignore */ }
+      }
+    }
+
     // Tell the server the turn is starting immediately, rather than waiting for
     // the VAD energy threshold to notice speech a beat later.
-    const ws = wsRef.current;
     if (ws && ws.readyState === WebSocket.OPEN) {
       try { ws.send(JSON.stringify({ type: "speech_start" })); } catch { /* ignore */ }
     }
-    micControllerRef.current.setMuted(false);
+    mic.setMuted(false);
     pttCapturingRef.current = true;
-  }, []);
+  }, [canInterrupt, interruptAgentPlayback, setAwaitingResponse]);
 
   const handlePttRelease = useCallback(() => {
     const wasPending = pttPendingRef.current;
+    const pendingReason = pttPendingReasonRef.current;
     pttPendingRef.current = false;
+    pttPendingReasonRef.current = null;
     setIsPttActive(false);
 
     if (!pttCapturingRef.current) {
       // This hold never actually got to capture anything — it was pressed and
-      // released entirely while Ganesha was still busy. Say so, instead of the
-      // press silently vanishing with nothing to show for it.
+      // released entirely while the session was still busy. Say so, instead of
+      // the press silently vanishing with nothing to show for it.
       if (wasPending) {
-        toast.info("Ganesha is still finishing up — hold again once he's done.");
+        toast.info(
+          pendingReason === "mic"
+            ? "Still getting your mic ready — hold again in a moment."
+            : `${creatorName} is still finishing up — hold again in a moment.`
+        );
       }
       return;
     }
@@ -676,7 +786,7 @@ function VoiceChatContent() {
     // The backend does a RAG lookup before the agent can respond — surface that
     // wait instead of the UI just going quiet until audio eventually arrives.
     setAwaitingResponse(true);
-  }, []);
+  }, [creatorName, setAwaitingResponse]);
 
   // Ganesha-only: holding the spacebar anywhere on the page works like holding the button.
   useEffect(() => {
