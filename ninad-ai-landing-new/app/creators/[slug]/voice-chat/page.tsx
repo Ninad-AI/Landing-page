@@ -419,7 +419,7 @@ function VoiceChatContent() {
         creatorImage={creatorImage}
       />
 
-      <p className="pointer-events-none fixed bottom-12 left-1/2 z-[110] -translate-x-1/2 text-[10px] font-normal tracking-wide text-white/60 sm:bottom-14 sm:text-[11px] short:bottom-2">
+      <p className="pointer-events-none fixed bottom-12 left-1/2 z-[110] -translate-x-1/2 text-[10px] font-normal tracking-wide text-white/60 sm:bottom-14 sm:text-[11px]">
         Ninad AI can make mistakes.
       </p>
     </main>

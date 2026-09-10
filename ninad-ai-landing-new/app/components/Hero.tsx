@@ -15,7 +15,7 @@ export default function Hero() {
         />
 
         <div className="relative z-10">
-          <h1 className="font-display text-[40px] sm:text-[56px] md:text-[58px] lg:text-[68px] xl:text-[74px] leading-[0.99] tracking-tight text-nd-ink mb-5">
+          <h1 className="font-display text-[40px] sm:text-[56px] md:text-[68px] lg:text-[74px] leading-[0.99] tracking-tight text-nd-ink mb-5">
             Talk to the people who <em className="not-italic italic text-nd-accent">shaped you</em>.
           </h1>
           <p className="text-base sm:text-lg leading-relaxed text-nd-muted max-w-[460px] mb-8">

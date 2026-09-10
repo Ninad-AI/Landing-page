@@ -1,14 +1,6 @@
 /* Google Fonts - loaded via link in layout.tsx for Tailwind v4 compatibility */
 @import "tailwindcss";
 
-/* Short viewports (landscape phones, small browser windows): lets components
-   tighten vertical layout with a `short:` prefix, independent of width. */
-@custom-variant short {
-  @media (max-height: 600px) {
-    @slot;
-  }
-}
-
 :root {
   /* Colors */
   --background: #000000;
@@ -308,11 +300,9 @@ button::-moz-focus-inner {
     min-height: 36px;
   }
 
-  /* Prevent horizontal overflow on very small screens. `clip` (not `hidden`)
-     so the section doesn't become a scroll container, which would break
-     position: sticky inside it and could add stray vertical scrollbars. */
+  /* Prevent horizontal overflow on very small screens */
   section {
-    overflow-x: clip;
+    overflow-x: hidden;
   }
 }
 
@@ -434,21 +424,7 @@ h4,
 h5,
 h6 {
   overflow-wrap: anywhere;
-}
-
-p {
   hyphens: auto;
-}
-
-/* Headings keep their words intact — auto-hyphenation splits display copy
-   ("shap-ed you") on narrow screens. */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  hyphens: manual;
 }
 
 /* ═══════════════════════════════════════════════
@@ -591,11 +567,8 @@ h6 {
   }
 }
 
-/* No `forwards` fill: the final keyframe equals the natural state, and keeping a
-   transform/filter applied would make this wrapper the containing block for
-   every position: fixed descendant (modals, call-screen overlays). */
 .page-enter {
-  animation: pageEnter 0.7s var(--ease-out-expo);
+  animation: pageEnter 0.7s var(--ease-out-expo) forwards;
 }
 
 /* ═══════════════════════════════════════════════

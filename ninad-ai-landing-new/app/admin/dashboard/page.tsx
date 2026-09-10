@@ -271,7 +271,7 @@ function AdminDashboardContent() {
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Live</span>
           </div>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="font-display text-3xl md:text-5xl text-nd-ink tracking-tight mb-2">
                 Admin Dashboard
@@ -283,7 +283,7 @@ function AdminDashboardContent() {
             <button
               onClick={() => void loadAnalytics(true)}
               disabled={isRefreshing}
-              className="self-start shrink-0 px-4 py-2 rounded-xl border border-nd-line bg-white text-nd-muted text-sm font-semibold transition-colors hover:bg-nd-panel disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-nd-line bg-white text-nd-muted text-sm font-semibold transition-colors hover:bg-nd-panel disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               {isRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
@@ -324,7 +324,7 @@ function AdminDashboardContent() {
         {/* Promote Influencer */}
         <div className="bg-white border border-nd-line rounded-2xl p-6 animate-nd-up mb-6">
           <h3 className="font-nd-sans font-bold text-lg text-nd-ink mb-5">Promote to Influencer</h3>
-          <form onSubmit={handlePromote} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <form onSubmit={handlePromote} className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="flex-1 w-full">
               <label className="block text-xs text-nd-dim font-semibold mb-1.5">User ID</label>
               <input
@@ -348,7 +348,7 @@ function AdminDashboardContent() {
             <button
               type="submit"
               disabled={promoting}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-nd-ink text-nd-bg text-sm font-bold transition-all hover:bg-[#302C36] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-nd-ink text-nd-bg text-sm font-bold transition-all hover:bg-[#302C36] disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
             >
               {promoting ? 'Promoting...' : 'Promote'}
             </button>
@@ -381,7 +381,7 @@ function AdminDashboardContent() {
 
             <div className="space-y-2">
               {(usageData?.influencer_breakdown ?? []).map((entry, index) => (
-                <div key={`${entry.influencer_id || entry.influencer_name || 'row'}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-nd-line-soft bg-white px-3 py-2">
+                <div key={`${entry.influencer_id || entry.influencer_name || 'row'}-${index}`} className="flex items-center justify-between rounded-xl border border-nd-line-soft bg-white px-3 py-2">
                   <span className="text-sm text-nd-ink font-medium">{entry.influencer_name || entry.influencer_id || 'Influencer'}</span>
                   <span className="text-xs text-nd-dim tabular-nums">{formatNumber(entry.calls)} calls • {formatNumber(entry.minutes)} min</span>
                 </div>
@@ -416,7 +416,7 @@ function AdminDashboardContent() {
             <h3 className="font-nd-sans font-bold text-lg text-nd-ink mb-5">User Growth Trends</h3>
             <div className="space-y-2">
               {(usersData?.growth_trends ?? []).slice(0, 10).map((trend, index) => (
-                <div key={`${trend.date}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-nd-line-soft bg-white px-3 py-2">
+                <div key={`${trend.date}-${index}`} className="flex items-center justify-between rounded-xl border border-nd-line-soft bg-white px-3 py-2">
                   <span className="text-sm text-nd-ink">{trend.date}</span>
                   <span className="text-xs text-nd-dim tabular-nums">
                     Active: {formatNumber(trend.active_users ?? 0)} • New: {formatNumber(trend.new_users ?? 0)}
@@ -444,7 +444,7 @@ function AdminDashboardContent() {
 
             <div className="space-y-2">
               {(feedbackData?.influencer_feedback ?? []).map((item, index) => (
-                <div key={`${item.influencer_id || item.influencer_name || 'feedback'}-${index}`} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-nd-line-soft bg-white px-3 py-2">
+                <div key={`${item.influencer_id || item.influencer_name || 'feedback'}-${index}`} className="flex items-center justify-between rounded-xl border border-nd-line-soft bg-white px-3 py-2">
                   <span className="text-sm text-nd-ink font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
                   <span className="text-xs text-nd-dim tabular-nums">{(item.avg_rating ?? 0).toFixed(2)} ★ • {formatNumber(item.total_feedback ?? item.feedback_count ?? 0)} reviews</span>
                 </div>
@@ -515,7 +515,7 @@ function AdminDashboardContent() {
                     key={`${item.influencer_id || item.influencer_name || 'influencer'}-${index}`}
                     onClick={() => item.influencer_id && handleInfClick(item.influencer_id)}
                     disabled={!item.influencer_id}
-                    className="w-full flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-nd-line-soft bg-white px-3 py-2 hover:bg-nd-panel hover:border-nd-accent/30 transition-all text-left cursor-pointer disabled:cursor-default"
+                    className="w-full flex items-center justify-between rounded-xl border border-nd-line-soft bg-white px-3 py-2 hover:bg-nd-panel hover:border-nd-accent/30 transition-all text-left cursor-pointer disabled:cursor-default"
                   >
                     <span className="text-sm text-nd-ink font-medium">{item.influencer_name || item.influencer_id || 'Influencer'}</span>
                     <span className="text-xs text-nd-dim tabular-nums">
@@ -535,7 +535,7 @@ function AdminDashboardContent() {
             <div className="space-y-2">
               {recentBookings.map((booking, index) => (
                 <div key={`${booking.id}-${index}`} className="rounded-xl border border-nd-line-soft bg-white px-3 py-2">
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <div className="flex items-center justify-between gap-3">
                     <span className="text-sm text-nd-ink font-medium">{booking.user_name || 'User'} • {booking.influencer_name || 'Influencer'}</span>
                     <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${bookingStatusClass(booking.status)}`}>
                       {booking.status || 'unknown'}
