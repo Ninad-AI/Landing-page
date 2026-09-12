@@ -89,7 +89,7 @@ export interface CheckoutResponse {
   session_id: string;
 }
 
-export type AllowedDurationMinutes = 1 | 3 | 5 | 10 | 15;
+export type AllowedDurationMinutes = 1 | 3 | 5 | 10 | 15 | 20 | 30;
 
 export interface RazorpayCreateOrderRequest {
   duration_minutes: AllowedDurationMinutes;

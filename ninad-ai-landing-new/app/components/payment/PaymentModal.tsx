@@ -14,12 +14,19 @@ const DEFAULT_PROVIDER_NAME = "deepgram";
 const HIGH_TRAFFIC_MESSAGE = "The traffic is high right now. Please come back later.";
 const HEALTH_RECHECK_SECONDS = HEALTH_POLL_INTERVAL_SECONDS;
 
+// Mirrors the backend price table exactly. Backend amounts, in paise:
+//   1 -> 1900, 3 -> 5900, 5 -> 9900, 10 -> 18900,
+//   15 -> 27900, 20 -> 37900, 30 -> 56900
+// Razorpay is charged those amounts, so a price shown here that disagrees with
+// this list quotes the user a number they will not actually be billed.
 const DURATION_PLANS: MinutePlan[] = [
   { minutes: 1, price: 19, label: "1 minute", featured: true },
   { minutes: 3, price: 59, label: "3 minutes" },
-  { minutes: 5, price: 79, label: "5 minutes" },
-  { minutes: 10, price: 149, label: "10 minutes" },
-  { minutes: 15, price: 199, label: "15 minutes" },
+  { minutes: 5, price: 99, label: "5 minutes" },
+  { minutes: 10, price: 189, label: "10 minutes" },
+  { minutes: 15, price: 279, label: "15 minutes" },
+  { minutes: 20, price: 379, label: "20 minutes" },
+  { minutes: 30, price: 569, label: "30 minutes" },
 ];
 
 const STAR_COPY: Record<FeedbackStars, string> = {
@@ -300,13 +307,13 @@ export default function PaymentModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={handleClose} />
       <div className="relative w-[92vw] max-w-[360px] sm:w-full sm:max-w-md animate-fade-in-up">
         <div
-          className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[400px] sm:min-h-[440px] flex flex-col justify-center overflow-hidden"
+          className="relative bg-black/80 backdrop-blur-3xl border border-white/10 shadow-2xl px-6 sm:px-8 p-6 sm:p-8 md:p-10 min-h-[min(400px,calc(100dvh-2rem))] sm:min-h-[min(440px,calc(100dvh-2rem))] max-h-[calc(100dvh-2rem)] flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ borderRadius: "1.5rem" }}
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/20 blur-[80px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 blur-[80px] rounded-full pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col h-full justify-center items-center">
+          <div className="relative z-10 my-auto flex w-full flex-col items-center">
             <div className="w-full max-w-[340px] flex flex-col justify-center">
               {feedbackMode ? (
                 <div className="w-full">
