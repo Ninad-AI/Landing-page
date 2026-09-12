@@ -26,7 +26,8 @@ export default function MinutesSelector({
     <div className="w-full grid grid-cols-6 gap-x-2.5 gap-y-2.5 sm:gap-x-3 sm:gap-y-3">
       {plans.map((plan, index) => {
         const isSelected = selectedMinutes === plan.minutes;
-        const isBottomRow = index >= 3;
+        // First three plans share a 3-up row; the longer ones get wider cells.
+        const isWideCell = index >= 3;
         const featured = plan.featured;
 
         return (
@@ -34,7 +35,7 @@ export default function MinutesSelector({
             key={plan.minutes}
             onClick={() => onSelectMinutes(plan.minutes)}
             disabled={disabled}
-            className={`relative ${isBottomRow ? "col-span-3" : "col-span-2"} h-[62px] sm:h-[68px] rounded-xl sm:rounded-2xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
+            className={`relative ${isWideCell ? "col-span-3" : "col-span-2"} h-[62px] sm:h-[68px] rounded-xl sm:rounded-2xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer ${
               featured
                 ? "bg-gradient-to-br from-nd-accent to-nd-accent-dark p-[2px] hover:scale-[1.03]"
                 : `border flex flex-col items-center justify-center ${isSelected ? "border-nd-ink bg-nd-tint text-nd-ink" : "border-nd-line bg-white text-nd-muted hover:border-nd-ink/50"}`

@@ -15,12 +15,19 @@ const DEFAULT_PROVIDER_NAME = "deepgram";
 const HIGH_TRAFFIC_MESSAGE = "The traffic is high right now. Please come back later.";
 const HEALTH_RECHECK_SECONDS = HEALTH_POLL_INTERVAL_SECONDS;
 
+// Mirrors the backend price table exactly. Backend amounts, in paise:
+//   1 -> 1900, 3 -> 5900, 5 -> 9900, 10 -> 18900,
+//   15 -> 27900, 20 -> 37900, 30 -> 56900
+// Razorpay is charged those amounts, so a price shown here that disagrees with
+// this list quotes the user a number they will not actually be billed.
 const DURATION_PLANS: MinutePlan[] = [
   { minutes: 1, price: 19, label: "1 minute", featured: true },
   { minutes: 3, price: 59, label: "3 minutes" },
   { minutes: 5, price: 99, label: "5 minutes" },
   { minutes: 10, price: 189, label: "10 minutes" },
   { minutes: 15, price: 279, label: "15 minutes" },
+  { minutes: 20, price: 379, label: "20 minutes" },
+  { minutes: 30, price: 569, label: "30 minutes" },
 ];
 
 const STAR_COPY: Record<FeedbackStars, string> = {
@@ -298,7 +305,7 @@ export default function PaymentModal({
 
   return (
     <NdModal onClose={handleClose} maxWidth={400}>
-      <div className="min-h-[380px] sm:min-h-[420px] flex flex-col justify-center">
+      <div className="min-h-[min(380px,70dvh)] sm:min-h-[min(420px,70dvh)] flex flex-col justify-center">
         <div className="w-full max-w-[340px] mx-auto flex flex-col justify-center">
           {feedbackMode ? (
             <div className="w-full">
