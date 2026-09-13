@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { toast } from "sonner";
 import { paymentApi } from "../../lib/api";
 import { RAZORPAY_PUBLIC_KEY } from "../../lib/config";
@@ -92,6 +92,12 @@ interface PaymentModalProps {
   autoStartDuration?: AllowedDurationMinutes | null;
   onAutoStartConsumed?: () => void;
   onSelectPaidPlan?: (duration: AllowedDurationMinutes) => void;
+  /**
+   * Restricts the offered plans to these durations. Omit to offer the full
+   * price table. Pass a module-level constant — it feeds a memo, so a fresh
+   * array every render would defeat it.
+   */
+  allowedDurations?: readonly AllowedDurationMinutes[];
   feedbackMode?: boolean;
   onSubmitFeedback?: (stars: FeedbackStars, comment?: string) => Promise<void>;
   isSubmittingFeedback?: boolean;
@@ -111,6 +117,7 @@ export default function PaymentModal({
   autoStartDuration,
   onAutoStartConsumed,
   onSelectPaidPlan,
+  allowedDurations,
   feedbackMode = false,
   onSubmitFeedback,
   isSubmittingFeedback = false,
@@ -127,6 +134,16 @@ export default function PaymentModal({
   const [hoverStars, setHoverStars] = useState<0 | FeedbackStars>(0);
   const [comment, setComment] = useState("");
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+
+  const plans = useMemo(() => {
+    if (!allowedDurations?.length) return DURATION_PLANS;
+    const filtered = DURATION_PLANS.filter((plan) => allowedDurations.includes(plan.minutes));
+    // A restriction that matches nothing is a misconfiguration — fall back to
+    // the full table rather than rendering a modal with nothing to buy.
+    return filtered.length > 0 ? filtered : DURATION_PLANS;
+  }, [allowedDurations]);
+
+  const isSinglePlan = plans.length === 1;
 
   const { openCheckout } = useRazorpay();
   const slots = useSlotAvailability(providerName);
@@ -154,6 +171,13 @@ export default function PaymentModal({
       if (nextCheckTimerRef.current) clearInterval(nextCheckTimerRef.current);
     };
   }, [isOpen, slots.isFull, slots.isChecking]);
+
+  // With a single plan there is nothing to choose — preselect it so Pay Now is
+  // live immediately instead of making the user tap the only option first.
+  useEffect(() => {
+    if (!isOpen || feedbackMode || !isSinglePlan) return;
+    setSelectedMinutes(plans[0].minutes);
+  }, [isOpen, feedbackMode, isSinglePlan, plans]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -418,16 +442,18 @@ export default function PaymentModal({
                 <>
                   <div className="text-left w-full sm:w-[320px] mx-auto px-4 sm:px-6">
                     <h3 className="text-[30px] sm:text-[32px] md:text-[34px] font-black mb-1.5 sm:mb-2 text-white tracking-tight leading-tight">
-                      Duration.
+                      {isSinglePlan ? "Session." : "Duration."}
                     </h3>
                     <p className="text-[14px] sm:text-[15px] md:text-[16px] text-[#A1A1A1] mb-8 sm:mb-9 font-medium leading-snug">
-                      Select your preferred session length.
+                      {isSinglePlan
+                        ? `${plans[0].label} with ${creatorName} for ₹${plans[0].price}.`
+                        : "Select your preferred session length."}
                     </p>
                   </div>
 
                   <div className="w-full animate-fade-in-up flex flex-col items-center gap-4 sm:gap-5 mt-1 sm:mt-2">
                     <MinutesSelector
-                      plans={DURATION_PLANS}
+                      plans={plans}
                       selectedMinutes={selectedMinutes}
                       onSelectMinutes={(minutes) => {
                         setSelectedMinutes(minutes);
@@ -482,7 +508,9 @@ export default function PaymentModal({
                               ? "Checking Slots..."
                             : slots.isFull
                               ? "Waiting for Slots..."
-                              : "Pay Now"}
+                              : isSinglePlan
+                                ? `Pay ₹${plans[0].price}`
+                                : "Pay Now"}
                       </button>
                     </div>
                   </div>

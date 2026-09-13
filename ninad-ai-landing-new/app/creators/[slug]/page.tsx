@@ -32,7 +32,28 @@ const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
 
 /* ── Creator data ── */
-const CREATORS_DATA: Record<string, { name: string; image: string; role: string; influencerId: string; preferredProvider: string }> = {
+const CREATORS_DATA: Record<
+  string,
+  {
+    name: string;
+    image: string;
+    role: string;
+    influencerId: string;
+    preferredProvider: string;
+    /**
+     * Restricts the payment modal to these durations. Omit to offer every plan
+     * in the price table. Must stay a stable reference — it feeds a memo.
+     */
+    offeredDurations?: readonly AllowedDurationMinutes[];
+    /**
+     * When true, a verified payment does NOT drop the user straight into the
+     * call — it parks a ready-to-start booking and waits for them to press
+     * Start Session, so the paid clock can't start ticking while they're still
+     * getting settled.
+     */
+    requireManualStart?: boolean;
+  }
+> = {
   "nirupam": {
     name: "Nirupam Paritala",
     image: "/assets/creators/nirupam.jpeg",
@@ -75,6 +96,8 @@ const CREATORS_DATA: Record<string, { name: string; image: string; role: string;
     role: "Guide & Guardian",
     influencerId: "ganeshji",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    offeredDurations: [3],
+    requireManualStart: true,
   },
 };
 
@@ -88,6 +111,8 @@ export default function CreatorProfilePage() {
   const creatorRole = creatorData?.role ?? "Creator";
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
+  const offeredDurations = creatorData?.offeredDurations;
+  const requireManualStart = creatorData?.requireManualStart ?? false;
 
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
@@ -104,6 +129,10 @@ export default function CreatorProfilePage() {
      /trial/status — no persona id or duration is ever hardcoded here) ── */
   const [myTrial, setMyTrial] = useState<TrialStatus | null>(null);
   const trialAvailable = !!myTrial?.available;
+
+  /* ── Paid and waiting: set for requireManualStart creators once checkout is
+     verified, cleared when the user actually starts the session. ── */
+  const [readyBooking, setReadyBooking] = useState<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
 
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
@@ -478,6 +507,12 @@ export default function CreatorProfilePage() {
   const handleStartSession = async () => {
     setShowFeedback(false);
 
+    // Already paid for and waiting on the user's go-ahead — this press is it.
+    if (readyBooking) {
+      redirectToSession(readyBooking.duration, readyBooking.bookingId);
+      return;
+    }
+
     if (isHydrated && isAuthenticated) {
       try {
         const activeBooking = await paymentApi.getActiveBooking();
@@ -576,6 +611,13 @@ export default function CreatorProfilePage() {
 
   const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
     if (isHydrated && isAuthenticated) {
+      if (requireManualStart) {
+        // Paid, but don't dial in yet — park the booking and let the Start
+        // Session button be the thing that actually opens the call.
+        setReadyBooking({ duration: durationMinutes, bookingId });
+        toast.success("Payment confirmed. Press Start Session when you're ready.");
+        return;
+      }
       redirectToSession(durationMinutes, bookingId);
       return;
     }
@@ -620,6 +662,28 @@ export default function CreatorProfilePage() {
      Render
      ═══════════════════════════════════════ */
 
+  // A paid booking waiting to be started outranks a trial offer.
+  const ctaLabel = trialAvailable && !readyBooking ? "Start Free Trial" : "Start Session";
+
+  // Rendered above the CTA in both the desktop and mobile layouts.
+  const renderCtaBadge = (className: string) => {
+    if (readyBooking) {
+      return (
+        <span className={`${className} inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(251,146,60,0.4)]`}>
+          Session ready · {readyBooking.duration} min
+        </span>
+      );
+    }
+    if (trialAvailable && myTrial) {
+      return (
+        <span className={`${className} inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]`}>
+          {formatTrialDuration(myTrial.duration_seconds)} free trial
+        </span>
+      );
+    }
+    return null;
+  };
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#0F0F13] text-white font-sans selection:bg-rose-500/30">
       {/* Background Aurora */}
@@ -652,14 +716,10 @@ export default function CreatorProfilePage() {
               </h1>
 
               <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                {trialAvailable && myTrial && (
-                  <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]">
-                    {formatTrialDuration(myTrial.duration_seconds)} free trial
-                  </span>
-                )}
+                {renderCtaBadge("mb-3")}
                 <button onClick={handleStartSession} className="group relative flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
                   <span className="flex items-center gap-3">
-                    {trialAvailable ? "Start Free Trial" : "Start Session"}
+                    {ctaLabel}
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
                     </svg>
@@ -682,13 +742,9 @@ export default function CreatorProfilePage() {
             </div>
 
             <div className="animate-fade-in-up mt-6 md:hidden w-full flex flex-col items-center gap-3 z-30">
-              {trialAvailable && myTrial && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]">
-                  {formatTrialDuration(myTrial.duration_seconds)} free trial
-                </span>
-              )}
+              {renderCtaBadge("")}
               <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                {trialAvailable ? "Start Free Trial" : "Start Session"}
+                {ctaLabel}
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
                 </svg>
@@ -764,6 +820,7 @@ export default function CreatorProfilePage() {
         providerName={preferredProvider}
         onPaymentVerified={handlePaymentVerified}
         onRequireAuth={isHydrated && !isAuthenticated ? handleRequireAuthForPayment : undefined}
+        allowedDurations={offeredDurations}
         autoStartDuration={autoStartDuration}
         onAutoStartConsumed={() => setAutoStartDuration(null)}
         feedbackMode={showFeedback}

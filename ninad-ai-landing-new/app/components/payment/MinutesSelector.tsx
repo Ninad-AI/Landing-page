@@ -27,7 +27,9 @@ export default function MinutesSelector({
       {plans.map((plan, index) => {
         const isSelected = selectedMinutes === plan.minutes;
         // First three plans share a 3-up row; the longer ones get wider cells.
-        const isWideCell = index >= 3;
+        // A creator offering a single plan gets one full-width card instead of
+        // a lone third-width cell stranded on the left.
+        const columnSpan = plans.length === 1 ? "col-span-6" : index >= 3 ? "col-span-3" : "col-span-2";
         const featured = plan.featured;
 
         return (
@@ -35,7 +37,7 @@ export default function MinutesSelector({
             key={plan.minutes}
             onClick={() => onSelectMinutes(plan.minutes)}
             disabled={disabled}
-            className={`relative ${isWideCell ? "col-span-3" : "col-span-2"} h-[62px] sm:h-[68px] rounded-xl sm:rounded-2xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
+            className={`relative ${columnSpan} h-[62px] sm:h-[68px] rounded-xl sm:rounded-2xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed ${
               featured
                 ? "bg-gradient-to-br from-pink-500 via-rose-500 to-orange-500 p-[2px] shadow-[0_10px_30px_rgba(236,72,153,0.35)] hover:scale-[1.04] hover:shadow-[0_12px_36px_rgba(236,72,153,0.5)] active:scale-[1.01]"
                 : `border flex flex-col items-center justify-center ${isSelected ? "border-white bg-white/10 text-white shadow-lg" : "border-white/20 bg-white/5 text-white/70 hover:border-white/50"}`
