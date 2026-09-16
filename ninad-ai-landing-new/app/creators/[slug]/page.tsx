@@ -1,32 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuthStore } from "../../lib/stores";
-import { startStreamingMic, type StreamingMicHandle } from "../../lib/audioUtils";
-import { PlayoutBuffer } from "../../lib/playbackUtils";
-import CreatorVoiceSessionUI from "../../components/CreatorVoiceSessionUI";
 import PaymentModal from "../../components/payment/PaymentModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi, feedbackApi, trialApi } from "../../lib/api";
-import { buildCreatorVoiceWsUrl } from "../../lib/config";
-import { openAppWebSocket } from "../../lib/websocket";
-import type { AllowedDurationMinutes, FeedbackStars, TrialStatus } from "../../lib/types";
+import { authApi, paymentApi, feedbackApi } from "../../lib/api";
+import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
-function formatTrialDuration(seconds: number): string {
-  if (seconds > 0 && seconds % 60 === 0) {
-    const minutes = seconds / 60;
-    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
-  }
-  return `${seconds} seconds`;
-}
-
-/* ── Flow: idle → duration → auth (if needed) → active ── */
-type FlowState = "idle" | "auth" | "duration" | "active";
-type CallPhase = "connecting" | "listening" | "speaking";
+/* ── Flow: idle → duration → auth (if needed); a verified session
+   redirects to /creators/[slug]/voice-chat ── */
+type FlowState = "idle" | "auth" | "duration";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
@@ -119,16 +106,7 @@ export default function CreatorProfilePage() {
 
   /* ── UI state ── */
   const [flowState, setFlowState] = useState<FlowState>("idle");
-  const [selectedMinutes, setSelectedMinutes] = useState<AllowedDurationMinutes | null>(null);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [callPhase, setCallPhase] = useState<CallPhase>("connecting");
   const [isVisible, setIsVisible] = useState(false);
-
-  /* ── Free trial state (server is the sole authority: driven entirely by
-     /trial/status — no persona id or duration is ever hardcoded here) ── */
-  const [myTrial, setMyTrial] = useState<TrialStatus | null>(null);
-  const trialAvailable = !!myTrial?.available;
 
   /* ── Paid and waiting: set for requireManualStart creators once checkout is
      verified, cleared when the user actually starts the session. ── */
@@ -148,18 +126,6 @@ export default function CreatorProfilePage() {
   const mousePosRef = useRef({ x: 0, y: 0 });
   const mouseTargetRef = useRef({ x: 0, y: 0 });
   const avatarRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  /* ── Audio streaming refs ── */
-  const wsRef = useRef<WebSocket | null>(null);
-  const micControllerRef = useRef<StreamingMicHandle | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const playHeadRef = useRef(0);
-  const sourceNodesRef = useRef<AudioBufferSourceNode[]>([]);
-  const sourceEndPromisesRef = useRef<Promise<void>[]>([]);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const ttsActiveRef = useRef(false);
-  const agentSpeakingRef = useRef(false);
-  const playoutRef = useRef<PlayoutBuffer | null>(null);
 
   /* ═══════════════════════════════════════
      Effects
@@ -194,297 +160,6 @@ export default function CreatorProfilePage() {
     };
   }, []);
 
-  // Trial eligibility can only be checked once signed in (the endpoint requires
-  // a JWT). Also re-runs whenever we come back to this page after a trial
-  // session ends, so the affordance correctly flips to "used".
-  useEffect(() => {
-    if (!isHydrated || !isAuthenticated) return;
-    let cancelled = false;
-    trialApi
-      .getStatus()
-      .then((status) => {
-        if (cancelled) return;
-        const trial = status.enabled
-          ? status.trials.find((t) => t.influencer_id === creatorInfluencerId) ?? null
-          : null;
-        setMyTrial(trial);
-      })
-      .catch(() => {
-        // Silently ignore — the trial affordance just won't show; paid flow is unaffected.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isHydrated, isAuthenticated, creatorInfluencerId]);
-
-  /* ═══════════════════════════════════════
-     Audio helpers
-     ═══════════════════════════════════════ */
-
-  const getAudioContext = useCallback(() => {
-    if (!audioContextRef.current) {
-      const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new Ctor({ sampleRate: 16000 });
-      playHeadRef.current = audioContextRef.current.currentTime;
-      sourceEndPromisesRef.current = [];
-      playoutRef.current = new PlayoutBuffer(audioContextRef.current);
-    }
-    return audioContextRef.current;
-  }, []);
-
-  const scheduleBuffer = useCallback((buffer: AudioBuffer) => {
-    const p = playoutRef.current!.enqueue(buffer);
-    sourceEndPromisesRef.current.push(p);
-    p.then(() => {
-      const arr = sourceEndPromisesRef.current;
-      const idx = arr.indexOf(p);
-      if (idx !== -1) arr.splice(idx, 1);
-      if (arr.length === 0) {
-        setIsSpeaking(false);
-        setCallPhase("listening");
-      }
-    });
-  }, []);
-
-  const stopPlayback = useCallback(() => {
-    playoutRef.current?.stop();
-    playoutRef.current = null;
-    sourceNodesRef.current = [];
-    sourceEndPromisesRef.current = [];
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-    playHeadRef.current = 0;
-  }, []);
-
-  const processBinaryChunk = useCallback((buf: ArrayBuffer) => {
-    const i16 = new Int16Array(buf);
-    const f32 = new Float32Array(i16.length);
-    for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
-    const ctx = getAudioContext();
-    const ab = ctx.createBuffer(1, f32.length, 16000);
-    ab.copyToChannel(f32, 0, 0);
-    scheduleBuffer(ab);
-  }, [getAudioContext, scheduleBuffer]);
-
-  /* ═══════════════════════════════════════
-     WebSocket streaming (when active)
-     ═══════════════════════════════════════ */
-
-  useEffect(() => {
-    if (flowState !== "active") return;
-    let disposed = false;
-    let initAckReceived = false;
-
-    setIsSpeaking(false);
-    setCallPhase("connecting");
-
-    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
-    const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
-
-    const ws = openAppWebSocket(wsUrl);
-    ws.binaryType = "arraybuffer";
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      if (disposed) return;
-
-      // Send init message immediately — mic streaming starts only after init_ack
-      if (ws.readyState === WebSocket.OPEN) {
-        try {
-          ws.send(
-            JSON.stringify({
-              token: authToken,
-              influencer_id: creatorInfluencerId,
-              preferred_provider: preferredProvider,
-            })
-          );
-        } catch {
-          // Ignore init-message failures
-        }
-      }
-    };
-
-    const startMic = async () => {
-      try {
-        const micHandle = await startStreamingMic(ws, () => {}, {
-          energyThreshold: 0.01,
-          silenceMs: 600,
-          onSpeechStart: () => {
-            if (!ttsActiveRef.current) setCallPhase("listening");
-          },
-          onSpeechEnd: () => {
-            if (!ttsActiveRef.current) setCallPhase("listening");
-          },
-        });
-        if (disposed) {
-          micHandle.stop();
-          return;
-        }
-        micControllerRef.current = micHandle;
-      } catch {
-        // mic failed
-      }
-    };
-
-    ws.onmessage = (event: MessageEvent) => {
-      if (event.data instanceof ArrayBuffer) {
-        ttsActiveRef.current = true;
-        setIsSpeaking(true);
-        setCallPhase("speaking");
-        processBinaryChunk(event.data);
-      } else {
-        try {
-          const msg = JSON.parse(event.data as string);
-
-          if (msg.type === "init_ack") {
-            // Server confirmed session — now begin audio streaming
-            initAckReceived = true;
-            setCallPhase("listening");
-            ttsActiveRef.current = false;
-            void startMic();
-            return;
-          }
-
-          if (msg.type === "timeout") {
-            toast.info("Session time is up.");
-            handleEndCall();
-            return;
-          }
-
-          if (msg.type === "error") {
-            const errMsg: string = msg.error || msg.message || "An error occurred.";
-            const lower = errMsg.toLowerCase();
-            if (lower.includes("no active booking")) {
-              toast.error("No active booking found. Please purchase a session.");
-            } else if (lower.includes("capacity") || lower.includes("full capacity")) {
-              toast.error("All sessions are at capacity. Please try again later.");
-            } else if (lower.includes("authentication required")) {
-              toast.error("Authentication required. Please sign in.");
-            } else {
-              toast.error(errMsg);
-            }
-            if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) ws.close();
-            handleEndCall();
-            return;
-          }
-
-          if (msg.type === "tts_start") {
-            ttsActiveRef.current = true;
-            setIsSpeaking(true);
-            setCallPhase("speaking");
-          }
-          if (msg.type === "tts_end") {
-            const pending = [...sourceEndPromisesRef.current];
-            const done = () => {
-              ttsActiveRef.current = false;
-              setIsSpeaking(false);
-              setCallPhase("listening");
-            };
-            if (pending.length > 0) {
-              Promise.all(pending).then(done);
-            } else {
-              done();
-            }
-          }
-
-          if (msg.type === "AgentAudioStart") {
-            agentSpeakingRef.current = true;
-            micControllerRef.current?.setMuted(true);
-          }
-          if (msg.type === "AgentAudioDone") {
-            agentSpeakingRef.current = false;
-            micControllerRef.current?.setMuted(false);
-          }
-        } catch {
-          // non-JSON
-        }
-      }
-    };
-
-    ws.onerror = () => {
-      if (!disposed) {
-        setCallPhase("connecting");
-        toast.error("Unable to connect to voice server. Please try again.");
-      }
-    };
-
-    ws.onclose = () => {
-      if (disposed) return;
-      setIsSpeaking(false);
-      setCallPhase("connecting");
-    };
-
-    return () => {
-      disposed = true;
-      micControllerRef.current?.stop();
-      micControllerRef.current = null;
-      if (ws.readyState === WebSocket.OPEN) {
-        try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
-        ws.close();
-      } else if (ws.readyState === WebSocket.CONNECTING) {
-        // Defer close until the handshake finishes to avoid the
-        // "WebSocket is closed before the connection is established" console error.
-        ws.onopen = () => {
-          try { ws.close(); } catch { /* ignore */ }
-        };
-      }
-      wsRef.current = null;
-      ttsActiveRef.current = false;
-      agentSpeakingRef.current = false;
-      stopPlayback();
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creatorInfluencerId, flowState, preferredProvider, processBinaryChunk, stopPlayback]);
-
-  const handleEndCall = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    micControllerRef.current?.stop();
-    micControllerRef.current = null;
-    const ws = wsRef.current;
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      try { ws.send(JSON.stringify({ type: "close" })); } catch { /* ignore */ }
-      ws.close();
-    } else if (ws && ws.readyState === WebSocket.CONNECTING) {
-      // Defer close until the handshake finishes to avoid the
-      // "WebSocket is closed before the connection is established" console error.
-      ws.onopen = () => {
-        try { ws.close(); } catch { /* ignore */ }
-      };
-    }
-    wsRef.current = null;
-    stopPlayback();
-    ttsActiveRef.current = false;
-    agentSpeakingRef.current = false;
-    setFlowState("idle");
-    setTimeLeft(0);
-    setSelectedMinutes(null);
-    setIsSpeaking(false);
-    setCallPhase("connecting");
-  }, [stopPlayback]);
-
-  /* ═══════════════════════════════════════
-     Countdown timer
-     ═══════════════════════════════════════ */
-
-  useEffect(() => {
-    if (flowState !== "active" || timeLeft <= 0) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          handleEndCall();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [flowState, timeLeft, handleEndCall]);
-
   /* ═══════════════════════════════════════
      Handlers
      ═══════════════════════════════════════ */
@@ -493,15 +168,6 @@ export default function CreatorProfilePage() {
     const query = new URLSearchParams({ duration: String(durationMinutes) });
     if (bookingId) query.set("booking_id", bookingId);
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
-  };
-
-  // No booking_id, no payment step — the server decides is_trial from
-  // influencer_id + the signed-in user alone. The duration here is only an
-  // initial estimate for the countdown UI; voice-chat corrects it from
-  // init_ack.trial_duration_seconds once connected.
-  const redirectToTrialSession = (durationSeconds: number) => {
-    const minutes = Math.max(1, Math.round(durationSeconds / 60));
-    router.push(`/creators/${slug}/voice-chat?duration=${minutes}`);
   };
 
   const handleStartSession = async () => {
@@ -525,13 +191,6 @@ export default function CreatorProfilePage() {
         }
       } catch {
         // Continue to payment flow if active booking check fails
-      }
-
-      // A paid booking always wins; a free trial is only offered when there's
-      // no active booking to resume.
-      if (trialAvailable && myTrial) {
-        redirectToTrialSession(myTrial.duration_seconds);
-        return;
       }
     }
 
@@ -576,22 +235,6 @@ export default function CreatorProfilePage() {
         }
       } catch {
         // Continue to payment flow if active booking check fails
-      }
-
-      // Freshly signed in — the mount-time trial fetch may not have resolved
-      // yet, so check directly rather than reading possibly-stale state.
-      try {
-        const status = await trialApi.getStatus();
-        const trial = status.enabled
-          ? status.trials.find((t) => t.influencer_id === creatorInfluencerId) ?? null
-          : null;
-        setMyTrial(trial);
-        if (trial?.available) {
-          redirectToTrialSession(trial.duration_seconds);
-          return;
-        }
-      } catch {
-        // Continue to payment flow if the trial check fails
       }
 
       setFlowState("duration");
@@ -647,7 +290,6 @@ export default function CreatorProfilePage() {
 
   const closeModal = () => {
     setFlowState("idle");
-    setSelectedMinutes(null);
     setShowFeedback(false);
     pendingSessionRef.current = null;
     setAutoStartDuration(null);
@@ -662,96 +304,73 @@ export default function CreatorProfilePage() {
      Render
      ═══════════════════════════════════════ */
 
-  // A paid booking waiting to be started outranks a trial offer.
-  const ctaLabel = trialAvailable && !readyBooking ? "Start Free Trial" : "Start Session";
-
   // Rendered above the CTA in both the desktop and mobile layouts.
   const renderCtaBadge = (className: string) => {
-    if (readyBooking) {
-      return (
-        <span className={`${className} inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(251,146,60,0.4)]`}>
-          Session ready · {readyBooking.duration} min
-        </span>
-      );
-    }
-    if (trialAvailable && myTrial) {
-      return (
-        <span className={`${className} inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]`}>
-          {formatTrialDuration(myTrial.duration_seconds)} free trial
-        </span>
-      );
-    }
-    return null;
+    if (!readyBooking) return null;
+    return (
+      <span className={`${className} inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(251,146,60,0.4)]`}>
+        Session ready · {readyBooking.duration} min
+      </span>
+    );
   };
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#0F0F13] text-white font-sans selection:bg-rose-500/30">
       {/* Background Aurora */}
       <div className="absolute inset-0 pointer-events-none">
-        <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={flowState === "active" ? 0.6 : 1.0} speed={0.5} />
+        <Aurora colorStops={["#0B132B", "#6366f1", "#ec4899"]} blend={0.5} amplitude={1.0} speed={0.5} />
       </div>
 
       {/* Main Content */}
       <div className={`relative z-10 w-full min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 md:px-10 py-14 sm:py-16 md:py-20 transition-all duration-700 ease-out ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
-        {flowState === "active" ? (
-          <CreatorVoiceSessionUI
-            isSpeaking={isSpeaking}
-            callPhase={callPhase}
-            timeLeft={timeLeft}
-            totalTime={selectedMinutes ? selectedMinutes * 60 : 0}
-            creatorName={creatorName}
-            creatorImage={creatorImage}
-          />
-        ) : (
-          <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-4 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
-            <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
-              <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
-                • {creatorRole}
-              </h2>
-              <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
-                <span className="block">{creatorName.split(" ")[0]}</span>
-                <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
-                  {creatorName.split(" ").slice(1).join(" ")}.
+        <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center justify-center gap-4 sm:gap-8 md:flex-row md:justify-between md:gap-12 lg:gap-16">
+          <div className="relative z-20 flex flex-col items-center md:items-start text-center md:text-left">
+            <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
+              • {creatorRole}
+            </h2>
+            <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
+              <span className="block">{creatorName.split(" ")[0]}</span>
+              <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
+                {creatorName.split(" ").slice(1).join(" ")}.
+              </span>
+            </h1>
+
+            <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
+              {renderCtaBadge("mb-3")}
+              <button onClick={handleStartSession} className="group relative flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+                <span className="flex items-center gap-3">
+                  Start Session
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+                  </svg>
                 </span>
-              </h1>
-
-              <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">
-                {renderCtaBadge("mb-3")}
-                <button onClick={handleStartSession} className="group relative flex items-center justify-center rounded-full bg-white text-black font-bold text-sm sm:text-base tracking-wide w-[200px] lg:w-[220px] h-12 lg:h-14 xl:h-16 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                  <span className="flex items-center gap-3">
-                    {ctaLabel}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <div className="relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
-              <div
-                ref={(el) => { avatarRefs.current[1] = el; }}
-                className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
-                style={{ borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%" }}
-              >
-                <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
-              </div>
-              <div className="absolute -top-4 -right-4 sm:-top-12 sm:-right-12 w-10 h-10 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />
-              <div className="absolute bottom-12 -left-3 sm:-left-16 w-10 h-10 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
-            </div>
-
-            <div className="animate-fade-in-up mt-6 md:hidden w-full flex flex-col items-center gap-3 z-30">
-              {renderCtaBadge("")}
-              <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
-                {ctaLabel}
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
-                </svg>
               </button>
             </div>
           </div>
-        )}
+
+          <div className="relative w-[200px] h-[200px] sm:w-[280px] sm:h-[280px] md:w-[380px] md:h-[460px] lg:w-[500px] lg:h-[600px] flex-shrink-0">
+            <div
+              ref={(el) => { avatarRefs.current[1] = el; }}
+              className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
+              style={{ borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%" }}
+            >
+              <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
+            </div>
+            <div className="absolute -top-4 -right-4 sm:-top-12 sm:-right-12 w-10 h-10 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />
+            <div className="absolute bottom-12 -left-3 sm:-left-16 w-10 h-10 sm:w-32 sm:h-32 bg-rose-500/20 backdrop-blur-md border border-rose-500/20 z-20 animate-float animation-delay-2000" style={{ borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%" }} />
+          </div>
+
+          <div className="animate-fade-in-up mt-6 md:hidden w-full flex flex-col items-center gap-3 z-30">
+            {renderCtaBadge("")}
+            <button onClick={handleStartSession} className="group relative inline-flex items-center justify-center gap-3 rounded-full bg-white text-black font-bold text-sm tracking-wide w-[180px] sm:w-[200px] h-12 sm:h-14 shadow-[0_0_40px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_rgba(255,255,255,0.5)] hover:scale-105 transition-all duration-300">
+              Start Session
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
 
       {flowState === "auth" && (

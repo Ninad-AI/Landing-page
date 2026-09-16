@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProfileCard from "../components/ProfileCard";
-import { useAuthStore } from "../lib/stores";
-import { trialApi } from "../lib/api";
-import type { TrialStatus } from "../lib/types";
 
 interface Creator {
   id: string;
@@ -15,7 +12,7 @@ interface Creator {
   handle: string;
   status: string;
   bio?: string;
-  /** Real backend influencer id — used to match against /trial/status, not for display. */
+  /** Real backend influencer id, not for display. */
   influencerId: string;
 }
 
@@ -73,19 +70,9 @@ const CREATORS: Creator[] = [
   },
 ];
 
-function formatTrialDuration(seconds: number): string {
-  if (seconds > 0 && seconds % 60 === 0) {
-    const minutes = seconds / 60;
-    return `${minutes} min free`;
-  }
-  return `${seconds}s free`;
-}
-
 export default function CreatorsPage() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
-  const { isHydrated, isAuthenticated } = useAuthStore();
-  const [trialsByInfluencerId, setTrialsByInfluencerId] = useState<Record<string, TrialStatus>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,31 +80,6 @@ export default function CreatorsPage() {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-
-  // Trial eligibility can only be checked once signed in (the endpoint requires
-  // a JWT) — unauthenticated visitors simply see no free-trial badges.
-  useEffect(() => {
-    if (!isHydrated || !isAuthenticated) return;
-    let cancelled = false;
-    trialApi
-      .getStatus()
-      .then((status) => {
-        if (cancelled) return;
-        const byId: Record<string, TrialStatus> = {};
-        if (status.enabled) {
-          for (const trial of status.trials) {
-            byId[trial.influencer_id] = trial;
-          }
-        }
-        setTrialsByInfluencerId(byId);
-      })
-      .catch(() => {
-        // Silently ignore — badges just won't show; normal paid flow is unaffected.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isHydrated, isAuthenticated]);
 
   const handleTalk = (creator: Creator) => {
     router.push(`/creators/${creator.handle}`);
@@ -156,25 +118,17 @@ export default function CreatorsPage() {
             isVisible ? "animate-fade-in-up delay-200" : "opacity-0"
           }`}
         >
-          {CREATORS.map((creator) => {
-            const trial = trialsByInfluencerId[creator.influencerId];
-            return (
-              <div key={creator.id} className="relative w-full max-w-[400px] flex justify-center">
-                {trial?.available && (
-                  <span className="absolute top-3 left-3 z-20 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-black shadow-[0_4px_16px_rgba(16,185,129,0.4)]">
-                    {formatTrialDuration(trial.duration_seconds)}
-                  </span>
-                )}
-                <ProfileCard
-                  name={creator.name}
-                  title={creator.role}
-                  avatarUrl={creator.imageUrl}
-                  behindGlowColor="rgba(97, 37, 216, 0.5)"
-                  onContactClick={() => handleTalk(creator)}
-                />
-              </div>
-            );
-          })}
+          {CREATORS.map((creator) => (
+            <div key={creator.id} className="relative w-full max-w-[400px] flex justify-center">
+              <ProfileCard
+                name={creator.name}
+                title={creator.role}
+                avatarUrl={creator.imageUrl}
+                behindGlowColor="rgba(97, 37, 216, 0.5)"
+                onContactClick={() => handleTalk(creator)}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </main>
