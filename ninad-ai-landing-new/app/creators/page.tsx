@@ -49,16 +49,6 @@ const CREATORS: Creator[] = [
   //   influencerId: "beauty_khan",
   // },
   {
-    id: "sona-dey-001",
-    name: "Sona Dey",
-    role: "Model & Influencer",
-    imageUrl: "/assets/creators/sona.png",
-    handle: "sona-dey",
-    status: "Active",
-    bio: "A model and influencer known for bold, expressive visuals and a magnetic presence.",
-    influencerId: "sona_dey",
-  },
-  {
     id: "ganesha-001",
     name: "Lord Ganesha",
     role: "Guide & Guardian",

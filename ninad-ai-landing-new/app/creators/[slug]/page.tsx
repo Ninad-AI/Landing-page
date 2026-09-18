@@ -70,13 +70,6 @@ const CREATORS_DATA: Record<
   //   influencerId: "beauty_khan",
   //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   // },
-  "sona-dey": {
-    name: "Sona Dey",
-    image: "/assets/creators/sona.png",
-    role: "Model & Influencer",
-    influencerId: "sona_dey",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
   "ganesha": {
     name: "Lord Ganesha",
     image: "/assets/creators/ganesha.jpg",
