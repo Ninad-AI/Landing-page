@@ -98,6 +98,14 @@ interface PaymentModalProps {
    * array every render would defeat it.
    */
   allowedDurations?: readonly AllowedDurationMinutes[];
+  /**
+   * Per-creator price overrides in rupees, keyed by duration, for creators the
+   * backend prices differently from the shared table above. Must mirror what
+   * the backend charges THIS influencer: Razorpay is billed the server's
+   * `order.amount`, so an override the backend doesn't share quotes a price the
+   * user will not actually pay. Pass a module-level constant — it feeds a memo.
+   */
+  priceOverrides?: Readonly<Partial<Record<AllowedDurationMinutes, number>>>;
   feedbackMode?: boolean;
   onSubmitFeedback?: (stars: FeedbackStars, comment?: string) => Promise<void>;
   isSubmittingFeedback?: boolean;
@@ -118,6 +126,7 @@ export default function PaymentModal({
   onAutoStartConsumed,
   onSelectPaidPlan,
   allowedDurations,
+  priceOverrides,
   feedbackMode = false,
   onSubmitFeedback,
   isSubmittingFeedback = false,
@@ -136,12 +145,24 @@ export default function PaymentModal({
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
   const plans = useMemo(() => {
-    if (!allowedDurations?.length) return DURATION_PLANS;
-    const filtered = DURATION_PLANS.filter((plan) => allowedDurations.includes(plan.minutes));
-    // A restriction that matches nothing is a misconfiguration — fall back to
-    // the full table rather than rendering a modal with nothing to buy.
-    return filtered.length > 0 ? filtered : DURATION_PLANS;
-  }, [allowedDurations]);
+    let list = DURATION_PLANS;
+
+    if (allowedDurations?.length) {
+      const filtered = DURATION_PLANS.filter((plan) => allowedDurations.includes(plan.minutes));
+      // A restriction that matches nothing is a misconfiguration — fall back to
+      // the full table rather than rendering a modal with nothing to buy.
+      if (filtered.length > 0) list = filtered;
+    }
+
+    if (priceOverrides) {
+      list = list.map((plan) => {
+        const override = priceOverrides[plan.minutes];
+        return override === undefined ? plan : { ...plan, price: override };
+      });
+    }
+
+    return list;
+  }, [allowedDurations, priceOverrides]);
 
   const isSinglePlan = plans.length === 1;
 

@@ -33,6 +33,13 @@ const CREATORS_DATA: Record<
      */
     offeredDurations?: readonly AllowedDurationMinutes[];
     /**
+     * Price in rupees, keyed by duration, for creators the backend prices
+     * differently from the shared table in PaymentModal. Must match what the
+     * backend charges this influencer — the server's amount is what Razorpay
+     * actually bills. Must stay a stable reference — it feeds a memo.
+     */
+    priceOverrides?: Readonly<Partial<Record<AllowedDurationMinutes, number>>>;
+    /**
      * When true, a verified payment does NOT drop the user straight into the
      * call — it parks a ready-to-start booking and waits for them to press
      * Start Session, so the paid clock can't start ticking while they're still
@@ -77,6 +84,7 @@ const CREATORS_DATA: Record<
     influencerId: "ganeshji",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     offeredDurations: [3],
+    priceOverrides: { 3: 50 },
     requireManualStart: true,
   },
 };
@@ -92,6 +100,7 @@ export default function CreatorProfilePage() {
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const offeredDurations = creatorData?.offeredDurations;
+  const priceOverrides = creatorData?.priceOverrides;
   const requireManualStart = creatorData?.requireManualStart ?? false;
 
   /* ── Auth store ── */
@@ -433,6 +442,7 @@ export default function CreatorProfilePage() {
         onPaymentVerified={handlePaymentVerified}
         onRequireAuth={isHydrated && !isAuthenticated ? handleRequireAuthForPayment : undefined}
         allowedDurations={offeredDurations}
+        priceOverrides={priceOverrides}
         autoStartDuration={autoStartDuration}
         onAutoStartConsumed={() => setAutoStartDuration(null)}
         feedbackMode={showFeedback}
