@@ -20,7 +20,7 @@ export const RAZORPAY_PUBLIC_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim
 // Secondary backend for select creators' voice sessions (e.g. api-ninad-2.duckdns.org)
 const NINAD_2_API_BASE = process.env.NEXT_PUBLIC_NINAD_2_API_URL?.trim()?.replace(/\/$/, '') || '';
 // NOTE: Beauty Khan temporarily removed from the frontend. Re-enable by uncommenting 'beauty_khan' below.
-const NINAD_2_CREATOR_INFLUENCER_IDS = new Set([/* 'beauty_khan', */ 'sona_dey']);
+const NINAD_2_CREATOR_INFLUENCER_IDS = new Set([/* 'beauty_khan', */]);
 
 export function buildVoiceWsUrl(influencerId: string): string {
   return `${API_WS_BASE}/ws/voice?influencer_id=${encodeURIComponent(influencerId)}`;

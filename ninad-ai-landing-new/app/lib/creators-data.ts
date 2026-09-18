@@ -62,17 +62,6 @@ export const CREATORS: CreatorEntry[] = [
   //   category: "Art",
   //   status: "LIVE",
   // },
-  {
-    slug: "sona-dey",
-    name: "Sona Dey",
-    role: "Model & Influencer",
-    image: "/assets/creators/sona.png",
-    influencerId: "sona_dey",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-    category: "Modeling",
-    status: "LIVE",
-    bio: "A model and influencer known for bold, expressive visuals and a magnetic presence.",
-  },
 ];
 
 const CREATORS_BY_SLUG: Record<string, CreatorEntry> = Object.fromEntries(
