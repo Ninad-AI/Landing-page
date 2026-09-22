@@ -12,7 +12,7 @@ import PaymentModal from "../../components/payment/PaymentModal";
 import NdModal from "../../components/ui/NdModal";
 import { toast } from "sonner";
 import { authApi, paymentApi, feedbackApi } from "../../lib/api";
-import { buildCreatorVoiceWsUrl } from "../../lib/config";
+import { buildVoiceWsUrl } from "../../lib/config";
 import { openAppWebSocket } from "../../lib/websocket";
 import { getCreatorBySlug } from "../../lib/creators-data";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
@@ -138,7 +138,7 @@ export default function CreatorProfilePage() {
     setIsSpeaking(false);
     setCallPhase("connecting");
 
-    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);

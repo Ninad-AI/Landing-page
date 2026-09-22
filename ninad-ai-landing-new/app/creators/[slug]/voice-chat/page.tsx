@@ -7,7 +7,7 @@ import ProtectedRoute from "../../../components/ProtectedRoute";
 import CreatorVoiceSessionUI from "../../../components/CreatorVoiceSessionUI";
 import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUtils";
 import { PlayoutBuffer } from "../../../lib/playbackUtils";
-import { buildCreatorVoiceWsUrl } from "../../../lib/config";
+import { buildVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
 import { getCreatorBySlug } from "../../../lib/creators-data";
 
@@ -219,7 +219,7 @@ function VoiceChatContent() {
 
     let disposed = false;
 
-    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);
