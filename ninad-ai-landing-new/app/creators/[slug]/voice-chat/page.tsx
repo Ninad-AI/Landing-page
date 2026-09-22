@@ -8,7 +8,7 @@ import CreatorVoiceSessionUI from "../../../components/CreatorVoiceSessionUI";
 import Aurora from "../../../components/ui/Aurora";
 import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUtils";
 import { PlayoutBuffer } from "../../../lib/playbackUtils";
-import { buildCreatorVoiceWsUrl } from "../../../lib/config";
+import { buildVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
@@ -367,7 +367,7 @@ function VoiceChatContent() {
     // that here lets onclose tell an expected close apart from a real drop.
     let errorMessageReceived = false;
 
-    const wsUrl = buildCreatorVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);
