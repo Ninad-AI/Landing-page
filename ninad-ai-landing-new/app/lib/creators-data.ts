@@ -40,27 +40,6 @@ export const CREATORS: CreatorEntry[] = [
     status: "LIVE",
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
   },
-  // NOTE: Anveshi Jain temporarily removed from the frontend. Uncomment to re-enable.
-  // {
-  //   slug: "anveshi-jain",
-  //   name: "Anveshi Jain",
-  //   role: "Actress & Influencer",
-  //   image: "/assets/creators/anveshi.jpg",
-  //   influencerId: "anveshi_jain",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  //   category: "Film",
-  //   status: "LIVE",
-  // },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // {
-  //   slug: "beauty-khan",
-  //   name: "Beauty Khan",
-  //   role: "Artist and Creator",
-  //   image: "/assets/creators/beauty-khan.jpg",
-  //   influencerId: "beauty_khan",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  //   category: "Art",
-  //   status: "LIVE",
   // },
 ];
 
