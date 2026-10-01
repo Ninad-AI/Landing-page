@@ -24,6 +24,12 @@ const CREATORS_DATA: Record<
   {
     name: string;
     image: string;
+    /**
+     * CSS object-position for the avatar. Only needed when the subject isn't
+     * centred — e.g. a tall full-length photo, whose face would otherwise be
+     * cropped out of the small square avatar on phones.
+     */
+    imagePosition?: string;
     role: string;
     influencerId: string;
     preferredProvider: string;
@@ -72,6 +78,15 @@ const CREATORS_DATA: Record<
     priceOverrides: { 3: 50 },
     requireManualStart: true,
   },
+  // No price or duration overrides: she uses the standard price ladder.
+  "muskan-mittal": {
+    name: "Muskan Mittal",
+    image: "/assets/creators/muskan.png",
+    imagePosition: "center top",
+    role: "Yoga Journey with Muskan",
+    influencerId: "muskan_mittal",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorProfilePage() {
@@ -81,6 +96,7 @@ export default function CreatorProfilePage() {
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
+  const creatorImagePosition = creatorData?.imagePosition;
   const creatorRole = creatorData?.role ?? "Creator";
   const creatorInfluencerId = creatorData?.influencerId ?? "";
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
@@ -341,7 +357,7 @@ export default function CreatorProfilePage() {
               className="relative w-full h-full overflow-hidden shadow-2xl hover:scale-[1.02] transition-transform duration-700 will-change-transform"
               style={{ borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%" }}
             >
-              <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
+              <Image src={creatorImage} alt={creatorName} fill className="object-cover scale-110" style={creatorImagePosition ? { objectPosition: creatorImagePosition } : undefined} priority quality={100} sizes="(max-width: 640px) 280px, (max-width: 768px) 380px, 500px" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
             </div>
             <div className="absolute -top-4 -right-4 sm:-top-12 sm:-right-12 w-10 h-10 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md border border-white/20 z-20 animate-float" style={{ borderRadius: "50%" }} />

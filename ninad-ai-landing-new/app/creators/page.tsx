@@ -47,6 +47,16 @@ const CREATORS: Creator[] = [
     bio: "A divine guide and guardian offering wisdom, blessings, and protection for life's new beginnings.",
     influencerId: "ganeshji",
   },
+  {
+    id: "muskan-001",
+    name: "Muskan Mittal",
+    role: "Yoga Journey with Muskan",
+    imageUrl: "/assets/creators/muskan.png",
+    handle: "muskan-mittal",
+    status: "Active",
+    bio: "Guidance on yoga asanas, breathing and everyday routines.",
+    influencerId: "muskan_mittal",
+  },
 ];
 
 export default function CreatorsPage() {

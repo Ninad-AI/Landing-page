@@ -10,6 +10,14 @@ import { startStreamingMic, type StreamingMicHandle } from "../../../lib/audioUt
 import { PlayoutBuffer } from "../../../lib/playbackUtils";
 import { buildVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
+import { classifyPreSessionError, type PreSessionErrorKind } from "../../../lib/callErrors";
+import {
+  ENGLISH_AND_HINDI,
+  offersLanguageChoice,
+  readActiveLanguage,
+  resolveCallLanguage,
+  type CreatorLanguages,
+} from "../../../lib/creatorLanguages";
 
 const DEFAULT_PREFERRED_PROVIDER = "deepgram";
 
@@ -27,6 +35,20 @@ const CREATORS_DATA: Record<
     role: string;
     influencerId: string;
     preferredProvider: string;
+    /**
+     * Languages the creator speaks, for creators that offer more than one. A
+     * `?language=` URL param that matches one of these is sent as `language`,
+     * and the caller gets a short toast when the server switches language mid-
+     * call. Omit for single-language creators.
+     */
+    languages?: CreatorLanguages;
+    /**
+     * Opt-in. Shows a dedicated "busy" screen when the creator's own call cap is
+     * hit, and an "unavailable" screen when the backend doesn't know the creator,
+     * instead of a toast and a bounce back to the profile page. Off, those errors
+     * keep the original handling.
+     */
+    friendlyErrorScreens?: boolean;
     pushToTalk?: boolean;
     /**
      * When true, starting a turn while the agent is still talking cuts the
@@ -59,6 +81,15 @@ const CREATORS_DATA: Record<
     pushToTalk: true,
     allowInterruption: true,
   },
+  "muskan-mittal": {
+    name: "Muskan Mittal",
+    image: "/assets/creators/muskan.png",
+    role: "Yoga Journey with Muskan",
+    influencerId: "muskan_mittal",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    languages: ENGLISH_AND_HINDI,
+    friendlyErrorScreens: true,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
@@ -82,7 +113,14 @@ function VoiceChatContent() {
   const preferredProvider = creatorData?.preferredProvider ?? DEFAULT_PREFERRED_PROVIDER;
   const isPushToTalk = creatorData?.pushToTalk ?? false;
   const canInterrupt = creatorData?.allowInterruption ?? false;
+  const friendlyErrorScreens = creatorData?.friendlyErrorScreens ?? false;
   const bookingId = searchParams.get("booking_id");
+  // Set only for creators that offer a language choice. `callLanguage` is the
+  // `?language=` URL param, kept only if it is one of the creator's own
+  // options; undefined means "send none" and the server uses its default.
+  const configuredLanguages = creatorData?.languages;
+  const languageChoice = offersLanguageChoice(configuredLanguages) ? configuredLanguages : undefined;
+  const callLanguage = resolveCallLanguage(languageChoice, searchParams.get("language"));
 
   const durationValue = searchParams.get("duration");
   const durationMinutes = useMemo(() => {
@@ -112,7 +150,13 @@ function VoiceChatContent() {
   // A failure the server reported over the socket (as opposed to a silent
   // drop). `retryable` comes straight from the server — on a retryable
   // failure it has already refunded the trial, so retrying costs nothing.
-  const [connectionError, setConnectionError] = useState<{ message: string; retryable: boolean } | null>(null);
+  // `kind` is set only for the pre-session failures that get their own copy
+  // (see lib/callErrors.ts); those never carry the server's `retryable` flag.
+  const [connectionError, setConnectionError] = useState<{
+    message: string;
+    retryable: boolean;
+    kind?: PreSessionErrorKind;
+  } | null>(null);
   // Bumping this re-runs the socket effect — the only way a reconnect ever
   // happens. There is deliberately no automatic reconnect loop.
   const [connectionAttempt, setConnectionAttempt] = useState(0);
@@ -371,6 +415,9 @@ function VoiceChatContent() {
               token: authToken,
               influencer_id: creatorInfluencerId,
               preferred_provider: preferredProvider,
+              // Only creators that offer a language choice send one, and only a
+              // code from their own list. Left out, the server uses its default.
+              ...(callLanguage ? { language: callLanguage } : {}),
             })
           );
         } catch {
@@ -459,6 +506,15 @@ function VoiceChatContent() {
             ttsActiveRef.current = false;
             dropAgentAudioRef.current = false;
 
+            if (languageChoice && msg.language_honoured === false && callLanguage) {
+              // The server started in a different language than the one asked for;
+              // say so rather than leave the caller wondering why.
+              const language = readActiveLanguage(msg, languageChoice);
+              if (language && language.code !== callLanguage) {
+                toast.info(`Continuing in ${language.name}.`);
+              }
+            }
+
             // is_trial / trial_duration_seconds are the sole authority on
             // whether — and for how long — this session is a trial. The
             // duration passed in the URL was only ever a rough estimate;
@@ -483,6 +539,18 @@ function VoiceChatContent() {
           if (msg.type === "timeout") {
             toast.info("Session time is up.");
             handleEndCall(true);
+            return;
+          }
+
+          if (msg.type === "language_switched") {
+            // Following the caller's language happens server-side — this only
+            // tells the caller it happened, and never asks them to change anything.
+            if (languageChoice) {
+              const language = readActiveLanguage(msg, languageChoice);
+              if (language && msg.previous_language !== language.code) {
+                toast.info(`Switched to ${language.name}`, { duration: 2500 });
+              }
+            }
             return;
           }
 
@@ -517,6 +585,24 @@ function VoiceChatContent() {
             errorMessageReceived = true;
             setAwaitingResponse(false);
             const errMsg: string = msg.error || msg.message || "An error occurred.";
+
+            // For creators that opt in, two failures before a session starts get
+            // their own screen instead of a toast and a bounce: the creator's call
+            // cap and a creator the backend doesn't know. The server sends no code
+            // for them, so they are recognised by wording (lib/callErrors.ts) —
+            // narrowly, so every other error, including server-flagged retryable
+            // ones, falls through to the handling below unchanged.
+            const preSessionError =
+              friendlyErrorScreens && !initAckReceived && msg.retryable !== true
+                ? classifyPreSessionError(errMsg)
+                : null;
+            if (preSessionError) {
+              stopSessionResources();
+              setIsSpeaking(false);
+              setCallPhase("connecting");
+              setConnectionError({ message: errMsg, retryable: false, kind: preSessionError });
+              return;
+            }
 
             // Branch on the `retryable` flag and on whether the session had
             // already been accepted — never on the wording of the message.
@@ -646,7 +732,7 @@ function VoiceChatContent() {
       stopSessionResources();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creatorInfluencerId, durationMinutes, preferredProvider, isPushToTalk, canInterrupt, interruptAgentPlayback, processBinaryChunk, stopSessionResources, connectionAttempt, connectionError]);
+  }, [creatorInfluencerId, durationMinutes, preferredProvider, callLanguage, languageChoice, friendlyErrorScreens, isPushToTalk, canInterrupt, interruptAgentPlayback, processBinaryChunk, stopSessionResources, connectionAttempt, connectionError]);
 
   useEffect(() => {
     if (!durationMinutes || !sessionStorageKey || connectionError) return;
@@ -822,6 +908,27 @@ function VoiceChatContent() {
   }
 
   if (connectionError) {
+    // The two pre-session kinds carry their own copy (and never echo the server's
+    // wording, which names the creator's internal id or cap). Anything else keeps
+    // the original retryable / unexpected-end copy.
+    const { kind } = connectionError;
+    const errorTitle =
+      kind === "creator-busy"
+        ? `${creatorName} is busy right now`
+        : kind === "creator-unavailable"
+        ? `${creatorName} isn't available right now`
+        : connectionError.retryable
+        ? `Couldn't connect to ${creatorName}`
+        : "Something went wrong";
+    const errorBody =
+      kind === "creator-busy"
+        ? "Too many calls are in progress. Please try again in a moment."
+        : kind === "creator-unavailable"
+        ? "Please try again in a little while."
+        : connectionError.retryable
+        ? connectionError.message
+        : "The session ended unexpectedly. You can try again.";
+
     return (
       <main className="relative min-h-screen overflow-hidden bg-[#0F0F13] text-white">
         <div className="absolute inset-0 pointer-events-none">
@@ -830,14 +937,8 @@ function VoiceChatContent() {
 
         <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
           <div className="max-w-md w-full rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl p-8 text-center">
-            <h1 className="text-2xl font-bold">
-              {connectionError.retryable ? `Couldn't connect to ${creatorName}` : "Something went wrong"}
-            </h1>
-            <p className="mt-3 text-sm text-white/60">
-              {connectionError.retryable
-                ? connectionError.message
-                : "The session ended unexpectedly. You can try again."}
-            </p>
+            <h1 className="text-2xl font-bold">{errorTitle}</h1>
+            <p className="mt-3 text-sm text-white/60">{errorBody}</p>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
               <button
