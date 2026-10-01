@@ -62,21 +62,6 @@ const CREATORS_DATA: Record<
     influencerId: "aneri",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "anveshi-jain": {
-    name: "Anveshi Jain",
-    image: "/assets/creators/anveshi.jpg",
-    role: "Actress & Influencer",
-    influencerId: "anveshi_jain",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // "beauty-khan": {
-  //   name: "Beauty Khan",
-  //   image: "/assets/creators/beauty-khan.jpg",
-  //   role: "Artist and Creator",
-  //   influencerId: "beauty_khan",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  // },
   "ganesha": {
     name: "Lord Ganesha",
     image: "/assets/creators/ganesha.jpg",

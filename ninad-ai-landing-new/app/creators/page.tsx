@@ -37,17 +37,6 @@ const CREATORS: Creator[] = [
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
     influencerId: "aneri",
   },
-  // NOTE: Beauty Khan temporarily removed from the frontend. Uncomment to re-enable.
-  // {
-  //   id: "beauty-khan-001",
-  //   name: "Beauty Khan",
-  //   role: "Artist and Creator",
-  //   imageUrl: "/assets/creators/beauty-khan.jpg",
-  //   handle: "beauty-khan",
-  //   status: "Active",
-  //   bio: "An imaginative artist and creator bringing bold ideas to life through striking visuals and expressive storytelling.",
-  //   influencerId: "beauty_khan",
-  // },
   {
     id: "ganesha-001",
     name: "Lord Ganesha",
