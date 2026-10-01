@@ -40,7 +40,6 @@ export const CREATORS: CreatorEntry[] = [
     status: "LIVE",
     bio: "Captivating audiences with her stellar performances and magnetic screen presence.",
   },
-  // },
 ];
 
 const CREATORS_BY_SLUG: Record<string, CreatorEntry> = Object.fromEntries(
