@@ -90,6 +90,13 @@ const CREATORS_DATA: Record<
     languages: ENGLISH_AND_HINDI,
     friendlyErrorScreens: true,
   },
+  "bhagyashree-mote": {
+    name: "Bhagyashree Mote",
+    image: "/assets/creators/bhagyashree-mote.jpg",
+    role: "Actress and Filmmaker",
+    influencerId: "bhagyashree_mote",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

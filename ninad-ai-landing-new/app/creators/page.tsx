@@ -57,6 +57,15 @@ const CREATORS: Creator[] = [
     bio: "Guidance on yoga asanas, breathing and everyday routines.",
     influencerId: "muskan_mittal",
   },
+  {
+    id: "bhagyashree-mote-001",
+    name: "Bhagyashree Mote",
+    role: "Actress and Filmmaker",
+    imageUrl: "/assets/creators/bhagyashree-mote.jpg",
+    handle: "bhagyashree-mote",
+    status: "Active",
+    influencerId: "bhagyashree_mote",
+  },
 ];
 
 export default function CreatorsPage() {

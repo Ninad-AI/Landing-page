@@ -87,6 +87,13 @@ const CREATORS_DATA: Record<
     influencerId: "muskan_mittal",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "bhagyashree-mote": {
+    name: "Bhagyashree Mote",
+    image: "/assets/creators/bhagyashree-mote.jpg",
+    role: "Actress and Filmmaker",
+    influencerId: "bhagyashree_mote",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorProfilePage() {
@@ -95,6 +102,7 @@ export default function CreatorProfilePage() {
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const keepNameWordsTogether = slug === "bhagyashree-mote";
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
   const creatorImagePosition = creatorData?.imagePosition;
   const creatorRole = creatorData?.role ?? "Creator";
@@ -331,9 +339,11 @@ export default function CreatorProfilePage() {
             <h2 className="text-[11px] sm:text-sm md:text-base text-rose-300 font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-3 sm:mb-6 animate-fade-in-up">
               • {creatorRole}
             </h2>
-            <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter leading-[1.1] mix-blend-exclusion">
-              <span className="block">{creatorName.split(" ")[0]}</span>
-              <span className="block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50">
+            <h1 className={`${keepNameWordsTogether ? "text-[clamp(2rem,6vw,4.5rem)]" : "text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl"} font-black tracking-tighter leading-[1.1] mix-blend-exclusion`}>
+              <span className={`block ${keepNameWordsTogether ? "whitespace-nowrap" : ""}`}>
+                {creatorName.split(" ")[0]}
+              </span>
+              <span className={`block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 ${keepNameWordsTogether ? "whitespace-nowrap" : ""}`}>
                 {creatorName.split(" ").slice(1).join(" ")}.
               </span>
             </h1>
