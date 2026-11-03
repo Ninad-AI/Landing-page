@@ -85,7 +85,16 @@ const CREATORS_DATA: Record<
     influencerId: "bhagyashree_mote",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "swaroop-bevara": {
+    name: "Swaroop",
+    image: "/assets/creators/swaroop.jpg",
+    role: "Creator and Influencer",
+    influencerId: "swaroop_bevara",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
+
+const NAME_GRADIENT = "text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50";
 
 export default function CreatorProfilePage() {
   const router = useRouter();
@@ -93,7 +102,9 @@ export default function CreatorProfilePage() {
   const slug = typeof params.slug === "string" ? params.slug : "creator";
   const creatorData = CREATORS_DATA[slug];
   const creatorName = creatorData?.name ?? slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-  const keepNameWordsTogether = slug === "bhagyashree-mote";
+  const nameWords = creatorName.split(" ");
+  const singleWordName = nameWords.length === 1;
+  const keepNameWordsTogether = slug === "bhagyashree-mote" || singleWordName;
   const creatorImage = creatorData?.image ?? `/assets/creators/${slug}.png`;
   const creatorImagePosition = creatorData?.imagePosition;
   const creatorRole = creatorData?.role ?? "Creator";
@@ -331,12 +342,15 @@ export default function CreatorProfilePage() {
               • {creatorRole}
             </h2>
             <h1 className={`${keepNameWordsTogether ? "text-[clamp(2rem,6vw,4.5rem)]" : "text-[2rem] sm:text-5xl md:text-6xl lg:text-8xl"} font-black tracking-tighter leading-[1.1] mix-blend-exclusion`}>
-              <span className={`block ${keepNameWordsTogether ? "whitespace-nowrap" : ""}`}>
-                {creatorName.split(" ")[0]}
+              {/* w-fit so the gradient spans the text itself, not the widest line */}
+              <span className={`block ${singleWordName ? `w-fit mx-auto md:mx-0 pb-2 ${NAME_GRADIENT}` : ""} ${keepNameWordsTogether ? "whitespace-nowrap" : ""}`}>
+                {nameWords[0]}{singleWordName ? "." : ""}
               </span>
-              <span className={`block pb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 ${keepNameWordsTogether ? "whitespace-nowrap" : ""}`}>
-                {creatorName.split(" ").slice(1).join(" ")}.
-              </span>
+              {!singleWordName && (
+                <span className={`block pb-2 ${NAME_GRADIENT} ${keepNameWordsTogether ? "w-fit mx-auto md:mx-0 whitespace-nowrap" : ""}`}>
+                  {nameWords.slice(1).join(" ")}.
+                </span>
+              )}
             </h1>
 
             <div className="animate-fade-in-up mt-8 shrink-0 hidden md:block">

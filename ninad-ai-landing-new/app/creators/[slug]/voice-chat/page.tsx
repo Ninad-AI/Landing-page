@@ -87,6 +87,13 @@ const CREATORS_DATA: Record<
     influencerId: "bhagyashree_mote",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "swaroop-bevara": {
+    name: "Swaroop",
+    image: "/assets/creators/swaroop.jpg",
+    role: "Creator and Influencer",
+    influencerId: "swaroop_bevara",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

@@ -56,6 +56,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     influencerId: "bhagyashree_mote",
   },
+  {
+    id: "swaroop-bevara-001",
+    name: "Swaroop",
+    role: "Creator and Influencer",
+    imageUrl: "/assets/creators/swaroop.jpg",
+    handle: "swaroop-bevara",
+    status: "Active",
+    influencerId: "swaroop_bevara",
+  },
 ];
 
 export default function CreatorsPage() {
