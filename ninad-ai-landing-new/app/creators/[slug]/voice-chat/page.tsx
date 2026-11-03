@@ -12,7 +12,6 @@ import { buildVoiceWsUrl } from "../../../lib/config";
 import { openAppWebSocket } from "../../../lib/websocket";
 import { classifyPreSessionError, type PreSessionErrorKind } from "../../../lib/callErrors";
 import {
-  ENGLISH_AND_HINDI,
   offersLanguageChoice,
   readActiveLanguage,
   resolveCallLanguage,
@@ -80,15 +79,6 @@ const CREATORS_DATA: Record<
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     pushToTalk: true,
     allowInterruption: true,
-  },
-  "muskan-mittal": {
-    name: "Muskan Mittal",
-    image: "/assets/creators/muskan.png",
-    role: "Yoga Journey with Muskan",
-    influencerId: "muskan_mittal",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-    languages: ENGLISH_AND_HINDI,
-    friendlyErrorScreens: true,
   },
   "bhagyashree-mote": {
     name: "Bhagyashree Mote",

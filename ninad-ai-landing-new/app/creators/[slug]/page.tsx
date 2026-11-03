@@ -78,15 +78,6 @@ const CREATORS_DATA: Record<
     priceOverrides: { 3: 50 },
     requireManualStart: true,
   },
-  // No price or duration overrides: she uses the standard price ladder.
-  "muskan-mittal": {
-    name: "Muskan Mittal",
-    image: "/assets/creators/muskan.png",
-    imagePosition: "center top",
-    role: "Yoga Journey with Muskan",
-    influencerId: "muskan_mittal",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
   "bhagyashree-mote": {
     name: "Bhagyashree Mote",
     image: "/assets/creators/bhagyashree-mote.jpg",
