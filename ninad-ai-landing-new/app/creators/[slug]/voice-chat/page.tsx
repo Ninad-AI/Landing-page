@@ -94,6 +94,13 @@ const CREATORS_DATA: Record<
     influencerId: "swaroop_bevara",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "pareen-lathia": {
+    name: "Pareen Lathia",
+    image: "/assets/creators/pareen.jpg",
+    role: "Founder Community Lead",
+    influencerId: "pareen_lathia",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {
