@@ -65,15 +65,6 @@ const CREATORS: Creator[] = [
     status: "Active",
     influencerId: "swaroop_bevara",
   },
-  {
-    id: "pareen-lathia-001",
-    name: "Pareen Lathia",
-    role: "Founder Community Lead",
-    imageUrl: "/assets/creators/pareen.jpg",
-    handle: "pareen-lathia",
-    status: "Active",
-    influencerId: "pareen_lathia",
-  },
 ];
 
 export default function CreatorsPage() {
