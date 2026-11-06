@@ -108,6 +108,13 @@ const CREATORS_DATA: Record<
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "pawan-kumar": {
+    name: "Pawan Kumar",
+    image: "/assets/creators/pavan.png",
+    role: "Influencer & Actor",
+    influencerId: "pawan_kumar",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

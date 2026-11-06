@@ -83,6 +83,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     influencerId: "sreemukhi",
   },
+  {
+    id: "pawan-kumar-001",
+    name: "Pawan Kumar",
+    role: "Influencer & Actor",
+    imageUrl: "/assets/creators/pavan.png",
+    handle: "pawan-kumar",
+    status: "Active",
+    influencerId: "pawan_kumar",
+  },
 ];
 
 export default function CreatorsPage() {

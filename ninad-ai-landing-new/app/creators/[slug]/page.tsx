@@ -106,6 +106,13 @@ const CREATORS_DATA: Record<
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "pawan-kumar": {
+    name: "Pawan Kumar",
+    image: "/assets/creators/pavan.png",
+    role: "Influencer & Actor",
+    influencerId: "pawan_kumar",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 const NAME_GRADIENT = "text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50";
