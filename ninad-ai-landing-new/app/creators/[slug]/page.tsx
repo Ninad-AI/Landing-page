@@ -52,6 +52,11 @@ const CREATORS_DATA: Record<
      * getting settled.
      */
     requireManualStart?: boolean;
+    /**
+     * Shows a "persona in development" note under the Start Session button,
+     * for personas whose voice isn't live yet.
+     */
+    inDevelopment?: boolean;
   }
 > = {
   "nirupam": {
@@ -98,6 +103,7 @@ const CREATORS_DATA: Record<
     role: "Creator and Influencer",
     influencerId: "sri_satya",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    inDevelopment: true,
   },
   sreemukhi: {
     name: "Sreemukhi",
@@ -105,6 +111,7 @@ const CREATORS_DATA: Record<
     role: "Creator and Influencer",
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    inDevelopment: true,
   },
   "pawan-kumar": {
     name: "Pawan Kumar",
@@ -112,6 +119,7 @@ const CREATORS_DATA: Record<
     role: "Influencer & Actor",
     influencerId: "pawan_kumar",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    inDevelopment: true,
   },
 };
 
@@ -134,6 +142,7 @@ export default function CreatorProfilePage() {
   const offeredDurations = creatorData?.offeredDurations;
   const priceOverrides = creatorData?.priceOverrides;
   const requireManualStart = creatorData?.requireManualStart ?? false;
+  const inDevelopment = creatorData?.inDevelopment ?? false;
 
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
@@ -348,6 +357,16 @@ export default function CreatorProfilePage() {
     );
   };
 
+  // Rendered under the CTA in both the desktop and mobile layouts.
+  const renderInDevelopmentNote = (className: string) => {
+    if (!inDevelopment) return null;
+    return (
+      <p className={`${className} text-xs leading-snug text-white/50`}>
+        Persona in development, so it won&apos;t work right now.
+      </p>
+    );
+  };
+
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#0F0F13] text-white font-sans selection:bg-rose-500/30">
       {/* Background Aurora */}
@@ -384,6 +403,7 @@ export default function CreatorProfilePage() {
                   </svg>
                 </span>
               </button>
+              {renderInDevelopmentNote("mt-3 max-w-[220px]")}
             </div>
           </div>
 
@@ -408,6 +428,7 @@ export default function CreatorProfilePage() {
                 <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
               </svg>
             </button>
+            {renderInDevelopmentNote("max-w-[240px] text-center")}
           </div>
         </div>
       </div>
