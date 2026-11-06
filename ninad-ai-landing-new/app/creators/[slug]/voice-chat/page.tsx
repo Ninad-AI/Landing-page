@@ -94,6 +94,13 @@ const CREATORS_DATA: Record<
     influencerId: "swaroop_bevara",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  "sri-satya": {
+    name: "Sri Satya",
+    image: "/assets/creators/sri_satya.jpg",
+    role: "Creator and Influencer",
+    influencerId: "sri_satya",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

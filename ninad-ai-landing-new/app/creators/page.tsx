@@ -65,6 +65,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     influencerId: "swaroop_bevara",
   },
+  {
+    id: "sri-satya-001",
+    name: "Sri Satya",
+    role: "Creator and Influencer",
+    imageUrl: "/assets/creators/sri_satya.jpg",
+    handle: "sri-satya",
+    status: "Active",
+    influencerId: "sri_satya",
+  },
 ];
 
 export default function CreatorsPage() {
