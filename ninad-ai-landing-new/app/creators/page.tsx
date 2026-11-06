@@ -74,6 +74,15 @@ const CREATORS: Creator[] = [
     status: "Active",
     influencerId: "sri_satya",
   },
+  {
+    id: "sreemukhi-001",
+    name: "Sreemukhi",
+    role: "Creator and Influencer",
+    imageUrl: "/assets/creators/sreemukhi.jpg",
+    handle: "sreemukhi",
+    status: "Active",
+    influencerId: "sreemukhi",
+  },
 ];
 
 export default function CreatorsPage() {

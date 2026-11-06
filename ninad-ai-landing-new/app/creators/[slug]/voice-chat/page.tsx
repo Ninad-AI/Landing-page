@@ -101,6 +101,13 @@ const CREATORS_DATA: Record<
     influencerId: "sri_satya",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  sreemukhi: {
+    name: "Sreemukhi",
+    image: "/assets/creators/sreemukhi.jpg",
+    role: "Creator and Influencer",
+    influencerId: "sreemukhi",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 export default function CreatorVoiceChatPage() {

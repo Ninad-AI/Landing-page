@@ -99,6 +99,13 @@ const CREATORS_DATA: Record<
     influencerId: "sri_satya",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
+  sreemukhi: {
+    name: "Sreemukhi",
+    image: "/assets/creators/sreemukhi.jpg",
+    role: "Creator and Influencer",
+    influencerId: "sreemukhi",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  },
 };
 
 const NAME_GRADIENT = "text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50";
