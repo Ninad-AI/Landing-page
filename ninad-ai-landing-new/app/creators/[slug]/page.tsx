@@ -9,7 +9,7 @@ import PaymentModal from "../../components/payment/PaymentModal";
 import IntakeQuestionnaireModal from "../../components/intake/IntakeQuestionnaireModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
-import { authApi, paymentApi, feedbackApi } from "../../lib/api";
+import { authApi, paymentApi, feedbackApi, intakeApi } from "../../lib/api";
 import type { AllowedDurationMinutes, FeedbackStars } from "../../lib/types";
 
 /* ── Flow: idle → duration → auth (if needed); a verified session
@@ -227,17 +227,42 @@ export default function CreatorProfilePage() {
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
+  /**
+   * For creators with an intake questionnaire, checks whether the user has
+   * ALREADY submitted their intake responses. If already filled once, skips the
+   * modal and goes straight into the call; otherwise presents the form.
+   */
+  const proceedToSessionWithIntakeCheck = async (
+    durationMinutes: AllowedDurationMinutes,
+    bookingId?: string
+  ) => {
+    if (!hasIntakeQuestionnaire) {
+      redirectToSession(durationMinutes, bookingId);
+      return;
+    }
+
+    try {
+      const existing = await intakeApi.get(creatorInfluencerId, bookingId);
+      if (existing?.found && Array.isArray(existing.responses) && existing.responses.length > 0) {
+        // User has already filled it once! Proceed straight to voice call.
+        redirectToSession(durationMinutes, bookingId);
+        return;
+      }
+    } catch {
+      // If check fails, show the intake questionnaire
+    }
+
+    setIntakeBooking({ duration: durationMinutes, bookingId });
+  };
+
   const handleStartSession = async () => {
     setShowFeedback(false);
 
     // Already paid for and waiting on the user's go-ahead — this press is it.
     if (readyBooking) {
-      if (hasIntakeQuestionnaire) {
-        setIntakeBooking({ duration: readyBooking.duration, bookingId: readyBooking.bookingId });
-        setReadyBooking(null);
-        return;
-      }
-      redirectToSession(readyBooking.duration, readyBooking.bookingId);
+      const { duration, bookingId } = readyBooking;
+      setReadyBooking(null);
+      await proceedToSessionWithIntakeCheck(duration, bookingId);
       return;
     }
 
@@ -245,15 +270,8 @@ export default function CreatorProfilePage() {
       try {
         const activeBooking = await paymentApi.getActiveBooking();
         if (activeBooking) {
-          if (hasIntakeQuestionnaire) {
-            setIntakeBooking({
-              duration: (activeBooking.duration_minutes ?? 3) as AllowedDurationMinutes,
-              bookingId: activeBooking.id,
-            });
-            return;
-          }
-          redirectToSession(
-            activeBooking.duration_minutes ?? 3,
+          await proceedToSessionWithIntakeCheck(
+            (activeBooking.duration_minutes ?? 3) as AllowedDurationMinutes,
             activeBooking.id
           );
           return;
@@ -289,11 +307,7 @@ export default function CreatorProfilePage() {
 
       if (pending) {
         if (pending.bookingId) {
-          if (hasIntakeQuestionnaire) {
-            setIntakeBooking({ duration: pending.duration, bookingId: pending.bookingId });
-            return;
-          }
-          redirectToSession(pending.duration, pending.bookingId);
+          await proceedToSessionWithIntakeCheck(pending.duration, pending.bookingId);
           return;
         }
         setAutoStartDuration(pending.duration);
@@ -304,8 +318,8 @@ export default function CreatorProfilePage() {
       try {
         const activeBooking = await paymentApi.getActiveBooking();
         if (activeBooking) {
-          redirectToSession(
-            activeBooking.duration_minutes ?? 3,
+          await proceedToSessionWithIntakeCheck(
+            (activeBooking.duration_minutes ?? 3) as AllowedDurationMinutes,
             activeBooking.id
           );
           return;
@@ -329,12 +343,8 @@ export default function CreatorProfilePage() {
     toast.error("Google Sign-In was cancelled or failed. Please try again.");
   };
 
-  const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
+  const handlePaymentVerified = async (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
     if (isHydrated && isAuthenticated) {
-      if (hasIntakeQuestionnaire) {
-        setIntakeBooking({ duration: durationMinutes, bookingId });
-        return;
-      }
       if (requireManualStart) {
         // Paid, but don't dial in yet — park the booking and let the Start
         // Session button be the thing that actually opens the call.
@@ -342,7 +352,7 @@ export default function CreatorProfilePage() {
         toast.success("Payment confirmed. Press Start Session when you're ready.");
         return;
       }
-      redirectToSession(durationMinutes, bookingId);
+      await proceedToSessionWithIntakeCheck(durationMinutes, bookingId);
       return;
     }
 
