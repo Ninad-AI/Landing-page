@@ -6,6 +6,7 @@ import Image from "next/image";
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google";
 import { useAuthStore } from "../../lib/stores";
 import PaymentModal from "../../components/payment/PaymentModal";
+import IntakeQuestionnaireModal from "../../components/intake/IntakeQuestionnaireModal";
 import Aurora from "../../components/ui/Aurora";
 import { toast } from "sonner";
 import { authApi, paymentApi, feedbackApi } from "../../lib/api";
@@ -57,6 +58,10 @@ const CREATORS_DATA: Record<
      * for personas whose voice isn't live yet.
      */
     inDevelopment?: boolean;
+    /**
+     * Shows a post-payment intake questionnaire before entering the voice call.
+     */
+    hasIntakeQuestionnaire?: boolean;
   }
 > = {
   "nirupam": {
@@ -96,6 +101,7 @@ const CREATORS_DATA: Record<
     role: "Creator and Influencer",
     influencerId: "swaroop_bevara",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    hasIntakeQuestionnaire: true,
   },
   "sri-satya": {
     name: "Sri Satya",
@@ -143,6 +149,8 @@ export default function CreatorProfilePage() {
   const priceOverrides = creatorData?.priceOverrides;
   const requireManualStart = creatorData?.requireManualStart ?? false;
   const inDevelopment = creatorData?.inDevelopment ?? false;
+  const hasIntakeQuestionnaire =
+    creatorData?.hasIntakeQuestionnaire ?? (creatorInfluencerId === "swaroop_bevara");
 
   /* ── Auth store ── */
   const { isAuthenticated, isHydrated, login: authLogin, user } = useAuthStore();
@@ -154,6 +162,12 @@ export default function CreatorProfilePage() {
   /* ── Paid and waiting: set for requireManualStart creators once checkout is
      verified, cleared when the user actually starts the session. ── */
   const [readyBooking, setReadyBooking] = useState<{ duration: AllowedDurationMinutes; bookingId?: string } | null>(null);
+
+  /* ── Intake questionnaire: set when a creator requires a post-payment intake form ── */
+  const [intakeBooking, setIntakeBooking] = useState<{
+    duration: AllowedDurationMinutes;
+    bookingId?: string;
+  } | null>(null);
 
   /* ── Auth modal state ── */
   const [authLoading, setAuthLoading] = useState(false);
@@ -262,6 +276,14 @@ export default function CreatorProfilePage() {
       pendingSessionRef.current = null;
 
       if (pending) {
+        if (pending.bookingId) {
+          if (hasIntakeQuestionnaire) {
+            setIntakeBooking({ duration: pending.duration, bookingId: pending.bookingId });
+            return;
+          }
+          redirectToSession(pending.duration, pending.bookingId);
+          return;
+        }
         setAutoStartDuration(pending.duration);
         setFlowState("duration");
         return;
@@ -297,6 +319,10 @@ export default function CreatorProfilePage() {
 
   const handlePaymentVerified = (durationMinutes: AllowedDurationMinutes, bookingId?: string) => {
     if (isHydrated && isAuthenticated) {
+      if (hasIntakeQuestionnaire) {
+        setIntakeBooking({ duration: durationMinutes, bookingId });
+        return;
+      }
       if (requireManualStart) {
         // Paid, but don't dial in yet — park the booking and let the Start
         // Session button be the thing that actually opens the call.
@@ -310,6 +336,22 @@ export default function CreatorProfilePage() {
 
     pendingSessionRef.current = { duration: durationMinutes, bookingId };
     setFlowState("auth");
+  };
+
+  const handleIntakeComplete = () => {
+    if (intakeBooking) {
+      const { duration, bookingId } = intakeBooking;
+      setIntakeBooking(null);
+      redirectToSession(duration, bookingId);
+    }
+  };
+
+  const handleIntakeSkip = () => {
+    if (intakeBooking) {
+      const { duration, bookingId } = intakeBooking;
+      setIntakeBooking(null);
+      redirectToSession(duration, bookingId);
+    }
   };
 
   const handleSubmitFeedback = async (stars: FeedbackStars, feedbackComment?: string) => {
@@ -508,6 +550,17 @@ export default function CreatorProfilePage() {
         isSubmittingFeedback={isSubmittingFeedback}
         feedbackError={feedbackError}
         creatorName={creatorName}
+      />
+
+      <IntakeQuestionnaireModal
+        isOpen={intakeBooking !== null}
+        onClose={handleIntakeSkip}
+        influencerId={creatorInfluencerId}
+        creatorName={creatorName}
+        creatorImage={creatorImage}
+        bookingId={intakeBooking?.bookingId}
+        onComplete={handleIntakeComplete}
+        onSkip={handleIntakeSkip}
       />
     </main>
   );

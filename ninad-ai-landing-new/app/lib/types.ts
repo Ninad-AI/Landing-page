@@ -334,3 +334,32 @@ export interface ApiError {
   status: number;
   detail?: string;
 }
+
+// ─── Intake Questionnaire ───
+export interface IntakeResponseItem {
+  question: string;
+  answer: string;
+}
+
+export interface IntakeFormSubmitRequest {
+  influencer_id: string;
+  booking_id?: number | string;
+  responses: IntakeResponseItem[];
+}
+
+export interface IntakeFormSubmitResponse {
+  status: string;
+  message?: string;
+  id?: number | string;
+  influencer_id?: string;
+  booking_id?: number | string;
+}
+
+export interface IntakeFormGetResponse {
+  found: boolean;
+  id?: number | string;
+  influencer_id?: string;
+  booking_id?: number | string;
+  responses?: IntakeResponseItem[];
+  updated_at?: string;
+}

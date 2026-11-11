@@ -25,6 +25,9 @@ import type {
   VoiceSessionFeedbackRequest,
   VoiceSessionFeedbackResponse,
   TrialStatusResponse,
+  IntakeFormSubmitRequest,
+  IntakeFormSubmitResponse,
+  IntakeFormGetResponse,
 } from './types';
 import { API_BASE, buildVoiceWsUrl } from './config';
 
@@ -415,6 +418,19 @@ export const feedbackApi = {
 
     const response = await api.post<VoiceSessionFeedbackResponse>(FEEDBACK_PATH, payload);
     return response.data;
+  },
+};
+
+// ─── Intake Questionnaire Endpoints ───
+export const intakeApi = {
+  submit: (data: IntakeFormSubmitRequest) =>
+    api.post<IntakeFormSubmitResponse>('/intake-form', data).then((r) => r.data),
+
+  get: (influencerId: string, bookingId?: number | string) => {
+    const query = bookingId != null ? `?booking_id=${encodeURIComponent(bookingId)}` : '';
+    return api
+      .get<IntakeFormGetResponse>(`/intake-form/${encodeURIComponent(influencerId)}${query}`)
+      .then((r) => r.data);
   },
 };
 
