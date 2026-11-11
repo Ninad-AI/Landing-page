@@ -232,6 +232,11 @@ export default function CreatorProfilePage() {
 
     // Already paid for and waiting on the user's go-ahead — this press is it.
     if (readyBooking) {
+      if (hasIntakeQuestionnaire) {
+        setIntakeBooking({ duration: readyBooking.duration, bookingId: readyBooking.bookingId });
+        setReadyBooking(null);
+        return;
+      }
       redirectToSession(readyBooking.duration, readyBooking.bookingId);
       return;
     }
@@ -240,6 +245,13 @@ export default function CreatorProfilePage() {
       try {
         const activeBooking = await paymentApi.getActiveBooking();
         if (activeBooking) {
+          if (hasIntakeQuestionnaire) {
+            setIntakeBooking({
+              duration: (activeBooking.duration_minutes ?? 3) as AllowedDurationMinutes,
+              bookingId: activeBooking.id,
+            });
+            return;
+          }
           redirectToSession(
             activeBooking.duration_minutes ?? 3,
             activeBooking.id
