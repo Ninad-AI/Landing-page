@@ -28,13 +28,13 @@ export function decodePcm16ToFloat32(i16: Int16Array): Float32Array {
 let sharedCtx: AudioContext | null = null;
 
 /**
- * Get (or create) a shared AudioContext locked to 16000 Hz.
+ * Get (or create) a shared AudioContext.
  * Resumes if suspended (browser autoplay policy).
  */
 export function getSharedAudioContext(): AudioContext {
   if (!sharedCtx || sharedCtx.state === "closed") {
     const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    sharedCtx = new Ctor({ sampleRate: 16000 });
+    sharedCtx = new Ctor();
   }
   if (sharedCtx.state === "suspended") {
     sharedCtx.resume().catch(() => {});
@@ -43,23 +43,25 @@ export function getSharedAudioContext(): AudioContext {
 }
 
 /**
- * Play a single raw PCM16 chunk at 16000 Hz.
+ * Play a single raw PCM16 chunk at the specified sample rate (defaults to 16000 Hz, supports 44100 Hz, etc.).
  *
- * @param arrayBuffer - Raw linear16 PCM data (Int16 bytes, 16000 Hz, mono).
+ * @param arrayBuffer - Raw linear16 PCM data (Int16 bytes, mono).
  * @param audioContext - Optional; uses shared context if omitted.
  * @param destination - Optional; defaults to ctx.destination.
+ * @param sampleRate - Sample rate in Hz (default 16000, supports 44100, etc.).
  * @returns The AudioBufferSourceNode (useful for tracking/stopping).
  */
 export function playRawPcm16(
   arrayBuffer: ArrayBuffer,
   audioContext?: AudioContext,
   destination?: AudioNode,
+  sampleRate = 16000
 ): AudioBufferSourceNode {
   const ctx = audioContext ?? getSharedAudioContext();
   const dest = destination ?? ctx.destination;
   const i16 = new Int16Array(arrayBuffer);
   const f32 = decodePcm16ToFloat32(i16);
-  const audioBuffer = ctx.createBuffer(1, f32.length, 16000);
+  const audioBuffer = ctx.createBuffer(1, f32.length, sampleRate);
   audioBuffer.copyToChannel(f32 as Float32Array<ArrayBuffer>, 0, 0);
   const source = ctx.createBufferSource();
   source.buffer = audioBuffer;
@@ -85,15 +87,22 @@ export class Pcm16Player {
   private playHead = 0;
   private sourceNodes: AudioBufferSourceNode[] = [];
   private onEndCallbacks: Array<() => void> = [];
+  private sampleRate: number;
 
-  constructor(ctx?: AudioContext) {
+  constructor(ctx?: AudioContext, sampleRate = 16000) {
     this.ctx = ctx ?? getSharedAudioContext();
+    this.sampleRate = sampleRate;
   }
 
-  enqueue(arrayBuffer: ArrayBuffer): void {
+  setSampleRate(rate: number): void {
+    if (rate > 0) this.sampleRate = rate;
+  }
+
+  enqueue(arrayBuffer: ArrayBuffer, customSampleRate?: number): void {
+    const rate = customSampleRate || this.sampleRate;
     const i16 = new Int16Array(arrayBuffer);
     const f32 = decodePcm16ToFloat32(i16);
-    const audioBuffer = this.ctx.createBuffer(1, f32.length, 16000);
+    const audioBuffer = this.ctx.createBuffer(1, f32.length, rate);
     audioBuffer.copyToChannel(f32 as Float32Array<ArrayBuffer>, 0, 0);
     this.queue.push(audioBuffer);
     if (!this.playing) {

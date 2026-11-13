@@ -26,6 +26,39 @@ function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
 
+function extractSampleRate(msg: Record<string, unknown>): number | null {
+  const direct =
+    msg.sample_rate ??
+    msg.sampleRate ??
+    msg.output_sample_rate ??
+    msg.outputSampleRate ??
+    msg.sampling_rate ??
+    msg.audio_sample_rate ??
+    msg.rate;
+
+  if (typeof direct === "number" && Number.isFinite(direct) && direct > 0) {
+    return direct;
+  }
+  if (typeof direct === "string") {
+    const parsed = Number.parseInt(direct, 10);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+
+  const nested = (msg.audio_config || msg.format || msg.config || msg.tts_config) as Record<string, unknown> | undefined;
+  if (nested && typeof nested === "object") {
+    const nestedRate = nested.sample_rate ?? nested.sampleRate ?? nested.sampling_rate ?? nested.rate;
+    if (typeof nestedRate === "number" && Number.isFinite(nestedRate) && nestedRate > 0) {
+      return nestedRate;
+    }
+    if (typeof nestedRate === "string") {
+      const parsed = Number.parseInt(nestedRate, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+  }
+
+  return null;
+}
+
 const CREATORS_DATA: Record<
   string,
   {
@@ -59,6 +92,11 @@ const CREATORS_DATA: Record<
      * Default language code to use when none is requested in the URL.
      */
     defaultLanguage?: string;
+    /**
+     * Default output sample rate (e.g. 16000 or 44100).
+     * Automatically adapts if the backend emits sample_rate in any message.
+     */
+    outputSampleRate?: number;
   }
 > = {
   "nirupam": {
@@ -112,6 +150,7 @@ const CREATORS_DATA: Record<
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     defaultLanguage: "te",
+    outputSampleRate: 44100,
     languages: {
       default: "te",
       options: [
@@ -207,6 +246,24 @@ function VoiceChatContent() {
   // which can take a few seconds, so the UI shouldn't just look idle.
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
 
+  const initialSampleRate = useMemo(() => {
+    const raw =
+      searchParams.get("sample_rate") ||
+      searchParams.get("output_sample_rate") ||
+      searchParams.get("rate");
+    if (raw) {
+      const parsed = Number.parseInt(raw, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    return creatorData?.outputSampleRate ?? 16000;
+  }, [creatorData?.outputSampleRate, searchParams]);
+
+  const outputSampleRateRef = useRef<number>(initialSampleRate);
+
+  useEffect(() => {
+    outputSampleRateRef.current = initialSampleRate;
+  }, [initialSampleRate]);
+
   const wsRef = useRef<WebSocket | null>(null);
   const micControllerRef = useRef<StreamingMicHandle | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -261,7 +318,7 @@ function VoiceChatContent() {
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const Ctor = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      audioContextRef.current = new Ctor({ sampleRate: 16000 });
+      audioContextRef.current = new Ctor();
       playHeadRef.current = audioContextRef.current.currentTime;
       sourceEndPromisesRef.current = [];
       playoutRef.current = new PlayoutBuffer(audioContextRef.current);
@@ -313,7 +370,8 @@ function VoiceChatContent() {
     const f32 = new Float32Array(i16.length);
     for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
     const ctx = getAudioContext();
-    const ab = ctx.createBuffer(1, f32.length, 16000);
+    const rate = outputSampleRateRef.current;
+    const ab = ctx.createBuffer(1, f32.length, rate);
     ab.copyToChannel(f32, 0, 0);
     scheduleBuffer(ab);
   }, [getAudioContext, scheduleBuffer]);
@@ -540,6 +598,11 @@ function VoiceChatContent() {
       } else {
         try {
           const msg = JSON.parse(event.data as string);
+
+          const reportedRate = extractSampleRate(msg);
+          if (reportedRate) {
+            outputSampleRateRef.current = reportedRate;
+          }
 
           if (msg.type === "init_ack") {
             // Server confirmed session — now begin audio streaming
