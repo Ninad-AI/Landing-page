@@ -531,6 +531,6 @@ export const systemApi = {
 };
 
 // ─── WebSocket URL builder ───
-export function getVoiceWsUrl(influencerId: string): string {
-  return buildVoiceWsUrl(influencerId);
+export function getVoiceWsUrl(influencerId: string, language?: string): string {
+  return buildVoiceWsUrl(influencerId, language);
 }

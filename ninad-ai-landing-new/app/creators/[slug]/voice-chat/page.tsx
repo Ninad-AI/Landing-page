@@ -55,6 +55,10 @@ const CREATORS_DATA: Record<
      * it needs backend support for the `interrupt` message to be clean.
      */
     allowInterruption?: boolean;
+    /**
+     * Default language code to use when none is requested in the URL.
+     */
+    defaultLanguage?: string;
   }
 > = {
   "nirupam": {
@@ -107,6 +111,14 @@ const CREATORS_DATA: Record<
     role: "Creator and Influencer",
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    defaultLanguage: "te",
+    languages: {
+      default: "te",
+      options: [
+        { code: "te", name: "Telugu" },
+        { code: "en", name: "English" },
+      ],
+    },
   },
   "pawan-kumar": {
     name: "Pawan Kumar",
@@ -143,9 +155,14 @@ function VoiceChatContent() {
   // Set only for creators that offer a language choice. `callLanguage` is the
   // `?language=` URL param, kept only if it is one of the creator's own
   // options; undefined means "send none" and the server uses its default.
+  const defaultLanguage = creatorData?.defaultLanguage;
   const configuredLanguages = creatorData?.languages;
   const languageChoice = offersLanguageChoice(configuredLanguages) ? configuredLanguages : undefined;
-  const callLanguage = resolveCallLanguage(languageChoice, searchParams.get("language"));
+  const rawRequestedLanguage = searchParams.get("language");
+  const callLanguage =
+    resolveCallLanguage(languageChoice, rawRequestedLanguage) ||
+    rawRequestedLanguage ||
+    defaultLanguage;
 
   const durationValue = searchParams.get("duration");
   const durationMinutes = useMemo(() => {
@@ -421,7 +438,7 @@ function VoiceChatContent() {
     // that here lets onclose tell an expected close apart from a real drop.
     let errorMessageReceived = false;
 
-    const wsUrl = buildVoiceWsUrl(creatorInfluencerId);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId, callLanguage);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);

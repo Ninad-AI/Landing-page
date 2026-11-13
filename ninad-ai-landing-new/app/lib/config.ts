@@ -19,6 +19,10 @@ export const API_WS_BASE = API_BASE.replace(/^http/, 'ws');
 export const PAYMENT_API_BASE = (envPaymentApiBase || API_BASE).replace(/\/$/, '');
 export const RAZORPAY_PUBLIC_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() || '';
 
-export function buildVoiceWsUrl(influencerId: string): string {
-  return `${API_WS_BASE}/ws/voice?influencer_id=${encodeURIComponent(influencerId)}`;
+export function buildVoiceWsUrl(influencerId: string, language?: string): string {
+  const query = new URLSearchParams({ influencer_id: influencerId });
+  if (language) {
+    query.set('language', language);
+  }
+  return `${API_WS_BASE}/ws/voice?${query.toString()}`;
 }

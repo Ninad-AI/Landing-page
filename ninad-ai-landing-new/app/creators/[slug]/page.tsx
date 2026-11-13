@@ -62,6 +62,10 @@ const CREATORS_DATA: Record<
      * Shows a post-payment intake questionnaire before entering the voice call.
      */
     hasIntakeQuestionnaire?: boolean;
+    /**
+     * Default language code to forward into voice-chat (e.g. "te" for Telugu).
+     */
+    defaultLanguage?: string;
   }
 > = {
   "nirupam": {
@@ -117,7 +121,7 @@ const CREATORS_DATA: Record<
     role: "Creator and Influencer",
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-    inDevelopment: true,
+    defaultLanguage: "te",
   },
   "pawan-kumar": {
     name: "Pawan Kumar",
@@ -224,6 +228,7 @@ export default function CreatorProfilePage() {
   const redirectToSession = (durationMinutes: number, bookingId?: string) => {
     const query = new URLSearchParams({ duration: String(durationMinutes) });
     if (bookingId) query.set("booking_id", bookingId);
+    if (creatorData?.defaultLanguage) query.set("language", creatorData.defaultLanguage);
     router.push(`/creators/${slug}/voice-chat?${query.toString()}`);
   };
 
