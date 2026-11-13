@@ -29,20 +29,30 @@ function getSessionDurationSeconds(durationMinutes: number): number {
 function parseSampleRateValue(val: unknown): number | null {
   if (typeof val === "number" && Number.isFinite(val) && val > 0) {
     if (val === 16 || val === 16.0) return 16000;
-    if (val === 44 || val === 44.1) return 44100;
+    if (val === 44 || val === 44.0 || val === 44.1 || val === 44000) return 44100;
     if (val === 48 || val === 48.0) return 48000;
     return Math.round(val);
   }
   if (typeof val === "string") {
     const trimmed = val.trim().toLowerCase();
-    if (trimmed === "16k" || trimmed === "16khz") return 16000;
-    if (trimmed === "44.1k" || trimmed === "44.1khz" || trimmed === "44k" || trimmed === "44khz") return 44100;
-    if (trimmed === "48k" || trimmed === "48khz") return 48000;
+    if (trimmed === "16k" || trimmed === "16khz" || trimmed === "16") return 16000;
+    if (
+      trimmed === "44.1k" ||
+      trimmed === "44.1khz" ||
+      trimmed === "44k" ||
+      trimmed === "44khz" ||
+      trimmed === "44" ||
+      trimmed === "44000" ||
+      trimmed === "44100"
+    ) {
+      return 44100;
+    }
+    if (trimmed === "48k" || trimmed === "48khz" || trimmed === "48" || trimmed === "48000") return 48000;
 
     const parsed = Number.parseFloat(trimmed);
     if (Number.isFinite(parsed) && parsed > 0) {
       if (parsed === 16) return 16000;
-      if (parsed === 44.1 || parsed === 44) return 44100;
+      if (parsed === 44.1 || parsed === 44 || parsed === 44000) return 44100;
       if (parsed === 48) return 48000;
       return Math.round(parsed);
     }
@@ -183,6 +193,7 @@ const CREATORS_DATA: Record<
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     defaultLanguage: "te",
+    outputSampleRate: 44100,
     languages: {
       default: "te",
       options: [
@@ -329,6 +340,7 @@ function VoiceChatContent() {
   const awaitingResponseRef = useRef(false);
   const awaitingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasLoggedTurnChunkRef = useRef(false);
+  const lastReportedBackendRateRef = useRef<number | null>(null);
   const AWAITING_RESPONSE_TIMEOUT_MS = 20_000;
   const setAwaitingResponse = useCallback((value: boolean) => {
     awaitingResponseRef.current = value;
@@ -407,9 +419,14 @@ function VoiceChatContent() {
     for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
     const ctx = getAudioContext();
     const rate = outputSampleRateRef.current;
+    const hardwareRate = ctx.sampleRate;
+    const reported = lastReportedBackendRateRef.current;
+
     if (!hasLoggedTurnChunkRef.current) {
       console.log(
-        `[VoiceChat] 🔊 Audio chunk from backend: ${buf.byteLength} bytes (${i16.length} samples) | Active playback rate: ${rate} Hz`
+        `[VoiceChat] 🔊 Audio Chunk Playback:\n` +
+        `   • Receiving from backend: ${reported ? `${reported} Hz (specified in backend message)` : `${rate} Hz (raw linear16 PCM, ${buf.byteLength} bytes / ${i16.length} samples)`}\n` +
+        `   • Final output playing: ${rate} Hz AudioBuffer -> Web Audio ${hardwareRate} Hz hardware device destination`
       );
       hasLoggedTurnChunkRef.current = true;
     }
@@ -549,8 +566,11 @@ function VoiceChatContent() {
       if (disposed) return;
       ttsActiveRef.current = false;
       hasLoggedTurnChunkRef.current = false;
+      const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context initialization";
       console.log(
-        `[VoiceChat] 🔌 WebSocket connected. Current initial playback sample rate: ${outputSampleRateRef.current} Hz`
+        `[VoiceChat] 🔌 WebSocket connected to: ${wsUrl}\n` +
+        `   • Receiving from backend: ${lastReportedBackendRateRef.current ? `${lastReportedBackendRateRef.current} Hz` : `awaiting backend metadata (configured rate: ${outputSampleRateRef.current} Hz)`}\n` +
+        `   • Final output target: ${outputSampleRateRef.current} Hz (hardware device rate: ${hwRate})`
       );
 
       // Send init message — mic streaming starts only after init_ack
@@ -647,11 +667,15 @@ function VoiceChatContent() {
 
           const reportedRate = extractSampleRate(msg);
           if (reportedRate) {
+            lastReportedBackendRateRef.current = reportedRate;
+            outputSampleRateRef.current = reportedRate;
+            const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context";
             console.log(
-              `[VoiceChat] 🎚️ Backend specified sample rate: ${reportedRate} Hz (was: ${outputSampleRateRef.current} Hz) | Message type: "${msg.type || "unknown"}"`,
+              `[VoiceChat] 🎚️ Backend specified sample rate:\n` +
+              `   • Receiving from backend: ${reportedRate} Hz (message type: "${msg.type || "unknown"}")\n` +
+              `   • Final output playing: ${reportedRate} Hz AudioBuffer -> Web Audio ${hwRate} hardware device destination`,
               msg
             );
-            outputSampleRateRef.current = reportedRate;
           }
 
           if (msg.type === "init_ack") {
@@ -660,10 +684,15 @@ function VoiceChatContent() {
             setCallPhase("listening");
             ttsActiveRef.current = false;
             dropAgentAudioRef.current = false;
+            const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context";
             console.log(
-              `[VoiceChat] ℹ️ init_ack received. Backend sample rate: ${
-                reportedRate ? `${reportedRate} Hz` : `none specified in payload (active rate: ${outputSampleRateRef.current} Hz)`
-              }`,
+              `[VoiceChat] ℹ️ init_ack session confirmed:\n` +
+              `   • Receiving from backend: ${
+                reportedRate
+                  ? `${reportedRate} Hz (explicitly signaled in init_ack)`
+                  : `no sample_rate in init_ack payload (using configured rate: ${outputSampleRateRef.current} Hz)`
+              }\n` +
+              `   • Final output playing: ${outputSampleRateRef.current} Hz AudioBuffer -> Web Audio ${hwRate} hardware destination`,
               msg
             );
 
@@ -803,8 +832,11 @@ function VoiceChatContent() {
 
           if (msg.type === "tts_start") {
             hasLoggedTurnChunkRef.current = false;
+            const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context";
             console.log(
-              `[VoiceChat] 🎙️ tts_start received. Sample rate for response: ${outputSampleRateRef.current} Hz`,
+              `[VoiceChat] 🎙️ tts_start response starting:\n` +
+              `   • Receiving from backend: ${lastReportedBackendRateRef.current ? `${lastReportedBackendRateRef.current} Hz` : `${outputSampleRateRef.current} Hz`}\n` +
+              `   • Final output playing: ${outputSampleRateRef.current} Hz (hardware: ${hwRate})`,
               msg
             );
             // A response that starts while the user is already mid-hold answers
@@ -841,8 +873,11 @@ function VoiceChatContent() {
 
           if (msg.type === "AgentAudioStart") {
             hasLoggedTurnChunkRef.current = false;
+            const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context";
             console.log(
-              `[VoiceChat] 🎙️ AgentAudioStart received. Sample rate for response: ${outputSampleRateRef.current} Hz`,
+              `[VoiceChat] 🎙️ AgentAudioStart response starting:\n` +
+              `   • Receiving from backend: ${lastReportedBackendRateRef.current ? `${lastReportedBackendRateRef.current} Hz` : `${outputSampleRateRef.current} Hz`}\n` +
+              `   • Final output playing: ${outputSampleRateRef.current} Hz (hardware: ${hwRate})`,
               msg
             );
             // Same as tts_start: never mute the user mid-hold to make room for
