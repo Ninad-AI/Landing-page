@@ -150,7 +150,6 @@ const CREATORS_DATA: Record<
     influencerId: "sreemukhi",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
     defaultLanguage: "te",
-    outputSampleRate: 44100,
     languages: {
       default: "te",
       options: [
