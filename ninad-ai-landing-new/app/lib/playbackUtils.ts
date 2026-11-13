@@ -43,12 +43,12 @@ export function getSharedAudioContext(): AudioContext {
 }
 
 /**
- * Play a single raw PCM16 chunk at the specified sample rate (defaults to 16000 Hz, supports 44100 Hz, etc.).
+ * Play a single raw PCM16 chunk at the specified sample rate (defaults to 16000 Hz, supports 44100 Hz, 48000 Hz, etc.).
  *
  * @param arrayBuffer - Raw linear16 PCM data (Int16 bytes, mono).
  * @param audioContext - Optional; uses shared context if omitted.
  * @param destination - Optional; defaults to ctx.destination.
- * @param sampleRate - Sample rate in Hz (default 16000, supports 44100, etc.).
+ * @param sampleRate - Sample rate in Hz (default 16000, supports 44100, 48000, etc.).
  * @returns The AudioBufferSourceNode (useful for tracking/stopping).
  */
 export function playRawPcm16(

@@ -26,6 +26,30 @@ function getSessionDurationSeconds(durationMinutes: number): number {
   return durationMinutes * 60;
 }
 
+function parseSampleRateValue(val: unknown): number | null {
+  if (typeof val === "number" && Number.isFinite(val) && val > 0) {
+    if (val === 16 || val === 16.0) return 16000;
+    if (val === 44 || val === 44.1) return 44100;
+    if (val === 48 || val === 48.0) return 48000;
+    return Math.round(val);
+  }
+  if (typeof val === "string") {
+    const trimmed = val.trim().toLowerCase();
+    if (trimmed === "16k" || trimmed === "16khz") return 16000;
+    if (trimmed === "44.1k" || trimmed === "44.1khz" || trimmed === "44k" || trimmed === "44khz") return 44100;
+    if (trimmed === "48k" || trimmed === "48khz") return 48000;
+
+    const parsed = Number.parseFloat(trimmed);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      if (parsed === 16) return 16000;
+      if (parsed === 44.1 || parsed === 44) return 44100;
+      if (parsed === 48) return 48000;
+      return Math.round(parsed);
+    }
+  }
+  return null;
+}
+
 function extractSampleRate(msg: Record<string, unknown>): number | null {
   const direct =
     msg.sample_rate ??
@@ -36,23 +60,32 @@ function extractSampleRate(msg: Record<string, unknown>): number | null {
     msg.audio_sample_rate ??
     msg.rate;
 
-  if (typeof direct === "number" && Number.isFinite(direct) && direct > 0) {
-    return direct;
-  }
-  if (typeof direct === "string") {
-    const parsed = Number.parseInt(direct, 10);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-  }
+  const parsedDirect = parseSampleRateValue(direct);
+  if (parsedDirect) return parsedDirect;
 
-  const nested = (msg.audio_config || msg.format || msg.config || msg.tts_config) as Record<string, unknown> | undefined;
-  if (nested && typeof nested === "object") {
-    const nestedRate = nested.sample_rate ?? nested.sampleRate ?? nested.sampling_rate ?? nested.rate;
-    if (typeof nestedRate === "number" && Number.isFinite(nestedRate) && nestedRate > 0) {
-      return nestedRate;
-    }
-    if (typeof nestedRate === "string") {
-      const parsed = Number.parseInt(nestedRate, 10);
-      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  const nestedCandidates = [
+    msg.audio_config,
+    msg.audio,
+    msg.format,
+    msg.config,
+    msg.tts_config,
+    msg.metadata,
+    msg.extra,
+  ];
+
+  for (const candidate of nestedCandidates) {
+    if (candidate && typeof candidate === "object") {
+      const nested = candidate as Record<string, unknown>;
+      const nestedRate =
+        nested.sample_rate ??
+        nested.sampleRate ??
+        nested.output_sample_rate ??
+        nested.outputSampleRate ??
+        nested.sampling_rate ??
+        nested.audio_sample_rate ??
+        nested.rate;
+      const parsedNested = parseSampleRateValue(nestedRate);
+      if (parsedNested) return parsedNested;
     }
   }
 
@@ -251,8 +284,8 @@ function VoiceChatContent() {
       searchParams.get("output_sample_rate") ||
       searchParams.get("rate");
     if (raw) {
-      const parsed = Number.parseInt(raw, 10);
-      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+      const parsed = parseSampleRateValue(raw);
+      if (parsed) return parsed;
     }
     return creatorData?.outputSampleRate ?? 16000;
   }, [creatorData?.outputSampleRate, searchParams]);
