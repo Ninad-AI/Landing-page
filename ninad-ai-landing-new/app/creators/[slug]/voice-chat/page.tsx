@@ -328,6 +328,7 @@ function VoiceChatContent() {
   // without going stale.
   const awaitingResponseRef = useRef(false);
   const awaitingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasLoggedTurnChunkRef = useRef(false);
   const AWAITING_RESPONSE_TIMEOUT_MS = 20_000;
   const setAwaitingResponse = useCallback((value: boolean) => {
     awaitingResponseRef.current = value;
@@ -368,6 +369,7 @@ function VoiceChatContent() {
       if (arr.length === 0) {
         setIsSpeaking(false);
         setCallPhase("listening");
+        hasLoggedTurnChunkRef.current = false;
       }
     });
   }, []);
@@ -382,6 +384,7 @@ function VoiceChatContent() {
       audioContextRef.current = null;
     }
     playHeadRef.current = 0;
+    hasLoggedTurnChunkRef.current = false;
   }, []);
 
   // Barge-in: cut the agent off mid-sentence so the user can take the turn.
@@ -395,6 +398,7 @@ function VoiceChatContent() {
     dropAgentAudioRef.current = true;
     setIsSpeaking(false);
     setCallPhase("listening");
+    hasLoggedTurnChunkRef.current = false;
   }, []);
 
   const processBinaryChunk = useCallback((buf: ArrayBuffer) => {
@@ -403,6 +407,12 @@ function VoiceChatContent() {
     for (let i = 0; i < i16.length; i++) f32[i] = i16[i] / 32768;
     const ctx = getAudioContext();
     const rate = outputSampleRateRef.current;
+    if (!hasLoggedTurnChunkRef.current) {
+      console.log(
+        `[VoiceChat] 🔊 Audio chunk from backend: ${buf.byteLength} bytes (${i16.length} samples) | Active playback rate: ${rate} Hz`
+      );
+      hasLoggedTurnChunkRef.current = true;
+    }
     const ab = ctx.createBuffer(1, f32.length, rate);
     ab.copyToChannel(f32, 0, 0);
     scheduleBuffer(ab);
@@ -538,6 +548,10 @@ function VoiceChatContent() {
     ws.onopen = () => {
       if (disposed) return;
       ttsActiveRef.current = false;
+      hasLoggedTurnChunkRef.current = false;
+      console.log(
+        `[VoiceChat] 🔌 WebSocket connected. Current initial playback sample rate: ${outputSampleRateRef.current} Hz`
+      );
 
       // Send init message — mic streaming starts only after init_ack
       if (ws.readyState === WebSocket.OPEN) {
@@ -633,6 +647,10 @@ function VoiceChatContent() {
 
           const reportedRate = extractSampleRate(msg);
           if (reportedRate) {
+            console.log(
+              `[VoiceChat] 🎚️ Backend specified sample rate: ${reportedRate} Hz (was: ${outputSampleRateRef.current} Hz) | Message type: "${msg.type || "unknown"}"`,
+              msg
+            );
             outputSampleRateRef.current = reportedRate;
           }
 
@@ -642,6 +660,12 @@ function VoiceChatContent() {
             setCallPhase("listening");
             ttsActiveRef.current = false;
             dropAgentAudioRef.current = false;
+            console.log(
+              `[VoiceChat] ℹ️ init_ack received. Backend sample rate: ${
+                reportedRate ? `${reportedRate} Hz` : `none specified in payload (active rate: ${outputSampleRateRef.current} Hz)`
+              }`,
+              msg
+            );
 
             if (languageChoice && msg.language_honoured === false && callLanguage) {
               // The server started in a different language than the one asked for;
@@ -778,6 +802,11 @@ function VoiceChatContent() {
           }
 
           if (msg.type === "tts_start") {
+            hasLoggedTurnChunkRef.current = false;
+            console.log(
+              `[VoiceChat] 🎙️ tts_start received. Sample rate for response: ${outputSampleRateRef.current} Hz`,
+              msg
+            );
             // A response that starts while the user is already mid-hold answers
             // the turn they just interrupted — talking over them now would undo
             // the barge-in, so drop it and re-assert the interrupt.
@@ -793,6 +822,7 @@ function VoiceChatContent() {
             setCallPhase("speaking");
           }
           if (msg.type === "tts_end") {
+            hasLoggedTurnChunkRef.current = false;
             // Turn boundary: whatever the user interrupted is fully drained, so
             // the next response is safe to play again.
             dropAgentAudioRef.current = false;
@@ -810,6 +840,11 @@ function VoiceChatContent() {
           }
 
           if (msg.type === "AgentAudioStart") {
+            hasLoggedTurnChunkRef.current = false;
+            console.log(
+              `[VoiceChat] 🎙️ AgentAudioStart received. Sample rate for response: ${outputSampleRateRef.current} Hz`,
+              msg
+            );
             // Same as tts_start: never mute the user mid-hold to make room for
             // the answer to the turn they just cut off.
             if (canInterrupt && pttCapturingRef.current) {
@@ -823,6 +858,7 @@ function VoiceChatContent() {
             micControllerRef.current?.setMuted(true);
           }
           if (msg.type === "AgentAudioDone") {
+            hasLoggedTurnChunkRef.current = false;
             dropAgentAudioRef.current = false;
             agentSpeakingRef.current = false;
             // Push-to-talk creators stay muted until the button is held again;
