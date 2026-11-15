@@ -140,6 +140,10 @@ const CREATORS_DATA: Record<
      * Automatically adapts if the backend emits sample_rate in any message.
      */
     outputSampleRate?: number;
+    /**
+     * Custom voice ID (e.g. Cartesia voice UUID).
+     */
+    voiceId?: string;
   }
 > = {
   "nirupam": {
@@ -186,22 +190,23 @@ const CREATORS_DATA: Record<
   //   influencerId: "sri_satya",
   //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   // },
-  // sreemukhi: {
-  //   name: "Sreemukhi",
-  //   image: "/assets/creators/sreemukhi.jpg",
-  //   role: "Creator and Influencer",
-  //   influencerId: "sreemukhi",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  //   defaultLanguage: "te",
-  //   outputSampleRate: 44100,
-  //   languages: {
-  //     default: "te",
-  //     options: [
-  //       { code: "te", name: "Telugu" },
-  //       { code: "en", name: "English" },
-  //     ],
-  //   },
-  // },
+  sreemukhi: {
+    name: "Sreemukhi",
+    image: "/assets/creators/sreemukhi.jpg",
+    role: "Creator and Influencer",
+    influencerId: "sreemukhi",
+    voiceId: "b3365c1a-b747-4507-845b-27aef85b933c",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    defaultLanguage: "te",
+    outputSampleRate: 44100,
+    languages: {
+      default: "te",
+      options: [
+        { code: "te", name: "Telugu" },
+        { code: "en", name: "English" },
+      ],
+    },
+  },
   // "pawan-kumar": {
   //   name: "Pawan Kumar",
   //   image: "/assets/creators/pavan.png",
@@ -245,6 +250,7 @@ function VoiceChatContent() {
     resolveCallLanguage(languageChoice, rawRequestedLanguage) ||
     rawRequestedLanguage ||
     defaultLanguage;
+  const creatorVoiceId = searchParams.get("voice_id") || creatorData?.voiceId;
 
   const durationValue = searchParams.get("duration");
   const durationMinutes = useMemo(() => {
@@ -555,7 +561,7 @@ function VoiceChatContent() {
     // that here lets onclose tell an expected close apart from a real drop.
     let errorMessageReceived = false;
 
-    const wsUrl = buildVoiceWsUrl(creatorInfluencerId, callLanguage);
+    const wsUrl = buildVoiceWsUrl(creatorInfluencerId, callLanguage, creatorVoiceId);
     const authToken = typeof window !== "undefined" ? localStorage.getItem("ninad_access_token") : null;
 
     const ws = openAppWebSocket(wsUrl);
@@ -569,6 +575,7 @@ function VoiceChatContent() {
       const hwRate = audioContextRef.current ? `${audioContextRef.current.sampleRate} Hz` : "pending audio context initialization";
       console.log(
         `[VoiceChat] 🔌 WebSocket connected to: ${wsUrl}\n` +
+        `   • Voice ID: ${creatorVoiceId || "default"}\n` +
         `   • Receiving from backend: ${lastReportedBackendRateRef.current ? `${lastReportedBackendRateRef.current} Hz` : `awaiting backend metadata (configured rate: ${outputSampleRateRef.current} Hz)`}\n` +
         `   • Final output target: ${outputSampleRateRef.current} Hz (hardware device rate: ${hwRate})`
       );
@@ -581,6 +588,7 @@ function VoiceChatContent() {
               token: authToken,
               influencer_id: creatorInfluencerId,
               preferred_provider: preferredProvider,
+              ...(creatorVoiceId ? { voice_id: creatorVoiceId } : {}),
               // Only creators that offer a language choice send one, and only a
               // code from their own list. Left out, the server uses its default.
               ...(callLanguage ? { language: callLanguage } : {}),
