@@ -179,36 +179,36 @@ const CREATORS_DATA: Record<
     influencerId: "swaroop_bevara",
     preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   },
-  "sri-satya": {
-    name: "Sri Satya",
-    image: "/assets/creators/sri_satya.jpg",
-    role: "Creator and Influencer",
-    influencerId: "sri_satya",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
-  sreemukhi: {
-    name: "Sreemukhi",
-    image: "/assets/creators/sreemukhi.jpg",
-    role: "Creator and Influencer",
-    influencerId: "sreemukhi",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-    defaultLanguage: "te",
-    outputSampleRate: 44100,
-    languages: {
-      default: "te",
-      options: [
-        { code: "te", name: "Telugu" },
-        { code: "en", name: "English" },
-      ],
-    },
-  },
-  "pawan-kumar": {
-    name: "Pawan Kumar",
-    image: "/assets/creators/pavan.png",
-    role: "Influencer & Actor",
-    influencerId: "pawan_kumar",
-    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  },
+  // "sri-satya": {
+  //   name: "Sri Satya",
+  //   image: "/assets/creators/sri_satya.jpg",
+  //   role: "Creator and Influencer",
+  //   influencerId: "sri_satya",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  // },
+  // sreemukhi: {
+  //   name: "Sreemukhi",
+  //   image: "/assets/creators/sreemukhi.jpg",
+  //   role: "Creator and Influencer",
+  //   influencerId: "sreemukhi",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  //   defaultLanguage: "te",
+  //   outputSampleRate: 44100,
+  //   languages: {
+  //     default: "te",
+  //     options: [
+  //       { code: "te", name: "Telugu" },
+  //       { code: "en", name: "English" },
+  //     ],
+  //   },
+  // },
+  // "pawan-kumar": {
+  //   name: "Pawan Kumar",
+  //   image: "/assets/creators/pavan.png",
+  //   role: "Influencer & Actor",
+  //   influencerId: "pawan_kumar",
+  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+  // },
 };
 
 export default function CreatorVoiceChatPage() {
