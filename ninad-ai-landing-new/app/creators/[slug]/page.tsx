@@ -115,14 +115,14 @@ const CREATORS_DATA: Record<
   //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
   //   inDevelopment: true,
   // },
-  // sreemukhi: {
-  //   name: "Sreemukhi",
-  //   image: "/assets/creators/sreemukhi.jpg",
-  //   role: "Creator and Influencer",
-  //   influencerId: "sreemukhi",
-  //   preferredProvider: DEFAULT_PREFERRED_PROVIDER,
-  //   defaultLanguage: "te",
-  // },
+  sreemukhi: {
+    name: "Sreemukhi",
+    image: "/assets/creators/sreemukhi.jpg",
+    role: "Creator and Influencer",
+    influencerId: "sreemukhi",
+    preferredProvider: DEFAULT_PREFERRED_PROVIDER,
+    defaultLanguage: "te",
+  },
   // "pawan-kumar": {
   //   name: "Pawan Kumar",
   //   image: "/assets/creators/pavan.png",
