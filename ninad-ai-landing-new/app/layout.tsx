@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import ComingSoonBanner from "./components/ComingSoonBanner";
 import Providers from "./components/Providers";
+import InAppBrowserNotice from "./components/InAppBrowserNotice";
 
 export const metadata: Metadata = {
   title: "Ninad AI - Real-Time AI Voice That Feels Human",
@@ -50,6 +51,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <Providers>
+          <InAppBrowserNotice />
           <ComingSoonBanner />
           <Header />
           {children}
